@@ -3,18 +3,23 @@ package com.example.demo;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javafx.animation.*;
+
 import javafx.event.EventHandler;
+import javafx.animation.*;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.image.*;
 import javafx.scene.input.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public abstract class LevelParent extends Observable {
 
 	private static final double SCREEN_HEIGHT_ADJUSTMENT = 150;
 	private static final int MILLISECOND_DELAY = 50;
+
 	private final double screenHeight;
 	private final double screenWidth;
 	private final double enemyMaximumYPosition;
@@ -29,7 +34,7 @@ public abstract class LevelParent extends Observable {
 	private final List<ActiveActorDestructible> enemyUnits;
 	private final List<ActiveActorDestructible> userProjectiles;
 	private final List<ActiveActorDestructible> enemyProjectiles;
-	
+
 	private int currentNumberOfEnemies;
 	private LevelView levelView;
 
@@ -74,8 +79,28 @@ public abstract class LevelParent extends Observable {
 	}
 
 	public void goToNextLevel(String levelName) {
-		setChanged();
-		notifyObservers(levelName);
+		try {
+			timeline.stop(); // Stop current level's timeline
+			Class<?> nextLevelClass = Class.forName(levelName);
+			LevelParent nextLevel = (LevelParent) nextLevelClass
+					.getConstructor(double.class, double.class)
+					.newInstance(screenHeight, screenWidth);
+
+			Scene nextScene = nextLevel.initializeScene();
+			Stage primaryStage = (Stage) root.getScene().getWindow();
+			primaryStage.setScene(nextScene);
+			nextLevel.startGame();
+		} catch (Exception e) {
+			showErrorDialog("Error transitioning to next level: " + e.getMessage());
+		}
+	}
+
+	private void showErrorDialog(String message) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("Error");
+		alert.setHeaderText(null);
+		alert.setContentText(message);
+		alert.showAndWait();
 	}
 
 	private void updateScene() {
