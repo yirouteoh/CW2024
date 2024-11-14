@@ -195,17 +195,25 @@ public abstract class LevelParent extends Observable {
 		handleCollisions(enemyProjectiles, friendlyUnits);
 	}
 
-	private void handleCollisions(List<ActiveActorDestructible> actors1,
-			List<ActiveActorDestructible> actors2) {
-		for (ActiveActorDestructible actor : actors2) {
-			for (ActiveActorDestructible otherActor : actors1) {
-				if (actor.getBoundsInParent().intersects(otherActor.getBoundsInParent())) {
-					actor.takeDamage();
-					otherActor.takeDamage();
+	private void handleCollisions(List<ActiveActorDestructible> projectiles, List<ActiveActorDestructible> enemies) {
+		for (ActiveActorDestructible projectile : projectiles) {
+			for (ActiveActorDestructible enemy : enemies) {
+				if (enemy instanceof Boss) {
+					// Use the Boss's custom hitbox for collision detection
+					Boss boss = (Boss) enemy;
+					if (boss.getCustomHitbox().intersects(projectile.getBoundsInParent())) {
+						projectile.takeDamage();
+						boss.takeDamage();
+					}
+				} else if (enemy.getBoundsInParent().intersects(projectile.getBoundsInParent())) {
+					// Use default collision detection for other enemies
+					projectile.takeDamage();
+					enemy.takeDamage();
 				}
 			}
 		}
 	}
+
 
 	private void handleEnemyPenetration() {
 		for (ActiveActorDestructible enemy : enemyUnits) {
