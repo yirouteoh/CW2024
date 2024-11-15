@@ -73,3 +73,22 @@ To compile and run the application, follow these steps:
    - Integrated Boss mechanics and limited enemy spawning.
    Reason:
    - To optimize performance and ensure the Boss works correctly with updated collision logic.
+
+5. HeartDisplay.java
+   Changes made:
+   - Fields containerXPosition, containerYPosition, and numberOfHeartsToDisplay were declared as final to ensure that these values, once set during construction, do not change throughout the lifecycle of an object, emphasizing immutability.
+   - Added null check before using toExternalForm() on the image URL to prevent NullPointerException if the image resource is not found.
+   Reason:
+   - Making fields final aligns with best practices for class design where these values should not change after initialization, enhancing thread safety and predictability of the object's state.
+   - Implementing a null check prevents application crashes due to missing resources, improving the robustness and reliability of the application.
+
+6. WinImage.java
+   Changes made: 
+   - Adjusted the destroy() method to only allow setting isDestroyed to true. This reflects the irreversible state change of an object being destroyed.
+   Reason:
+   - This change clarifies the intended use of the destroy() method, ensuring that the destruction state is final and cannot be mistakenly reverted, which aligns with the typical game logic where objects, once destroyed, do not return to an active state.
+
+7. GameOverImage.java
+   Changes made: 
+   - Implemented a robust resource loading strategy with error handling for the game over image, similar to other image handling updates in the project.
+   - Consistency in error handling across all classes that load images ensures that missing images are handled gracefully and errors are logged, improving maintainability and user experience.

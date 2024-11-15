@@ -1,14 +1,22 @@
 package com.example.demo;
 
-import javafx.scene.image.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public abstract class ActiveActor extends ImageView {
-	
+
 	private static final String IMAGE_LOCATION = "/com/example/demo/images/";
 
 	public ActiveActor(String imageName, int imageHeight, double initialXPos, double initialYPos) {
-		//this.setImage(new Image(IMAGE_LOCATION + imageName));
-		this.setImage(new Image(getClass().getResource(IMAGE_LOCATION + imageName).toExternalForm()));
+		super();
+		java.net.URL imageUrl = getClass().getResource(IMAGE_LOCATION + imageName);
+		if (imageUrl == null) {
+			System.err.println("Image resource not found: " + IMAGE_LOCATION + imageName);
+			// Optionally, set a default or placeholder image if the resource is not found.
+			this.setImage(new Image("path_to_default_placeholder_image"));
+		} else {
+			this.setImage(new Image(imageUrl.toExternalForm()));
+		}
 		this.setLayoutX(initialXPos);
 		this.setLayoutY(initialYPos);
 		this.setFitHeight(imageHeight);
@@ -24,5 +32,4 @@ public abstract class ActiveActor extends ImageView {
 	protected void moveVertically(double verticalMove) {
 		this.setTranslateY(getTranslateY() + verticalMove);
 	}
-
 }
