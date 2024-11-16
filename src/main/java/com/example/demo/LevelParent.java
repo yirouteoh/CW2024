@@ -211,20 +211,22 @@ public abstract class LevelParent {
 		for (ActiveActorDestructible projectile : projectiles) {
 			for (ActiveActorDestructible enemy : enemies) {
 				if (enemy instanceof Boss) {
-					// Use the Boss's custom hitbox for collision detection
 					Boss boss = (Boss) enemy;
 					if (boss.getCustomHitbox().intersects(projectile.getBoundsInParent())) {
-						projectile.takeDamage();
-						boss.takeDamage();
+						if (!boss.isShielded()) {
+							projectile.takeDamage(); // This will cause the projectile to disappear if it is designed to do so upon taking damage.
+							boss.takeDamage();
+						}
+						// If the boss is shielded, the projectile does not disappear and does not deal damage.
 					}
 				} else if (enemy.getBoundsInParent().intersects(projectile.getBoundsInParent())) {
-					// Use default collision detection for other enemies
-					projectile.takeDamage();
+					projectile.takeDamage(); // Normal behavior for collisions with non-boss enemies.
 					enemy.takeDamage();
 				}
 			}
 		}
 	}
+
 
 
 	private void handleEnemyPenetration() {

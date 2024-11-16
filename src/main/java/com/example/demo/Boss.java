@@ -5,7 +5,7 @@ import javafx.scene.effect.Glow;
 
 public class Boss extends FighterPlane {
 
-	private static final String IMAGE_NAME = "bossplane.png";
+	private static final String IMAGE_NAME = "bossPlane.png";
 	private static final double INITIAL_X_POSITION = 1000.0;
 	private static final double INITIAL_Y_POSITION = 400;
 	private static final double PROJECTILE_Y_POSITION_OFFSET = 75.0;
@@ -39,6 +39,10 @@ public class Boss extends FighterPlane {
 		initializeMovePattern();
 	}
 
+	public boolean isShielded() {
+		return isShielded;
+	}
+
 	@Override
 	public void updatePosition() {
 		double initialTranslateY = getTranslateY();
@@ -54,7 +58,7 @@ public class Boss extends FighterPlane {
 		updatePosition();
 		updateShield();
 
-		if (isShielded) {
+		if (isShielded()) {
 			setEffect(new Glow(0.8)); // Add glow effect
 		} else {
 			setEffect(null); // Remove effect when shield is deactivated
@@ -68,7 +72,7 @@ public class Boss extends FighterPlane {
 
 	@Override
 	public void takeDamage() {
-		if (!isShielded) {
+		if (!isShielded()) {
 			super.takeDamage();
 		}
 	}
