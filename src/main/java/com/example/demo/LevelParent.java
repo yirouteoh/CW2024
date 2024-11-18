@@ -245,6 +245,8 @@ public abstract class LevelParent {
 	private void updateKillCount() {
 		for (int i = 0; i < currentNumberOfEnemies - enemyUnits.size(); i++) {
 			user.incrementKillCount();
+			System.out.println("Enemy destroyed! Total kills: " + user.getNumberOfKills());
+
 		}
 	}
 
