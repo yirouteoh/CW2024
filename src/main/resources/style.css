@@ -1,0 +1,58 @@
+/* Root background */
+.menu-root {
+    -fx-background-color: linear-gradient(to bottom, #fceabb, #f8b500);
+}
+
+/* Menu panel */
+.menu-panel {
+    -fx-background-color: #FFD700; /* Golden yellow */
+    -fx-background-radius: 30;
+    -fx-padding: 30;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 15, 0, 0, 5);
+    -fx-alignment: center;
+}
+
+/* Banner */
+.banner {
+    -fx-background-color: #f0ad4e; /* Orange-yellow */
+    -fx-background-radius: 20;
+    -fx-padding: 10 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 5, 0, 0, 3);
+}
+
+.banner-text {
+    -fx-font-family: "Comic Sans MS";
+    -fx-font-size: 100px;
+    -fx-fill: white;
+}
+
+/* Buttons */
+.menu-button {
+    -fx-font-family: "Comic Sans MS";
+    -fx-font-size: 18px;
+    -fx-pref-width: 200px;
+    -fx-pref-height: 50px;
+    -fx-background-color: white;
+    -fx-text-fill: #333;
+    -fx-background-radius: 30;
+    -fx-border-color: #FFA500;
+    -fx-border-width: 2px;
+    -fx-border-radius: 30;
+}
+
+.menu-button:hover {
+    -fx-background-color: #FFFAF0; /* Light hover color */
+    -fx-border-color: #FF4500; /* Darker border on hover */
+}
+
+/* Close icon */
+.close-icon {
+    -fx-alignment: bottom-right;
+}
+
+.close-text {
+    -fx-font-family: "Comic Sans MS";
+    -fx-font-size: 18px;
+    -fx-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+}
