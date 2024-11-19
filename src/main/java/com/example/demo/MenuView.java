@@ -8,6 +8,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.scene.image.Image;
+
 
 public class MenuView {
 
@@ -22,14 +24,24 @@ public class MenuView {
 
     // Show the menu
     public void showMenu() {
-        // Root layout with a gradient background
+        // Root layout
         StackPane root = new StackPane();
-        root.getStyleClass().add("menu-root"); // Apply root background styling from CSS
+
+        // Load the background image
+        Image backgroundImage = new Image(getClass().getResource("/com/example/demo/images/background1.jpeg").toExternalForm());
+        BackgroundImage background = new BackgroundImage(
+                backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)
+        );
+        root.setBackground(new Background(background)); // Set the image as the background
 
         // Create menu layout
         VBox menuPanel = createMenuPanel();
 
-        // Add the menu panel to the root
+        // Add the menu panel on top of the background
         root.getChildren().add(menuPanel);
 
         // Scene setup
