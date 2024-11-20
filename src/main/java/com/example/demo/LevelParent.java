@@ -19,7 +19,6 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.event.EventHandler;
 
-
 public abstract class LevelParent {
 
 	private static final double SCREEN_HEIGHT_ADJUSTMENT = 150;
@@ -34,6 +33,8 @@ public abstract class LevelParent {
 	private final UserPlane user;
 	private final Scene scene;
 	private final ImageView background;
+
+	private ImageView pauseButton; // Pause button ImageView
 
 	private PropertyChangeSupport support = new PropertyChangeSupport(this);
 
@@ -143,21 +144,81 @@ public abstract class LevelParent {
 		background.setFocusTraversable(true);
 		background.setFitHeight(screenHeight);
 		background.setFitWidth(screenWidth);
+
+		// Add keyboard controls for game actions
 		background.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
 			public void handle(KeyEvent e) {
 				KeyCode kc = e.getCode();
-				if (kc == KeyCode.UP) user.moveUp();
-				if (kc == KeyCode.DOWN) user.moveDown();
-				if (kc == KeyCode.SPACE) fireProjectile();
+				if (kc == KeyCode.UP) {
+					user.moveUp();
+				} else if (kc == KeyCode.DOWN) {
+					user.moveDown();
+				} else if (kc == KeyCode.SPACE) {
+					fireProjectile();
+				}
 			}
 		});
+
 		background.setOnKeyReleased(new EventHandler<KeyEvent>() {
+			@Override
 			public void handle(KeyEvent e) {
 				KeyCode kc = e.getCode();
-				if (kc == KeyCode.UP || kc == KeyCode.DOWN) user.stop();
+				if (kc == KeyCode.UP || kc == KeyCode.DOWN) {
+					user.stop();
+				}
 			}
 		});
+
 		root.getChildren().add(background);
+
+		// Add the pause button
+		addPauseButton();
+	}
+
+	private void addPauseButton() {
+		// Load the pause button image
+		Image pauseImage = new Image(getClass().getResource("/com/example/demo/images/pause.png").toExternalForm());
+		pauseButton = new ImageView(pauseImage);
+
+		// Set button size and position
+		pauseButton.setFitWidth(50);
+		pauseButton.setFitHeight(50);
+		pauseButton.setX(screenWidth - 70); // Position near the top-right corner
+		pauseButton.setY(20);
+
+		// Enable interactivity
+		pauseButton.setPickOnBounds(true); // Allows clicks on the full image area
+		pauseButton.setFocusTraversable(true); // Makes the button focusable
+		pauseButton.setMouseTransparent(false); // Ensures it receives mouse events
+
+		// Add click handler for pause button
+		pauseButton.setOnMouseClicked(event -> {
+			System.out.println("Pause button clicked"); // Debugging statement
+			timeline.pause(); // Pause the game
+			showPauseScreen(); // Display the pause screen
+		});
+
+		// Add pause button to the root group
+		root.getChildren().add(pauseButton);
+	}
+
+
+	private void showPauseScreen() {
+		PauseScreen pauseScreen = new PauseScreen(
+				(Stage) scene.getWindow(),
+				() -> timeline.play(), // Resume the game
+				() -> System.out.println("Settings action"), // Placeholder for settings
+				this::returnToMainMenu // Return to the main menu
+		);
+		pauseScreen.show(); // Display the pause screen
+	}
+
+	private void returnToMainMenu() {
+		timeline.stop(); // Stop the game
+		Stage stage = (Stage) scene.getWindow(); // Get the current stage
+		MenuView menuView = new MenuView(stage, new com.example.demo.controller.Controller(stage));
+		menuView.showMenu(); // Transition back to the main menu
 	}
 
 	private void fireProjectile() {

@@ -54,11 +54,11 @@ public class MenuView {
 
     private VBox createMenuPanel() {
         // Title bar with green background and rounded corners
-        Rectangle titleBackground = new Rectangle(250, 50, Color.GREEN);
+        Rectangle titleBackground = new Rectangle(700, 180, Color.GREEN);
         titleBackground.setArcWidth(20);
         titleBackground.setArcHeight(20);
 
-        Text titleText = new Text("MENU");
+        Text titleText = new Text("SKY BATTLE");
         titleText.getStyleClass().add("banner-text");
 
         StackPane title = new StackPane(titleBackground, titleText);
