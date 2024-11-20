@@ -5,17 +5,20 @@ import java.util.stream.Collectors;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-
-import javafx.event.EventHandler;
-import javafx.animation.*;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.image.*;
-import javafx.scene.input.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.event.EventHandler;
+
 
 public abstract class LevelParent {
 
@@ -102,8 +105,8 @@ public abstract class LevelParent {
 			Stage primaryStage = (Stage) root.getScene().getWindow();
 			primaryStage.setScene(nextScene);
 			nextLevel.startGame();
-		} catch (Exception e) {
-			showErrorDialog("Error transitioning to next level: " + e.getMessage());
+		} catch (Throwable t) { // Catch Throwable instead of Exception
+			showErrorDialog("Error transitioning to next level: " + t.getMessage());
 		}
 	}
 
@@ -214,20 +217,17 @@ public abstract class LevelParent {
 					Boss boss = (Boss) enemy;
 					if (boss.getCustomHitbox().intersects(projectile.getBoundsInParent())) {
 						if (!boss.isShielded()) {
-							projectile.takeDamage(); // This will cause the projectile to disappear if it is designed to do so upon taking damage.
+							projectile.takeDamage();
 							boss.takeDamage();
 						}
-						// If the boss is shielded, the projectile does not disappear and does not deal damage.
 					}
 				} else if (enemy.getBoundsInParent().intersects(projectile.getBoundsInParent())) {
-					projectile.takeDamage(); // Normal behavior for collisions with non-boss enemies.
+					projectile.takeDamage();
 					enemy.takeDamage();
 				}
 			}
 		}
 	}
-
-
 
 	private void handleEnemyPenetration() {
 		for (ActiveActorDestructible enemy : enemyUnits) {
@@ -246,7 +246,6 @@ public abstract class LevelParent {
 		for (int i = 0; i < currentNumberOfEnemies - enemyUnits.size(); i++) {
 			user.incrementKillCount();
 			System.out.println("Enemy destroyed! Total kills: " + user.getNumberOfKills());
-
 		}
 	}
 
@@ -296,5 +295,4 @@ public abstract class LevelParent {
 	private void updateNumberOfEnemies() {
 		currentNumberOfEnemies = enemyUnits.size();
 	}
-
 }
