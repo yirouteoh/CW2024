@@ -13,11 +13,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import javafx.event.EventHandler;
 
 public abstract class LevelParent {
 
@@ -33,6 +30,7 @@ public abstract class LevelParent {
 	private final UserPlane user;
 	private final Scene scene;
 	private final ImageView background;
+	private final KillCountDisplay killCountDisplay;
 
 	private ImageView pauseButton; // Pause button ImageView
 
@@ -46,7 +44,7 @@ public abstract class LevelParent {
 	private int currentNumberOfEnemies;
 	private LevelView levelView;
 
-	public LevelParent(String backgroundImageName, double screenHeight, double screenWidth, int playerInitialHealth) {
+	public LevelParent(String backgroundImageName, double screenHeight, double screenWidth, int playerInitialHealth, int targetKillCount) {
 		this.root = new Group();
 		this.scene = new Scene(root, screenWidth, screenHeight);
 		this.timeline = new Timeline();
@@ -62,6 +60,10 @@ public abstract class LevelParent {
 		this.enemyMaximumYPosition = screenHeight - SCREEN_HEIGHT_ADJUSTMENT;
 		this.levelView = instantiateLevelView();
 		this.currentNumberOfEnemies = 0;
+
+		// Initialize KillCountDisplay with the target kill count
+		this.killCountDisplay = new KillCountDisplay(600, 55, targetKillCount);
+
 		initializeTimeline();
 		friendlyUnits.add(user);
 	}
@@ -87,6 +89,9 @@ public abstract class LevelParent {
 		initializeFriendlyUnits(); // Add the user plane and other units
 		levelView.showHeartDisplay(); // Show health or level-related UI
 
+		// Add the kill count display to the root
+		root.getChildren().add(killCountDisplay.getDisplay());
+
 		// Add key press and release handlers to the scene
 		scene.setOnKeyPressed(event -> {
 			switch (event.getCode()) {
@@ -108,6 +113,9 @@ public abstract class LevelParent {
 		return scene; // Return the configured scene
 	}
 
+	protected KillCountDisplay getKillCountDisplay() {
+		return killCountDisplay;
+	}
 
 	public void startGame() {
 		background.requestFocus();
@@ -126,7 +134,7 @@ public abstract class LevelParent {
 			Stage primaryStage = (Stage) root.getScene().getWindow();
 			primaryStage.setScene(nextScene);
 			nextLevel.startGame();
-		} catch (Throwable t) { // Catch Throwable instead of Exception
+		} catch (Throwable t) {
 			showErrorDialog("Error transitioning to next level: " + t.getMessage());
 		}
 	}
@@ -172,48 +180,41 @@ public abstract class LevelParent {
 	}
 
 	private void addPauseButton() {
-		// Load the pause button image
 		Image pauseImage = new Image(getClass().getResource("/com/example/demo/images/pause.png").toExternalForm());
 		pauseButton = new ImageView(pauseImage);
 
-		// Set button size and position
 		pauseButton.setFitWidth(50);
 		pauseButton.setFitHeight(50);
-		pauseButton.setX(screenWidth - 70); // Position near the top-right corner
+		pauseButton.setX(screenWidth - 70);
 		pauseButton.setY(20);
 
-		// Enable interactivity
-		pauseButton.setPickOnBounds(true); // Allows clicks on the full image area
-		pauseButton.setFocusTraversable(true); // Makes the button focusable
-		pauseButton.setMouseTransparent(false); // Ensures it receives mouse events
+		pauseButton.setPickOnBounds(true);
+		pauseButton.setFocusTraversable(true);
+		pauseButton.setMouseTransparent(false);
 
-		// Add click handler for pause button
 		pauseButton.setOnMouseClicked(event -> {
-			System.out.println("Pause button clicked"); // Debugging statement
-			timeline.pause(); // Pause the game
-			showPauseScreen(); // Display the pause screen
+			timeline.pause();
+			showPauseScreen();
 		});
 
-		// Add pause button to the root group
 		root.getChildren().add(pauseButton);
 	}
-
 
 	private void showPauseScreen() {
 		PauseScreen pauseScreen = new PauseScreen(
 				(Stage) scene.getWindow(),
-				() -> timeline.play(), // Resume the game
-				() -> System.out.println("Settings action"), // Placeholder for settings
-				this::returnToMainMenu // Return to the main menu
+				() -> timeline.play(),
+				() -> System.out.println("Settings action"),
+				this::returnToMainMenu
 		);
-		pauseScreen.show(); // Display the pause screen
+		pauseScreen.show();
 	}
 
 	private void returnToMainMenu() {
-		timeline.stop(); // Stop the game
-		Stage stage = (Stage) scene.getWindow(); // Get the current stage
+		timeline.stop();
+		Stage stage = (Stage) scene.getWindow();
 		MenuView menuView = new MenuView(stage, new com.example.demo.controller.Controller(stage));
-		menuView.showMenu(); // Transition back to the main menu
+		menuView.showMenu();
 	}
 
 	private void fireProjectile() {
@@ -248,7 +249,7 @@ public abstract class LevelParent {
 	}
 
 	private void removeDestroyedActors(List<ActiveActorDestructible> actors) {
-		List<ActiveActorDestructible> destroyedActors = actors.stream().filter(actor -> actor.isDestroyed())
+		List<ActiveActorDestructible> destroyedActors = actors.stream().filter(ActiveActorDestructible::isDestroyed)
 				.collect(Collectors.toList());
 		root.getChildren().removeAll(destroyedActors);
 		actors.removeAll(destroyedActors);
@@ -269,8 +270,7 @@ public abstract class LevelParent {
 	private void handleCollisions(List<ActiveActorDestructible> projectiles, List<ActiveActorDestructible> enemies) {
 		for (ActiveActorDestructible projectile : projectiles) {
 			for (ActiveActorDestructible enemy : enemies) {
-				if (enemy instanceof Boss) {
-					Boss boss = (Boss) enemy;
+				if (enemy instanceof Boss boss) {
 					if (boss.getCustomHitbox().intersects(projectile.getBoundsInParent())) {
 						if (!boss.isShielded()) {
 							projectile.takeDamage();
@@ -299,9 +299,10 @@ public abstract class LevelParent {
 	}
 
 	private void updateKillCount() {
-		for (int i = 0; i < currentNumberOfEnemies - enemyUnits.size(); i++) {
-			user.incrementKillCount();
-			System.out.println("Enemy destroyed! Total kills: " + user.getNumberOfKills());
+		int kills = currentNumberOfEnemies - enemyUnits.size();
+		for (int i = 0; i < kills; i++) {
+			killCountDisplay.incrementKillCount();
+			System.out.println("Enemy destroyed! Total kills: " + killCountDisplay.getKillCount());
 		}
 	}
 
@@ -315,14 +316,10 @@ public abstract class LevelParent {
 	}
 
 	protected void loseGame() {
-		// Stop the game timeline
 		timeline.stop();
-
-		// Create and center the "Game Over" image
 		GameOverImage gameOverImage = new GameOverImage(screenWidth, screenHeight);
-		root.getChildren().add(gameOverImage); // Add the image to the root group
+		root.getChildren().add(gameOverImage);
 	}
-
 
 	protected UserPlane getUser() {
 		return user;
