@@ -315,9 +315,14 @@ public abstract class LevelParent {
 	}
 
 	protected void loseGame() {
+		// Stop the game timeline
 		timeline.stop();
-		levelView.showGameOverImage();
+
+		// Create and center the "Game Over" image
+		GameOverImage gameOverImage = new GameOverImage(screenWidth, screenHeight);
+		root.getChildren().add(gameOverImage); // Add the image to the root group
 	}
+
 
 	protected UserPlane getUser() {
 		return user;
