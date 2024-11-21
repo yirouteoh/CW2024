@@ -83,11 +83,31 @@ public abstract class LevelParent {
 	protected abstract LevelView instantiateLevelView();
 
 	public Scene initializeScene() {
-		initializeBackground();
-		initializeFriendlyUnits();
-		levelView.showHeartDisplay();
-		return scene;
+		initializeBackground(); // Set up the background and add to root
+		initializeFriendlyUnits(); // Add the user plane and other units
+		levelView.showHeartDisplay(); // Show health or level-related UI
+
+		// Add key press and release handlers to the scene
+		scene.setOnKeyPressed(event -> {
+			switch (event.getCode()) {
+				case UP -> user.moveUp();
+				case DOWN -> user.moveDown();
+				case LEFT -> user.moveLeft();
+				case RIGHT -> user.moveRight();
+				case SPACE -> fireProjectile(); // Fire projectile when space is pressed
+			}
+		});
+
+		scene.setOnKeyReleased(event -> {
+			switch (event.getCode()) {
+				case UP, DOWN -> user.stop(); // Stop vertical movement
+				case LEFT, RIGHT -> user.stopHorizontal(); // Stop horizontal movement
+			}
+		});
+
+		return scene; // Return the configured scene
 	}
+
 
 	public void startGame() {
 		background.requestFocus();
@@ -144,31 +164,6 @@ public abstract class LevelParent {
 		background.setFocusTraversable(true);
 		background.setFitHeight(screenHeight);
 		background.setFitWidth(screenWidth);
-
-		// Add keyboard controls for game actions
-		background.setOnKeyPressed(new EventHandler<KeyEvent>() {
-			@Override
-			public void handle(KeyEvent e) {
-				KeyCode kc = e.getCode();
-				if (kc == KeyCode.UP) {
-					user.moveUp();
-				} else if (kc == KeyCode.DOWN) {
-					user.moveDown();
-				} else if (kc == KeyCode.SPACE) {
-					fireProjectile();
-				}
-			}
-		});
-
-		background.setOnKeyReleased(new EventHandler<KeyEvent>() {
-			@Override
-			public void handle(KeyEvent e) {
-				KeyCode kc = e.getCode();
-				if (kc == KeyCode.UP || kc == KeyCode.DOWN) {
-					user.stop();
-				}
-			}
-		});
 
 		root.getChildren().add(background);
 
