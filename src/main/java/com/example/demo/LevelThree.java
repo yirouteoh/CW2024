@@ -5,9 +5,10 @@ import javafx.scene.image.Image;
 public class LevelThree extends LevelParent {
 
     private static final String BACKGROUND_IMAGE_NAME = "/com/example/demo/images/background4.jpg";
-    private static final int PLAYER_INITIAL_HEALTH = 5;
+    private static final int PLAYER_INITIAL_HEALTH = 50;
     private static final int TARGET_KILL_COUNT = 24; // Total number of kills needed to reach the boss
     private static final double ENEMY_SPAWN_PROBABILITY = 0.25; // Probability of enemy spawn
+    private static final double POWER_UP_SPAWN_PROBABILITY = 0.02; // 2% chance per frame for power-up spawn
 
     private final Boss finalBoss;
     private int currentWave; // Tracks the current wave
@@ -17,12 +18,12 @@ public class LevelThree extends LevelParent {
     public LevelThree(double screenHeight, double screenWidth) {
         super(BACKGROUND_IMAGE_NAME, screenHeight, screenWidth, PLAYER_INITIAL_HEALTH, TARGET_KILL_COUNT);
 
-        // Initialize the final boss with submarine.png
+        // Initialize the final boss with jetplane.png
         this.finalBoss = new Boss() {
             {
                 setImage(new Image(getClass().getResource("/com/example/demo/images/jetplane.png").toExternalForm()));
-                setFitHeight(300); // Set the height of the submarine
-                setFitWidth(500);  // Set the width of the submarine
+                setFitHeight(300); // Set the height of the boss
+                setFitWidth(500);  // Set the width of the boss
             }
         };
 
@@ -32,8 +33,11 @@ public class LevelThree extends LevelParent {
 
     @Override
     protected void initializeFriendlyUnits() {
-        getRoot().getChildren().add(getUser());
+        UserPlane user = getUser(); // Assuming getUser() creates or retrieves the UserPlane
+        user.setLevelParent(this); // Pass the current LevelParent instance to the user plane
+        getRoot().getChildren().add(user);
     }
+
 
     @Override
     protected void checkIfGameOver() {
@@ -51,6 +55,13 @@ public class LevelThree extends LevelParent {
             spawnWaveEnemies(); // Spawn enemies for the current wave
         } else if (getCurrentNumberOfEnemies() == 0 && !finalBoss.isDestroyed()) {
             addEnemyUnit(finalBoss); // Spawn the final boss after all waves
+        }
+
+        // Randomly spawn spreadshot power-up
+        if (Math.random() < POWER_UP_SPAWN_PROBABILITY) {
+            double screenWidthLimit = getScreenWidth() / 2; // Limit to the left half of the screen
+            double x = Math.random() * screenWidthLimit; // Generate an x-coordinate within the left half
+            addPowerUp(new SpreadshotPowerUp(x, 0)); // Spawn the spreadshot power-up
         }
     }
 

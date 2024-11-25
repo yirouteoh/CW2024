@@ -40,6 +40,8 @@ public abstract class LevelParent {
 	private final List<ActiveActorDestructible> enemyUnits;
 	private final List<ActiveActorDestructible> userProjectiles;
 	private final List<ActiveActorDestructible> enemyProjectiles;
+	private final List<ActiveActorDestructible> powerUps;
+
 
 	private int currentNumberOfEnemies;
 	private LevelView levelView;
@@ -49,10 +51,12 @@ public abstract class LevelParent {
 		this.scene = new Scene(root, screenWidth, screenHeight);
 		this.timeline = new Timeline();
 		this.user = new UserPlane(playerInitialHealth);
+		this.user.setLevelParent(this);
 		this.friendlyUnits = new ArrayList<>();
 		this.enemyUnits = new ArrayList<>();
 		this.userProjectiles = new ArrayList<>();
 		this.enemyProjectiles = new ArrayList<>();
+		this.powerUps = new ArrayList<>();
 
 		this.background = new ImageView(new Image(getClass().getResource(backgroundImageName).toExternalForm()));
 		this.screenHeight = screenHeight;
@@ -156,6 +160,7 @@ public abstract class LevelParent {
 		handleUserProjectileCollisions();
 		handleEnemyProjectileCollisions();
 		handlePlaneCollisions();
+		handlePowerUpCollisions(); // Handle power-up collection
 		removeAllDestroyedActors();
 		updateKillCount();
 		updateLevelView();
@@ -219,9 +224,21 @@ public abstract class LevelParent {
 
 	private void fireProjectile() {
 		ActiveActorDestructible projectile = user.fireProjectile();
-		root.getChildren().add(projectile);
-		userProjectiles.add(projectile);
+		if (projectile != null && !root.getChildren().contains(projectile)) {
+			root.getChildren().add(projectile);
+			userProjectiles.add(projectile);
+		}
 	}
+
+
+
+	public void addProjectile(ActiveActorDestructible projectile) {
+		if (!userProjectiles.contains(projectile) && !getRoot().getChildren().contains(projectile)) {
+			getRoot().getChildren().add(projectile); // Add to the scene graph
+			userProjectiles.add(projectile);         // Track the projectile
+		}
+	}
+
 
 	private void generateEnemyFire() {
 		enemyUnits.forEach(enemy -> spawnEnemyProjectile(((FighterPlane) enemy).fireProjectile()));
@@ -239,6 +256,7 @@ public abstract class LevelParent {
 		enemyUnits.forEach(enemy -> enemy.updateActor());
 		userProjectiles.forEach(projectile -> projectile.updateActor());
 		enemyProjectiles.forEach(projectile -> projectile.updateActor());
+		powerUps.forEach(powerUp -> powerUp.updateActor());
 	}
 
 	private void removeAllDestroyedActors() {
@@ -246,6 +264,7 @@ public abstract class LevelParent {
 		removeDestroyedActors(enemyUnits);
 		removeDestroyedActors(userProjectiles);
 		removeDestroyedActors(enemyProjectiles);
+		removeDestroyedActors(powerUps);
 	}
 
 	private void removeDestroyedActors(List<ActiveActorDestructible> actors) {
@@ -294,6 +313,20 @@ public abstract class LevelParent {
 		}
 	}
 
+	private void handlePowerUpCollisions() {
+		for (ActiveActorDestructible powerUp : powerUps) {
+			if (powerUp.getBoundsInParent().intersects(user.getBoundsInParent())) {
+				if (powerUp instanceof SpreadshotPowerUp) {
+					((SpreadshotPowerUp) powerUp).activate(user); // Activate spreadshot
+				} else if (powerUp instanceof PowerUp) {
+					((PowerUp) powerUp).activate(user); // Activate default power-ups
+				}
+
+				powerUp.destroy(); // Remove power-up after collection
+			}
+		}
+	}
+
 	private void updateLevelView() {
 		levelView.removeHearts(user.getHealth());
 	}
@@ -334,9 +367,20 @@ public abstract class LevelParent {
 	}
 
 	protected void addEnemyUnit(ActiveActorDestructible enemy) {
-		enemyUnits.add(enemy);
-		root.getChildren().add(enemy);
+		if (!enemyUnits.contains(enemy) && !getRoot().getChildren().contains(enemy)) {
+			enemyUnits.add(enemy);
+			getRoot().getChildren().add(enemy);
+		}
 	}
+
+
+	protected void addPowerUp(PowerUp powerUp) {
+		if (!powerUps.contains(powerUp) && !getRoot().getChildren().contains(powerUp)) {
+			powerUps.add(powerUp);
+			getRoot().getChildren().add(powerUp);
+		}
+	}
+
 
 	protected double getEnemyMaximumYPosition() {
 		return enemyMaximumYPosition;
