@@ -20,7 +20,7 @@ public class LevelThree extends LevelParent {
         // Initialize the final boss with submarine.png
         this.finalBoss = new Boss() {
             {
-                setImage(new Image(getClass().getResource("/com/example/demo/images/submarine.png").toExternalForm()));
+                setImage(new Image(getClass().getResource("/com/example/demo/images/jetplane.png").toExternalForm()));
                 setFitHeight(300); // Set the height of the submarine
                 setFitWidth(500);  // Set the width of the submarine
             }
