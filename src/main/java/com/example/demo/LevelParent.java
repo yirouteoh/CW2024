@@ -45,6 +45,8 @@ public abstract class LevelParent {
 
 	private int currentNumberOfEnemies;
 	private LevelView levelView;
+	private SoundManager soundManager;
+
 
 	public LevelParent(String backgroundImageName, double screenHeight, double screenWidth, int playerInitialHealth, int targetKillCount) {
 		this.root = new Group();
@@ -67,6 +69,8 @@ public abstract class LevelParent {
 
 		// Initialize KillCountDisplay with the target kill count
 		this.killCountDisplay = new KillCountDisplay(600, 55, targetKillCount);
+		this.soundManager = SoundManager.getInstance();
+
 
 		initializeTimeline();
 		friendlyUnits.add(user);
@@ -199,6 +203,7 @@ public abstract class LevelParent {
 
 		pauseButton.setOnMouseClicked(event -> {
 			timeline.pause();
+			soundManager.pauseBackgroundMusic(); // Pause music
 			showPauseScreen();
 		});
 
@@ -208,12 +213,18 @@ public abstract class LevelParent {
 	private void showPauseScreen() {
 		PauseScreen pauseScreen = new PauseScreen(
 				(Stage) scene.getWindow(),
-				() -> timeline.play(),
-				() -> System.out.println("Settings action"),
-				this::returnToMainMenu
+				() -> {
+					timeline.play(); // Resume game timeline
+					soundManager.resumeBackgroundMusic(); // Resume music
+				},
+				() -> System.out.println("Settings action"), // Placeholder for settings action
+				this::returnToMainMenu,
+				soundManager // Pass the SoundManager instance
 		);
 		pauseScreen.show();
 	}
+
+
 
 	private void returnToMainMenu() {
 		timeline.stop();

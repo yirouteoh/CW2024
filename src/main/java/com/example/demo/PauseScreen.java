@@ -15,15 +15,20 @@ public class PauseScreen {
     private final Runnable resumeAction; // Action to resume the game
     private final Runnable settingsAction; // Action to open settings
     private final Runnable returnToMenuAction; // Action to return to the main menu
+    private final SoundManager soundManager;
 
-    public PauseScreen(Stage gameStage, Runnable resumeAction, Runnable settingsAction, Runnable returnToMenuAction) {
+
+    public PauseScreen(Stage gameStage, Runnable resumeAction, Runnable settingsAction, Runnable returnToMenuAction, SoundManager soundManager) {
         this.gameStage = gameStage;
         this.resumeAction = resumeAction;
         this.settingsAction = settingsAction;
         this.returnToMenuAction = returnToMenuAction;
+        this.soundManager = soundManager; // Initialize SoundManager
     }
 
+
     public void show() {
+        soundManager.pauseBackgroundMusic(); // Pause music when the pause screen is shown
         // Pause overlay stage
         Stage pauseStage = new Stage();
         pauseStage.initModality(Modality.APPLICATION_MODAL); // Prevent interactions with the main stage
@@ -36,6 +41,7 @@ public class PauseScreen {
         Button resumeButton = createButtonWithImage("/com/example/demo/images/resume.png");
         resumeButton.setOnAction(event -> {
             if (resumeAction != null) {
+                soundManager.resumeBackgroundMusic(); // Resume music
                 resumeAction.run(); // Resume the game
             }
             pauseStage.close();

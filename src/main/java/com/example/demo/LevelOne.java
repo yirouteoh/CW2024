@@ -9,6 +9,8 @@ public class LevelOne extends LevelParent {
 	private static final double ENEMY_SPAWN_PROBABILITY = 0.20; // Probability of spawning a new enemy
 	private static final int PLAYER_INITIAL_HEALTH = 5; // User plane initial health
 
+	private SoundManager soundManager;
+
 	/**
 	 * Constructor for Level One
 	 *
@@ -18,6 +20,8 @@ public class LevelOne extends LevelParent {
 	public LevelOne(double screenHeight, double screenWidth) {
 		// Pass the target kills (KILLS_TO_ADVANCE) to the parent constructor
 		super(BACKGROUND_IMAGE_NAME, screenHeight, screenWidth, PLAYER_INITIAL_HEALTH, KILLS_TO_ADVANCE);
+		this.soundManager = SoundManager.getInstance();
+
 	}
 
 	/**
@@ -26,8 +30,10 @@ public class LevelOne extends LevelParent {
 	@Override
 	protected void checkIfGameOver() {
 		if (userIsDestroyed()) {
+			soundManager.stopBackgroundMusic(); // Stop music on game over
 			loseGame(); // Trigger loss condition
 		} else if (userHasReachedKillTarget()) {
+			soundManager.stopBackgroundMusic(); // Stop music before transitioning
 			goToNextLevel(NEXT_LEVEL); // Advance to Level Two
 		}
 	}
@@ -37,6 +43,7 @@ public class LevelOne extends LevelParent {
 	 */
 	@Override
 	protected void initializeFriendlyUnits() {
+		soundManager.playBackgroundMusic(SoundManager.LEVEL_ONE_MUSIC); // Play Level One music
 		getRoot().getChildren().add(getUser()); // Add the user's plane to the scene
 	}
 

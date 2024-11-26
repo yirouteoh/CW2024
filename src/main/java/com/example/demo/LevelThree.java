@@ -5,7 +5,7 @@ import javafx.scene.image.Image;
 public class LevelThree extends LevelParent {
 
     private static final String BACKGROUND_IMAGE_NAME = "/com/example/demo/images/background4.jpg";
-    private static final int PLAYER_INITIAL_HEALTH = 50;
+    private static final int PLAYER_INITIAL_HEALTH = 5;
     private static final int TARGET_KILL_COUNT = 24; // Total number of kills needed to reach the boss
     private static final double ENEMY_SPAWN_PROBABILITY = 0.25; // Probability of enemy spawn
     private static final double POWER_UP_SPAWN_PROBABILITY = 0.02; // 2% chance per frame for power-up spawn
@@ -14,6 +14,7 @@ public class LevelThree extends LevelParent {
     private int currentWave; // Tracks the current wave
     private int totalSpawnedEnemies; // Tracks the total number of spawned enemies
     private final int[] waveEnemyCounts = {5, 8, 11}; // Number of enemies per wave
+    private SoundManager soundManager;
 
     public LevelThree(double screenHeight, double screenWidth) {
         super(BACKGROUND_IMAGE_NAME, screenHeight, screenWidth, PLAYER_INITIAL_HEALTH, TARGET_KILL_COUNT);
@@ -29,10 +30,13 @@ public class LevelThree extends LevelParent {
 
         this.currentWave = 0; // Start at wave 0 (first wave)
         this.totalSpawnedEnemies = 0; // No enemies spawned initially
+        this.soundManager = SoundManager.getInstance();
+
     }
 
     @Override
     protected void initializeFriendlyUnits() {
+        soundManager.playBackgroundMusic(SoundManager.LEVEL_THREE_MUSIC); // Play Level Three music
         UserPlane user = getUser(); // Assuming getUser() creates or retrieves the UserPlane
         user.setLevelParent(this); // Pass the current LevelParent instance to the user plane
         getRoot().getChildren().add(user);
@@ -42,8 +46,10 @@ public class LevelThree extends LevelParent {
     @Override
     protected void checkIfGameOver() {
         if (userIsDestroyed()) {
+            soundManager.stopBackgroundMusic(); // Stop Level Three music
             loseGame(); // User loses the game
         } else if (finalBoss.isDestroyed()) {
+            soundManager.stopBackgroundMusic(); // Stop Level Three music
             winGame(); // User wins the game after defeating the boss
         }
     }

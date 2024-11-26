@@ -15,15 +15,21 @@ public class MenuView {
 
     private final Stage stage;
     private final com.example.demo.controller.Controller controller;
+    private SoundManager soundManager;
 
     // Constructor to accept Stage and Controller
     public MenuView(Stage stage, com.example.demo.controller.Controller controller) {
         this.stage = stage;
         this.controller = controller;
+        this.soundManager = SoundManager.getInstance();
+
     }
 
     // Show the menu
     public void showMenu() {
+        // Play the menu background music
+        soundManager.playBackgroundMusic(SoundManager.MENU_MUSIC);
+
         // Root layout
         StackPane root = new StackPane();
 
@@ -70,6 +76,7 @@ public class MenuView {
         // Button actions
         playButton.setOnAction(e -> {
             try {
+                soundManager.stopBackgroundMusic(); // Stop the menu background music
                 controller.launchGame(); // Launch the game using the controller
             } catch (Exception ex) {
                 ex.printStackTrace();

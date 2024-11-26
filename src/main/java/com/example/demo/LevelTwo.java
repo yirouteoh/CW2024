@@ -7,6 +7,7 @@ public class LevelTwo extends LevelParent {
 	private static final int TARGET_KILL_COUNT = 1; // Set this to the number of kills required for Level 2 to win
 
 	private final Boss boss;
+	private SoundManager soundManager;
 
 	/**
 	 * Constructor for Level Two
@@ -18,6 +19,8 @@ public class LevelTwo extends LevelParent {
 		// Pass target kill count to LevelParent
 		super(BACKGROUND_IMAGE_NAME, screenHeight, screenWidth, PLAYER_INITIAL_HEALTH, TARGET_KILL_COUNT);
 		this.boss = new Boss();
+		this.soundManager = SoundManager.getInstance();
+
 	}
 
 	/**
@@ -25,6 +28,7 @@ public class LevelTwo extends LevelParent {
 	 */
 	@Override
 	protected void initializeFriendlyUnits() {
+		soundManager.playBackgroundMusic(SoundManager.LEVEL_TWO_MUSIC); // Play Level Two music
 		getRoot().getChildren().add(getUser());
 	}
 
@@ -34,8 +38,10 @@ public class LevelTwo extends LevelParent {
 	@Override
 	protected void checkIfGameOver() {
 		if (userIsDestroyed()) {
+			soundManager.stopBackgroundMusic(); // Stop Level Two music
 			loseGame();
 		} else if (boss.isDestroyed()) {
+			soundManager.stopBackgroundMusic(); // Stop Level Two music
 			goToNextLevel("com.example.demo.LevelThree");
 		}
 	}
