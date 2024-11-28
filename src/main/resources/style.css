@@ -56,3 +56,26 @@
     -fx-fill: white;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
 }
+
+/* For dialog background */
+.instructions-dialog {
+    -fx-background-color: #f6e58d;
+    -fx-padding: 20;
+    -fx-border-color: #ff7979;
+    -fx-border-width: 3;
+}
+
+/* For text inside the dialog */
+.instructions-text {
+    -fx-font-size: 18px;
+    -fx-text-fill: #535c68;
+    -fx-font-family: "Arial";
+}
+
+/* For the close button */
+.close-button {
+    -fx-background-color: #badc58;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-padding: 10;
+}
