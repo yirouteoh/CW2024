@@ -108,6 +108,13 @@ public abstract class LevelParent {
 				case LEFT -> user.moveLeft();
 				case RIGHT -> user.moveRight();
 				case SPACE -> fireProjectile(); // Fire projectile when space is pressed
+				case P -> {
+					if (!timeline.getStatus().equals(Timeline.Status.PAUSED)) {
+						timeline.pause();
+						soundManager.pauseBackgroundMusic();
+						showPauseScreen(); // Display pause screen
+					}
+				}
 			}
 		});
 
