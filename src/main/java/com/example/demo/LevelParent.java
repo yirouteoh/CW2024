@@ -217,12 +217,24 @@ public abstract class LevelParent {
 					timeline.play(); // Resume game timeline
 					soundManager.resumeBackgroundMusic(); // Resume music
 				},
-				() -> System.out.println("Settings action"), // Placeholder for settings action
+				() -> restartGame(), // restart
 				this::returnToMainMenu,
 				soundManager // Pass the SoundManager instance
 		);
 		pauseScreen.show();
 	}
+
+	private void restartGame() {
+		try {
+			timeline.stop(); // Stop the current game timeline
+			soundManager.stopBackgroundMusic(); // Stop any background music
+			com.example.demo.controller.Controller controller = new com.example.demo.controller.Controller((Stage) scene.getWindow());
+			controller.launchGame(); // Restart the game from Level One
+		} catch (Exception e) {
+			showErrorDialog("Error restarting the game: " + e.getMessage());
+		}
+	}
+
 
 
 

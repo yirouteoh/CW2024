@@ -13,15 +13,15 @@ public class PauseScreen {
 
     private final Stage gameStage; // Main game stage
     private final Runnable resumeAction; // Action to resume the game
-    private final Runnable settingsAction; // Action to open settings
+    private final Runnable restartAction; // Action to restart the game
     private final Runnable returnToMenuAction; // Action to return to the main menu
     private final SoundManager soundManager;
 
 
-    public PauseScreen(Stage gameStage, Runnable resumeAction, Runnable settingsAction, Runnable returnToMenuAction, SoundManager soundManager) {
+    public PauseScreen(Stage gameStage, Runnable resumeAction, Runnable restartAction, Runnable returnToMenuAction, SoundManager soundManager) {
         this.gameStage = gameStage;
         this.resumeAction = resumeAction;
-        this.settingsAction = settingsAction;
+        this.restartAction = restartAction; // Add restart logic
         this.returnToMenuAction = returnToMenuAction;
         this.soundManager = soundManager; // Initialize SoundManager
     }
@@ -47,12 +47,14 @@ public class PauseScreen {
             pauseStage.close();
         });
 
-        // Settings button with image
-        Button settingsButton = createButtonWithImage("/com/example/demo/images/settings.png");
-        settingsButton.setOnAction(event -> {
-            if (settingsAction != null) {
-                settingsAction.run(); // Open settings
+        // Restart button with image
+        Button restartButton = createButtonWithImage("/com/example/demo/images/restart.png");
+        restartButton.setOnAction(event -> {
+            if (restartAction != null) {
+                soundManager.stopBackgroundMusic(); // Stop current music
+                restartAction.run(); // Restart the game
             }
+            pauseStage.close();
         });
 
         // Return to Main Menu button with image
@@ -64,7 +66,7 @@ public class PauseScreen {
             pauseStage.close();
         });
 
-        layout.getChildren().addAll(resumeButton, settingsButton, mainMenuButton);
+        layout.getChildren().addAll(resumeButton, restartButton, mainMenuButton);
 
         Scene pauseScene = new Scene(layout, 400, 300);
         pauseStage.setScene(pauseScene);
