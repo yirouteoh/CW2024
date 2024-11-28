@@ -108,7 +108,7 @@ public abstract class LevelParent {
 				case LEFT -> user.moveLeft();
 				case RIGHT -> user.moveRight();
 				case SPACE -> fireProjectile(); // Fire projectile when space is pressed
-				case P -> {
+				case ESCAPE -> {
 					if (!timeline.getStatus().equals(Timeline.Status.PAUSED)) {
 						timeline.pause();
 						soundManager.pauseBackgroundMusic();
@@ -391,9 +391,19 @@ public abstract class LevelParent {
 
 	protected void loseGame() {
 		timeline.stop();
-		GameOverImage gameOverImage = new GameOverImage(screenWidth, screenHeight);
+		soundManager.stopBackgroundMusic();
+
+		// Add the GameOverImage to the root
+		GameOverImage gameOverImage = new GameOverImage(
+				screenWidth,
+				screenHeight,
+				this::restartGame,       // Pass the restart callback
+				this::returnToMainMenu   // Pass the exit callback
+		);
 		root.getChildren().add(gameOverImage);
 	}
+
+
 
 	protected UserPlane getUser() {
 		return user;
