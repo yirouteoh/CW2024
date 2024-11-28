@@ -211,23 +211,31 @@ public abstract class LevelParent {
 	}
 
 	private void showPauseScreen() {
+		timeline.pause(); // Pause the game timeline
+		soundManager.pauseBackgroundMusic(); // Pause the music
+
 		PauseScreen pauseScreen = new PauseScreen(
-				(Stage) scene.getWindow(),
+				root, // Pass the root Group
 				() -> {
-					timeline.play(); // Resume game timeline
-					soundManager.resumeBackgroundMusic(); // Resume music
+					timeline.play(); // Resume the game timeline
+					soundManager.resumeBackgroundMusic(); // Resume the music
 				},
-				() -> restartGame(), // restart
-				this::returnToMainMenu,
+				this::restartGame, // Restart the game
+				this::returnToMainMenu, // Return to the main menu
 				soundManager // Pass the SoundManager instance
 		);
-		pauseScreen.show();
+		pauseScreen.show(); // Display the pause screen
 	}
+
+
+
 
 	private void restartGame() {
 		try {
 			timeline.stop(); // Stop the current game timeline
-			soundManager.stopBackgroundMusic(); // Stop any background music
+			soundManager.stopBackgroundMusic(); // Stop the music
+
+			// Assuming Controller handles restarting
 			com.example.demo.controller.Controller controller = new com.example.demo.controller.Controller((Stage) scene.getWindow());
 			controller.launchGame(); // Restart the game from Level One
 		} catch (Exception e) {
@@ -239,11 +247,14 @@ public abstract class LevelParent {
 
 
 	private void returnToMainMenu() {
-		timeline.stop();
-		Stage stage = (Stage) scene.getWindow();
+		timeline.stop(); // Stop the game
+		Stage stage = (Stage) scene.getWindow(); // Get the current stage
+
+		// Assuming MenuView handles showing the main menu
 		MenuView menuView = new MenuView(stage, new com.example.demo.controller.Controller(stage));
-		menuView.showMenu();
+		menuView.showMenu(); // Display the main menu
 	}
+
 
 	private void fireProjectile() {
 		ActiveActorDestructible projectile = user.fireProjectile();
