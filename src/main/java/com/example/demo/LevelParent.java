@@ -391,6 +391,7 @@ public abstract class LevelParent {
 	protected void winGame() {
 		timeline.stop();
 		soundManager.stopBackgroundMusic();
+		soundManager.playBackgroundMusic(SoundManager.WIN_GAME_MUSIC); // Play the win music
 
 		// Add the enhanced WinImage to the root
 		WinImage winScreen = new WinImage(
@@ -406,6 +407,7 @@ public abstract class LevelParent {
 	protected void loseGame() {
 		timeline.stop();
 		soundManager.stopBackgroundMusic();
+		soundManager.playBackgroundMusic(SoundManager.GAME_OVER_MUSIC); // Play the Game Over music
 
 		// Add the GameOverImage to the root
 		GameOverImage gameOverImage = new GameOverImage(

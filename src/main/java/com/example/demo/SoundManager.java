@@ -17,6 +17,8 @@ public class SoundManager {
     public static final String LEVEL_ONE_MUSIC = "/com/example/demo/audios/levelonemusic.mp3";
     public static final String LEVEL_TWO_MUSIC = "/com/example/demo/audios/leveltwomusic.mp3";
     public static final String LEVEL_THREE_MUSIC = "/com/example/demo/audios/levelthreemusic.mp3";
+    public static final String GAME_OVER_MUSIC = "/com/example/demo/audios/gameovermusic.mp3";
+    public static final String WIN_GAME_MUSIC = "/com/example/demo/audios/wingamemusic.mp3";
     public static final String SHOOT_SOUND = "/com/example/demo/audios/shootmusic.mp3";
 
     private SoundManager() { }
