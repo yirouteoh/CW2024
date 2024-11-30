@@ -1,5 +1,6 @@
 package com.example.demo;
 
+import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
@@ -7,54 +8,68 @@ import java.net.URL;
 
 public class SoundManager {
     private static SoundManager instance; // Singleton instance
-    private MediaPlayer mediaPlayer;
+    private MediaPlayer mediaPlayer; // For background music
+    private AudioClip shootingSound; // For short sound effects
+    private final double volume = 0.5; // Default volume (50%)
 
-    // Audio file path for menu music
+    // Audio file paths
     public static final String MENU_MUSIC = "/com/example/demo/audios/menumusic.mp3";
-    // Audio file path for level one music
     public static final String LEVEL_ONE_MUSIC = "/com/example/demo/audios/levelonemusic.mp3";
     public static final String LEVEL_TWO_MUSIC = "/com/example/demo/audios/leveltwomusic.mp3";
     public static final String LEVEL_THREE_MUSIC = "/com/example/demo/audios/levelthreemusic.mp3";
+    public static final String SHOOT_SOUND = "/com/example/demo/audios/shootmusic.mp3";
 
-    // Private constructor to enforce Singleton pattern
     private SoundManager() { }
 
-    // Public method to get the Singleton instance
     public static SoundManager getInstance() {
         if (instance == null) {
             instance = new SoundManager();
+            instance.initializeSounds(); // Initialize all sounds
         }
         return instance;
     }
 
+    private void initializeSounds() {
+        try {
+            // Load shooting sound
+            URL shootResource = getClass().getResource(SHOOT_SOUND);
+            if (shootResource == null) {
+                throw new IllegalArgumentException("Audio file not found: " + SHOOT_SOUND);
+            }
+            shootingSound = new AudioClip(shootResource.toExternalForm());
+            shootingSound.setVolume(volume); // Set initial volume for sound effects
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void playBackgroundMusic(String audioFilePath) {
         try {
-            // Stop any existing media player
             if (mediaPlayer != null) {
                 mediaPlayer.stop();
             }
 
-            // Locate the audio file
             URL resource = getClass().getResource(audioFilePath);
             if (resource == null) {
                 throw new IllegalArgumentException("Audio file not found: " + audioFilePath);
             }
-            // Create Media and MediaPlayer
+
             Media media = new Media(resource.toExternalForm());
             mediaPlayer = new MediaPlayer(media);
-
-            // Configure MediaPlayer settings
-            mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop indefinitely
-            mediaPlayer.setVolume(0.5); // Set volume (0.0 to 1.0)
-
-            // Play the music
+            mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop background music
+            mediaPlayer.setVolume(volume); // Set initial volume for background music
             mediaPlayer.play();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // Method to stop background music
+    public void playShootSound() {
+        if (shootingSound != null) {
+            shootingSound.play();
+        }
+    }
+
     public void stopBackgroundMusic() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
@@ -72,4 +87,6 @@ public class SoundManager {
             mediaPlayer.play();
         }
     }
+
+
 }

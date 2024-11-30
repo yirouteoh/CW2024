@@ -107,7 +107,10 @@ public abstract class LevelParent {
 				case DOWN -> user.moveDown();
 				case LEFT -> user.moveLeft();
 				case RIGHT -> user.moveRight();
-				case SPACE -> fireProjectile(); // Fire projectile when space is pressed
+				case SPACE -> {
+					fireProjectile(); // Fire projectile
+					soundManager.playShootSound(); // Play shooting sound effect
+				}
 				case ESCAPE -> {
 					if (!timeline.getStatus().equals(Timeline.Status.PAUSED)) {
 						timeline.pause();
@@ -117,6 +120,7 @@ public abstract class LevelParent {
 				}
 			}
 		});
+
 
 		scene.setOnKeyReleased(event -> {
 			switch (event.getCode()) {
