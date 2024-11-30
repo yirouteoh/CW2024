@@ -139,7 +139,9 @@ public class MenuView {
                 + "1. Use arrow keys to navigate your plane.\n"
                 + "2. Press space to shoot.\n"
                 + "3. Destroy enemy planes and avoid obstacles.\n"
-                + "4. Survive and progress through levels to win!");
+                + "4. Collect power up at level 3 to spreadshot!\n"
+                + "5. Survive and progress through levels to win!");
+
         howToPlayText.setStyle("-fx-font-size: 16px; -fx-text-fill: #30336b;");
         howToPlayText.setWrappingWidth(450);
         page1.getChildren().addAll(icon1, howToPlayText);

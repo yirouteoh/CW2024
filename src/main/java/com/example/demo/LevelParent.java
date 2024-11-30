@@ -386,8 +386,18 @@ public abstract class LevelParent {
 
 	protected void winGame() {
 		timeline.stop();
-		levelView.showWinImage();
+		soundManager.stopBackgroundMusic();
+
+		// Add the enhanced WinImage to the root
+		WinImage winScreen = new WinImage(
+				screenWidth,
+				screenHeight,
+				this::restartGame,       // Restart callback
+				this::returnToMainMenu   // Exit callback
+		);
+		root.getChildren().add(winScreen);
 	}
+
 
 	protected void loseGame() {
 		timeline.stop();
