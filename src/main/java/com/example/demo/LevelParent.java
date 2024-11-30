@@ -326,6 +326,7 @@ public abstract class LevelParent {
 					friendly.takeDamage();
 					enemy.takeDamage();
 					soundManager.playCrashSound(); // Play crash sound
+					shakeScreen(); // Trigger screen shake
 				}
 			}
 		}
@@ -341,6 +342,7 @@ public abstract class LevelParent {
 				user.takeDamage();
 				projectile.destroy();
 				soundManager.playCrashSound(); // Play crash sound
+				shakeScreen(); // Trigger screen shake
 			}
 		}
 	}
@@ -386,6 +388,19 @@ public abstract class LevelParent {
 			}
 		}
 	}
+
+	private void shakeScreen() {
+		final double amplitude = 10; // How far the screen moves
+		final int cycles = 5; // Number of back-and-forth movements
+		Timeline timeline = new Timeline();
+		for (int i = 0; i < cycles; i++) {
+			double offset = (i % 2 == 0) ? amplitude : -amplitude; // Alternate directions
+			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(50 * i), e -> root.setTranslateX(offset)));
+		}
+		timeline.getKeyFrames().add(new KeyFrame(Duration.millis(50 * cycles), e -> root.setTranslateX(0))); // Reset position
+		timeline.play();
+	}
+
 
 	private void updateLevelView() {
 		levelView.removeHearts(user.getHealth());
