@@ -46,6 +46,10 @@ public abstract class LevelParent {
 	private int currentNumberOfEnemies;
 	private LevelView levelView;
 	private SoundManager soundManager;
+	private boolean isGameOver = false;
+	private boolean isGameWon = false;
+
+
 
 
 	public LevelParent(String backgroundImageName, double screenHeight, double screenWidth, int playerInitialHealth, int targetKillCount) {
@@ -112,10 +116,10 @@ public abstract class LevelParent {
 					soundManager.playShootSound(); // Play shooting sound effect
 				}
 				case ESCAPE -> {
-					if (!timeline.getStatus().equals(Timeline.Status.PAUSED)) {
+					if (!isGameOver && !isGameWon && !timeline.getStatus().equals(Timeline.Status.PAUSED)) {
 						timeline.pause();
 						soundManager.pauseBackgroundMusic();
-						showPauseScreen(); // Display pause screen
+						showPauseScreen();
 					}
 				}
 			}
@@ -243,6 +247,8 @@ public abstract class LevelParent {
 
 	private void restartGame() {
 		try {
+			isGameWon = false; // Reset the game won flag
+			isGameOver = false; // Reset game over flag
 			timeline.stop(); // Stop the current game timeline
 			soundManager.stopBackgroundMusic(); // Stop the music
 
@@ -258,6 +264,8 @@ public abstract class LevelParent {
 
 
 	private void returnToMainMenu() {
+		isGameWon = false; // Reset the game won flag
+		isGameOver = false; // Reset game over flag
 		timeline.stop(); // Stop the game
 		Stage stage = (Stage) scene.getWindow(); // Get the current stage
 
@@ -422,6 +430,7 @@ public abstract class LevelParent {
 		timeline.stop();
 		soundManager.stopBackgroundMusic();
 		soundManager.playBackgroundMusic(SoundManager.WIN_GAME_MUSIC); // Play the win music
+		isGameWon = true; // Set the game won flag
 
 		// Add the enhanced WinImage to the root
 		WinImage winScreen = new WinImage(
@@ -438,6 +447,7 @@ public abstract class LevelParent {
 		timeline.stop();
 		soundManager.stopBackgroundMusic();
 		soundManager.playBackgroundMusic(SoundManager.GAME_OVER_MUSIC); // Play the Game Over music
+		isGameOver = true; // Set game over flag
 
 		// Add the GameOverImage to the root
 		GameOverImage gameOverImage = new GameOverImage(
