@@ -320,7 +320,15 @@ public abstract class LevelParent {
 	}
 
 	private void handlePlaneCollisions() {
-		handleCollisions(friendlyUnits, enemyUnits);
+		for (ActiveActorDestructible friendly : friendlyUnits) {
+			for (ActiveActorDestructible enemy : enemyUnits) {
+				if (friendly instanceof UserPlane && friendly.getBoundsInParent().intersects(enemy.getBoundsInParent())) {
+					friendly.takeDamage();
+					enemy.takeDamage();
+					soundManager.playCrashSound(); // Play crash sound
+				}
+			}
+		}
 	}
 
 	private void handleUserProjectileCollisions() {
@@ -328,8 +336,15 @@ public abstract class LevelParent {
 	}
 
 	private void handleEnemyProjectileCollisions() {
-		handleCollisions(enemyProjectiles, friendlyUnits);
+		for (ActiveActorDestructible projectile : enemyProjectiles) {
+			if (projectile.getBoundsInParent().intersects(user.getBoundsInParent())) {
+				user.takeDamage();
+				projectile.destroy();
+				soundManager.playCrashSound(); // Play crash sound
+			}
+		}
 	}
+
 
 	private void handleCollisions(List<ActiveActorDestructible> projectiles, List<ActiveActorDestructible> enemies) {
 		for (ActiveActorDestructible projectile : projectiles) {
