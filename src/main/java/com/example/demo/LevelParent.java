@@ -48,8 +48,8 @@ public abstract class LevelParent {
 	private SoundManager soundManager;
 	private boolean isGameOver = false;
 	private boolean isGameWon = false;
-
-
+	private CountdownOverlay countdownOverlay;
+	private boolean countdownInProgress = false; // Flag to track countdown state
 
 
 	public LevelParent(String backgroundImageName, double screenHeight, double screenWidth, int playerInitialHealth, int targetKillCount) {
@@ -74,7 +74,7 @@ public abstract class LevelParent {
 		// Initialize KillCountDisplay with the target kill count
 		this.killCountDisplay = new KillCountDisplay(600, 55, targetKillCount);
 		this.soundManager = SoundManager.getInstance();
-
+		this.countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
 
 		initializeTimeline();
 		friendlyUnits.add(user);
@@ -106,6 +106,8 @@ public abstract class LevelParent {
 
 		// Add key press and release handlers to the scene
 		scene.setOnKeyPressed(event -> {
+			if (countdownInProgress) return; // Ignore input during countdown
+
 			switch (event.getCode()) {
 				case UP -> user.moveUp();
 				case DOWN -> user.moveDown();
@@ -127,6 +129,8 @@ public abstract class LevelParent {
 
 
 		scene.setOnKeyReleased(event -> {
+			if (countdownInProgress) return; // Ignore input during countdown
+
 			switch (event.getCode()) {
 				case UP, DOWN -> user.stop(); // Stop vertical movement
 				case LEFT, RIGHT -> user.stopHorizontal(); // Stop horizontal movement
@@ -140,10 +144,21 @@ public abstract class LevelParent {
 		return killCountDisplay;
 	}
 
+
 	public void startGame() {
-		background.requestFocus();
-		timeline.play();
+		countdownInProgress = true; // Disable input during countdown
+		background.requestFocus(); // Ensure the background receives focus for key events
+
+		// Use CountdownOverlay to show a 3-2-1-GO sequence
+		CountdownOverlay countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
+		countdownOverlay.showCountdown(() -> {
+			countdownInProgress = false; // Re-enable input after countdown
+			timeline.play(); // Start the timeline after countdown ends
+		});
 	}
+
+
+
 
 	public void goToNextLevel(String levelName) {
 		try {
