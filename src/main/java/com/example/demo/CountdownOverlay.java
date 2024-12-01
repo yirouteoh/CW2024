@@ -37,12 +37,11 @@ public class CountdownOverlay {
                 new KeyFrame(Duration.seconds(3), e -> {
                     countdownText.setText("GO!");
                     countdownText.setStyle("-fx-font-size: 100px; -fx-fill: yellow;");
+                    onCountdownComplete.run(); // Enable input here when "GO!" is displayed
                 }),
-                new KeyFrame(Duration.seconds(4), e -> {
-                    root.getChildren().remove(countdownText);
-                    onCountdownComplete.run();
-                })
+                new KeyFrame(Duration.seconds(3.5), e -> root.getChildren().remove(countdownText)) // Remove the text earlier
         );
         countdownTimeline.play();
     }
+
 }
