@@ -61,6 +61,8 @@ public class LevelThree extends LevelParent {
             spawnWaveEnemies(); // Spawn enemies for the current wave
         } else if (getCurrentNumberOfEnemies() == 0 && !finalBoss.isDestroyed()) {
             addEnemyUnit(finalBoss); // Spawn the final boss after all waves
+            // Add boss health bar and its background to the scene
+            getRoot().getChildren().addAll(finalBoss.getHealthBarBackground(), finalBoss.getHealthBar());
         }
 
         // Randomly spawn spreadshot power-up

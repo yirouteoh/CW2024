@@ -2,6 +2,8 @@ package com.example.demo;
 
 import java.util.*;
 import javafx.scene.effect.Glow;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 public class Boss extends FighterPlane {
 
@@ -19,24 +21,39 @@ public class Boss extends FighterPlane {
 	private static final int MAX_FRAMES_WITH_SAME_MOVE = 10;
 	private static final int Y_POSITION_UPPER_BOUND = -100;
 	private static final int Y_POSITION_LOWER_BOUND = 475;
-	private static final int MAX_FRAMES_WITH_SHIELD = 100; // Reduced shield duration
-	private static final int SHIELD_COOLDOWN = 300; // Frames before shield can activate again
+	private static final int MAX_FRAMES_WITH_SHIELD = 100;
+	private static final int SHIELD_COOLDOWN = 300;
+
+	// Health bar constants
+	private static final double HEALTH_BAR_WIDTH = 100;
+	private static final double HEALTH_BAR_HEIGHT = 10;
+	private static final double HEALTH_BAR_OFFSET_Y = -5;
+
 	private final List<Integer> movePattern;
+	private final Rectangle healthBar;
+	private final Rectangle healthBarBackground;
+
 	private boolean isShielded;
 	private int consecutiveMovesInSameDirection;
 	private int indexOfCurrentMove;
 	private int framesWithShieldActivated;
-	private int framesSinceShieldDeactivated; // Tracks frames since shield was last deactivated
+	private int framesSinceShieldDeactivated;
 
 	public Boss() {
 		super(IMAGE_NAME, IMAGE_HEIGHT, INITIAL_X_POSITION, INITIAL_Y_POSITION, HEALTH);
+
+		// Initialize movement variables
 		movePattern = new ArrayList<>();
 		consecutiveMovesInSameDirection = 0;
 		indexOfCurrentMove = 0;
 		framesWithShieldActivated = 0;
-		framesSinceShieldDeactivated = SHIELD_COOLDOWN; // Start with the ability to activate shield
+		framesSinceShieldDeactivated = SHIELD_COOLDOWN;
 		isShielded = false;
 		initializeMovePattern();
+
+		// Initialize health bar
+		healthBarBackground = new Rectangle(HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, Color.DARKGRAY);
+		healthBar = new Rectangle(HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, Color.RED);
 	}
 
 	public boolean isShielded() {
@@ -58,10 +75,19 @@ public class Boss extends FighterPlane {
 		updatePosition();
 		updateShield();
 
+		// Update health bar position
+		double healthBarX = getLayoutX() + getTranslateX();
+		double healthBarY = getLayoutY() + getTranslateY() + HEALTH_BAR_OFFSET_Y;
+		healthBar.setX(healthBarX);
+		healthBar.setY(healthBarY);
+		healthBarBackground.setX(healthBarX);
+		healthBarBackground.setY(healthBarY);
+
+		// Apply shield effect
 		if (isShielded()) {
-			setEffect(new Glow(0.8)); // Add glow effect
+			setEffect(new Glow(0.8));
 		} else {
-			setEffect(null); // Remove effect when shield is deactivated
+			setEffect(null);
 		}
 	}
 
@@ -74,22 +100,32 @@ public class Boss extends FighterPlane {
 	public void takeDamage() {
 		if (!isShielded()) {
 			super.takeDamage();
+
+			// Update health bar width based on health percentage
+			double healthPercentage = (double) getHealth() / getMaxHealth();
+			healthBar.setWidth(HEALTH_BAR_WIDTH * healthPercentage);
 		}
 	}
 
 	public javafx.geometry.Bounds getCustomHitbox() {
-		// Get the default bounds of the Boss
 		javafx.geometry.Bounds originalBounds = super.getBoundsInParent();
 
-		// Adjust the bounds to make the hitbox more precise
-		double paddingX = 80; // Horizontal padding
-		double paddingY = 80; // Vertical padding
+		double paddingX = 80;
+		double paddingY = 80;
 		return new javafx.geometry.BoundingBox(
-				originalBounds.getMinX() + paddingX, // Adjust left boundary
-				originalBounds.getMinY() + paddingY, // Adjust top boundary
-				originalBounds.getWidth() - 2 * paddingX, // Adjust width
-				originalBounds.getHeight() - 2 * paddingY // Adjust height
+				originalBounds.getMinX() + paddingX,
+				originalBounds.getMinY() + paddingY,
+				originalBounds.getWidth() - 2 * paddingX,
+				originalBounds.getHeight() - 2 * paddingY
 		);
+	}
+
+	public Rectangle getHealthBar() {
+		return healthBar;
+	}
+
+	public Rectangle getHealthBarBackground() {
+		return healthBarBackground;
 	}
 
 	private void initializeMovePattern() {
@@ -111,7 +147,7 @@ public class Boss extends FighterPlane {
 			framesSinceShieldDeactivated++;
 			if (shieldShouldBeActivated() && framesSinceShieldDeactivated >= SHIELD_COOLDOWN) {
 				activateShield();
-				framesSinceShieldDeactivated = 0; // Reset cooldown
+				framesSinceShieldDeactivated = 0;
 			}
 		}
 	}
@@ -154,6 +190,6 @@ public class Boss extends FighterPlane {
 	private void deactivateShield() {
 		isShielded = false;
 		framesWithShieldActivated = 0;
-		framesSinceShieldDeactivated = 0; // Start counting frames since shield deactivation
+		framesSinceShieldDeactivated = 0;
 	}
 }

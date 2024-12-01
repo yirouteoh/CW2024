@@ -53,6 +53,8 @@ public class LevelTwo extends LevelParent {
 	protected void spawnEnemyUnits() {
 		if (getCurrentNumberOfEnemies() == 0 && !boss.isDestroyed()) {
 			addEnemyUnit(boss);
+			// Add boss health bar and its background to the scene
+			getRoot().getChildren().addAll(boss.getHealthBarBackground(), boss.getHealthBar());
 		}
 	}
 
