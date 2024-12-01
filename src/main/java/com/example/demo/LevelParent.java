@@ -512,6 +512,11 @@ public abstract class LevelParent {
 		return screenWidth;
 	}
 
+	protected double getScreenHeight() {
+		return screenHeight;
+	}
+
+
 	protected boolean userIsDestroyed() {
 		return user.isDestroyed();
 	}

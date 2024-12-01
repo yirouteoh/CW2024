@@ -1,6 +1,11 @@
 package com.example.demo;
 
+import javafx.animation.PauseTransition;
 import javafx.scene.image.Image;
+import javafx.scene.text.Text;
+import javafx.scene.text.Font;
+import javafx.scene.paint.Color;
+import javafx.util.Duration;
 
 public class LevelThree extends LevelParent {
 
@@ -15,6 +20,9 @@ public class LevelThree extends LevelParent {
     private int totalSpawnedEnemies; // Tracks the total number of spawned enemies
     private final int[] waveEnemyCounts = {5, 8, 11}; // Number of enemies per wave
     private SoundManager soundManager;
+
+    private boolean finalBossMessageDisplayed = false; // Tracks if the message is displayed
+    private boolean finalBossSpawned = false; // Tracks if the boss has been spawned
 
     public LevelThree(double screenHeight, double screenWidth) {
         super(BACKGROUND_IMAGE_NAME, screenHeight, screenWidth, PLAYER_INITIAL_HEALTH, TARGET_KILL_COUNT);
@@ -31,7 +39,6 @@ public class LevelThree extends LevelParent {
         this.currentWave = 0; // Start at wave 0 (first wave)
         this.totalSpawnedEnemies = 0; // No enemies spawned initially
         this.soundManager = SoundManager.getInstance();
-
     }
 
     @Override
@@ -41,7 +48,6 @@ public class LevelThree extends LevelParent {
         user.setLevelParent(this); // Pass the current LevelParent instance to the user plane
         getRoot().getChildren().add(user);
     }
-
 
     @Override
     protected void checkIfGameOver() {
@@ -59,10 +65,11 @@ public class LevelThree extends LevelParent {
         // Stop spawning enemies once totalSpawnedEnemies reaches TARGET_KILL_COUNT
         if (totalSpawnedEnemies < TARGET_KILL_COUNT) {
             spawnWaveEnemies(); // Spawn enemies for the current wave
-        } else if (getCurrentNumberOfEnemies() == 0 && !finalBoss.isDestroyed()) {
-            addEnemyUnit(finalBoss); // Spawn the final boss after all waves
-            // Add boss health bar and its background to the scene
-            getRoot().getChildren().addAll(finalBoss.getHealthBarBackground(), finalBoss.getHealthBar());
+        } else if (getCurrentNumberOfEnemies() == 0 && !finalBossSpawned) {
+            if (!finalBossMessageDisplayed) {
+                showFinalBossMessage(); // Display the message
+                finalBossMessageDisplayed = true; // Mark the message as displayed
+            }
         }
 
         // Randomly spawn spreadshot power-up
@@ -97,8 +104,59 @@ public class LevelThree extends LevelParent {
         }
     }
 
+    private void showFinalBossMessage() {
+        // Create the message text
+        Text bossMessage = new Text("The Final Boss is Entering!");
+        bossMessage.setFont(Font.font("Orbitron", javafx.scene.text.FontWeight.EXTRA_BOLD, 70)); // Fancy font
+        bossMessage.setFill(Color.WHITE); // White font color
+        bossMessage.setStroke(Color.RED); // Outer stroke color
+        bossMessage.setStrokeWidth(2); // Outline thickness
+        bossMessage.setEffect(new javafx.scene.effect.Glow(0.7)); // Add glow effect
+        bossMessage.setX(getScreenWidth() / 2 - 400); // Adjust horizontal centering
+        bossMessage.setY(getScreenHeight() / 2); // Center vertically
+
+        // Add the text to the root node
+        getRoot().getChildren().add(bossMessage);
+
+        // Add fade-in, smaller zoom, and fade-out effects
+        javafx.animation.FadeTransition fadeIn = new javafx.animation.FadeTransition(Duration.seconds(1), bossMessage);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1);
+
+        // Smaller zoom-in effect
+        javafx.animation.ScaleTransition zoomIn = new javafx.animation.ScaleTransition(Duration.seconds(1), bossMessage);
+        zoomIn.setFromX(0.9); // Smaller starting size
+        zoomIn.setFromY(0.9); // Smaller starting size
+        zoomIn.setToX(1.1); // Less dramatic zoom-in
+        zoomIn.setToY(1.1); // Less dramatic zoom-in
+
+        javafx.animation.FadeTransition fadeOut = new javafx.animation.FadeTransition(Duration.seconds(1), bossMessage);
+        fadeOut.setFromValue(1);
+        fadeOut.setToValue(0);
+
+        javafx.animation.SequentialTransition sequence = new javafx.animation.SequentialTransition(fadeIn, zoomIn, fadeOut);
+        sequence.setOnFinished(event -> {
+            getRoot().getChildren().remove(bossMessage); // Remove the message
+            spawnFinalBoss(); // Spawn the boss
+        });
+        sequence.play();
+    }
+
+
+
+
+
+    private void spawnFinalBoss() {
+        addEnemyUnit(finalBoss); // Add the final boss
+        finalBossSpawned = true; // Mark the boss as spawned
+
+        // Add boss health bar and its background to the scene
+        getRoot().getChildren().addAll(finalBoss.getHealthBarBackground(), finalBoss.getHealthBar());
+    }
+
     @Override
     protected LevelView instantiateLevelView() {
         return new LevelView(getRoot(), PLAYER_INITIAL_HEALTH);
     }
+
 }
