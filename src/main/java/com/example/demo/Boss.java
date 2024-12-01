@@ -1,9 +1,10 @@
 package com.example.demo;
 
 import java.util.*;
+import javafx.geometry.Bounds;
+import javafx.geometry.BoundingBox;
+import javafx.scene.Group;
 import javafx.scene.effect.Glow;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 
 public class Boss extends FighterPlane {
 
@@ -24,14 +25,8 @@ public class Boss extends FighterPlane {
 	private static final int MAX_FRAMES_WITH_SHIELD = 100;
 	private static final int SHIELD_COOLDOWN = 300;
 
-	// Health bar constants
-	private static final double HEALTH_BAR_WIDTH = 100;
-	private static final double HEALTH_BAR_HEIGHT = 10;
-	private static final double HEALTH_BAR_OFFSET_Y = -5;
-
 	private final List<Integer> movePattern;
-	private final Rectangle healthBar;
-	private final Rectangle healthBarBackground;
+	private final HealthBar healthBar;
 
 	private boolean isShielded;
 	private int consecutiveMovesInSameDirection;
@@ -52,8 +47,7 @@ public class Boss extends FighterPlane {
 		initializeMovePattern();
 
 		// Initialize health bar
-		healthBarBackground = new Rectangle(HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, Color.DARKGRAY);
-		healthBar = new Rectangle(HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, Color.RED);
+		healthBar = new HealthBar(200, 20); // Width: 100, Height: 10
 	}
 
 	public boolean isShielded() {
@@ -77,11 +71,8 @@ public class Boss extends FighterPlane {
 
 		// Update health bar position
 		double healthBarX = getLayoutX() + getTranslateX();
-		double healthBarY = getLayoutY() + getTranslateY() + HEALTH_BAR_OFFSET_Y;
-		healthBar.setX(healthBarX);
-		healthBar.setY(healthBarY);
-		healthBarBackground.setX(healthBarX);
-		healthBarBackground.setY(healthBarY);
+		double healthBarY = getLayoutY() + getTranslateY() - 20; // Position above the boss
+		healthBar.updatePosition(healthBarX, healthBarY);
 
 		// Apply shield effect
 		if (isShielded()) {
@@ -101,18 +92,19 @@ public class Boss extends FighterPlane {
 		if (!isShielded()) {
 			super.takeDamage();
 
-			// Update health bar width based on health percentage
+			// Update health bar based on health percentage
 			double healthPercentage = (double) getHealth() / getMaxHealth();
-			healthBar.setWidth(HEALTH_BAR_WIDTH * healthPercentage);
+			healthBar.animateHealth(healthPercentage);
+			healthBar.updateHealth(healthPercentage, getHealth(), getMaxHealth());
 		}
 	}
 
-	public javafx.geometry.Bounds getCustomHitbox() {
-		javafx.geometry.Bounds originalBounds = super.getBoundsInParent();
+	public Bounds getCustomHitbox() {
+		Bounds originalBounds = super.getBoundsInParent();
 
 		double paddingX = 80;
 		double paddingY = 80;
-		return new javafx.geometry.BoundingBox(
+		return new BoundingBox(
 				originalBounds.getMinX() + paddingX,
 				originalBounds.getMinY() + paddingY,
 				originalBounds.getWidth() - 2 * paddingX,
@@ -120,12 +112,20 @@ public class Boss extends FighterPlane {
 		);
 	}
 
-	public Rectangle getHealthBar() {
-		return healthBar;
+	public javafx.scene.shape.Rectangle getHealthBarBackground() {
+		return healthBar.getHealthBarBackground();
 	}
 
-	public Rectangle getHealthBarBackground() {
-		return healthBarBackground;
+	public javafx.scene.shape.Rectangle getHealthBar() {
+		return healthBar.getHealthBar();
+	}
+
+	public javafx.scene.Node getNode() {
+		return this; // Replace with your actual JavaFX Node representing the Boss
+	}
+
+	public void addBossToScene(Group root) {
+		root.getChildren().addAll(getNode(), healthBar.getHealthBarBackground(), healthBar.getHealthBar(), healthBar.getHealthLabel());
 	}
 
 	private void initializeMovePattern() {
