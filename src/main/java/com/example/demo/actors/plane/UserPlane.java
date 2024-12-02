@@ -26,8 +26,6 @@ public class UserPlane extends FighterPlane {
 
 	private int velocityMultiplier = 0;  // Controls vertical movement
 	private int horizontalVelocityMultiplier = 0;  // Controls horizontal movement
-	private int numberOfKills = 0;  // Tracks the number of kills made by the user
-
 	private int spreadshotCount = 0;  // Counter for spreadshot power-ups
 	private LevelParent levelParent; // Reference to the LevelParent for managing projectiles
 
@@ -110,14 +108,7 @@ public class UserPlane extends FighterPlane {
 		spreadshotCount++;
 	}
 
-	/**
-	 * Checks if the spreadshot power-up is active.
-	 *
-	 * @return true if spreadshot is active, false otherwise
-	 */
-	public boolean isSpreadshotActive() {
-		return spreadshotCount > 0;
-	}
+
 
 	/**
 	 * Creates a list of spreadshot projectiles.
@@ -189,21 +180,4 @@ public class UserPlane extends FighterPlane {
 		horizontalVelocityMultiplier = 0;
 	}
 
-	// Kill count management
-
-	/**
-	 * Gets the number of kills made by the user plane.
-	 *
-	 * @return the number of kills
-	 */
-	public int getNumberOfKills() {
-		return numberOfKills;
-	}
-
-	/**
-	 * Increments the kill count for the user plane.
-	 */
-	public void incrementKillCount() {
-		numberOfKills++;
-	}
 }
