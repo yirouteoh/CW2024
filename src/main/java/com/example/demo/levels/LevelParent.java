@@ -28,6 +28,9 @@ import javafx.util.Duration;
 
 public abstract class LevelParent {
 
+	// ==================== Constants & Core Properties =====================
+	// Constants and core attributes shared across all levels.
+
 	// Constants
 	private static final double SCREEN_HEIGHT_ADJUSTMENT = 150;
 	private static final int MILLISECOND_DELAY = 50;
@@ -62,6 +65,19 @@ public abstract class LevelParent {
 	private CountdownOverlay countdownOverlay;
 	private boolean countdownInProgress = false; // Flag to track countdown state
 
+	// ==================== Initialization =====================
+	// Methods for setting up the game environment, including the background, timeline, and handlers.
+
+	/**
+	 * Constructs a base class for levels in the game.
+	 *
+	 * @param backgroundImageName Path to the background image resource for the level.
+	 * @param screenHeight        Height of the game window.
+	 * @param screenWidth         Width of the game window.
+	 * @param playerInitialHealth The starting health of the player's plane.
+	 * @param targetKillCount     The number of kills required to complete the level.
+	 */
+
 	public LevelParent(String backgroundImageName, double screenHeight, double screenWidth, int playerInitialHealth, int targetKillCount) {
 		this.root = new Group();
 		this.scene = new Scene(root, screenWidth, screenHeight);
@@ -90,6 +106,10 @@ public abstract class LevelParent {
 		friendlyUnits.add(user);
 	}
 
+	/**
+	 * Initializes the timeline that controls the game loop.
+	 * The timeline runs indefinitely and invokes the `updateScene` method at fixed intervals.
+	 */
 	private void initializeTimeline() {
 		timeline.setCycleCount(Timeline.INDEFINITE);
 		KeyFrame gameLoop = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> updateScene());
@@ -101,6 +121,11 @@ public abstract class LevelParent {
 	protected abstract void spawnEnemyUnits();
 	protected abstract LevelView instantiateLevelView();
 
+	/**
+	 * Configures and initializes the game scene, including the background, friendly units, and input handlers.
+	 *
+	 * @return The fully configured game scene.
+	 */
 	public Scene initializeScene() {
 		initializeBackground(); // Set up the background and add to root
 		initializeFriendlyUnits(); // Add the user plane and other units
@@ -110,6 +135,10 @@ public abstract class LevelParent {
 		return scene; // Return the configured scene
 	}
 
+	/**
+	 * Configures the level background, including its dimensions and position in the scene graph.
+	 * Also adds the pause button to the scene.
+	 */
 	private void initializeBackground() {
 		background.setFocusTraversable(true);
 		background.setFitHeight(screenHeight);
@@ -125,6 +154,9 @@ public abstract class LevelParent {
 		return killCountDisplay;
 	}
 
+	/**
+	 * Adds event handlers for user inputs such as movement, firing, and pausing.
+	 */
 	private void initializeEventHandlers() {
 		scene.setOnKeyPressed(event -> {
 			if (countdownInProgress) return; // Ignore input during countdown
@@ -171,6 +203,13 @@ public abstract class LevelParent {
 	}
 
 
+	// ==================== Game Loop =====================
+	// Methods that define and update the game loop, including actor updates, collisions, and UI refresh.
+
+	/**
+	 * The primary game loop method. Updates game logic, handles collisions, cleans up destroyed actors,
+	 * updates UI elements, and checks game-over conditions.
+	 */
 
 	private void updateScene() {
 		updateEnemyUnits();
@@ -190,6 +229,9 @@ public abstract class LevelParent {
 		updateNumberOfEnemies();
 	}
 
+	/**
+	 * Updates all actors in the game, including their movement and actions.
+	 */
 	private void updateActors() {
 		updateActorList(friendlyUnits);
 		updateActorList(enemyUnits);
@@ -235,6 +277,12 @@ public abstract class LevelParent {
 	private void updateActorList(List<ActiveActorDestructible> actors) {
 		actors.forEach(ActiveActorDestructible::updateActor);
 	}
+
+	// Methods responsible for detecting and handling collisions between actors, projectiles, and power-ups.
+
+	/**
+	 * Processes all collision-related logic in the game, including projectile, plane, and power-up interactions.
+	 */
 
 	private void handleEnemyPenetration() {
 		for (ActiveActorDestructible enemy : enemyUnits) {
@@ -399,6 +447,13 @@ public abstract class LevelParent {
 		return Math.abs(enemy.getTranslateX()) > screenWidth;
 	}
 
+	// ==================== Pause & Game State Management =====================
+	// Methods for pausing, resuming, and managing game-over conditions.
+
+	/**
+	 * Pauses the game and displays the pause menu.
+	 */
+
 	private void addPauseButton() {
 		Image pauseImage = new Image(getClass().getResource("/com/example/demo/images/pause.png").toExternalForm());
 		pauseButton = new ImageView(pauseImage);
@@ -498,18 +553,20 @@ public abstract class LevelParent {
 		root.getChildren().add(gameOverImage);
 	}
 
-	protected UserPlane getUser() {
-		return user;
-	}
-
-	protected Group getRoot() {
-		return root;
-	}
 
 	protected int getCurrentNumberOfEnemies() {
 		return enemyUnits.size();
 	}
 
+	// ==================== Actor & Projectile Management =====================
+	// Methods responsible for adding, removing, or interacting with actors and projectiles.
+
+	/**
+	 * Adds a generic actor to the scene and tracks it in the specified list.
+	 *
+	 * @param actor     The actor to be added.
+	 * @param actorList The list in which the actor should be tracked.
+	 */
 	private void addActor(ActiveActorDestructible actor, List<ActiveActorDestructible> actorList) {
 		if (!actorList.contains(actor) && !root.getChildren().contains(actor)) {
 			actorList.add(actor);
@@ -523,6 +580,17 @@ public abstract class LevelParent {
 
 	protected void addPowerUp(PowerUp powerUp) {
 		addActor(powerUp, powerUps);
+	}
+
+	// ==================== Utility Methods =====================
+	// Miscellaneous methods, including getters and utility functions for game logic.
+
+	protected UserPlane getUser() {
+		return user;
+	}
+
+	protected Group getRoot() {
+		return root;
 	}
 
 	protected double getEnemyMaximumYPosition() {
