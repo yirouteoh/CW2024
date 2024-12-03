@@ -44,25 +44,23 @@ public abstract class LevelParent {
 	private final ImageView background;
 	private final KillCountDisplay killCountDisplay;
 
-	private ImageView pauseButton; // Pause button ImageView
-
-	private PropertyChangeSupport support = new PropertyChangeSupport(this);
-
 	private final List<ActiveActorDestructible> friendlyUnits;
 	private final List<ActiveActorDestructible> enemyUnits;
 	private final List<ActiveActorDestructible> userProjectiles;
 	private final List<ActiveActorDestructible> enemyProjectiles;
 	private final List<ActiveActorDestructible> powerUps;
 
-
-	private int currentNumberOfEnemies;
-	private LevelView levelView;
+	private ImageView pauseButton; // Pause button ImageView
 	private SoundManager soundManager;
 	private boolean isGameOver = false;
 	private boolean isGameWon = false;
+
+	private PropertyChangeSupport support = new PropertyChangeSupport(this);
+
+	private int currentNumberOfEnemies;
+	private LevelView levelView;
 	private CountdownOverlay countdownOverlay;
 	private boolean countdownInProgress = false; // Flag to track countdown state
-
 
 	public LevelParent(String backgroundImageName, double screenHeight, double screenWidth, int playerInitialHealth, int targetKillCount) {
 		this.root = new Group();
@@ -100,27 +98,31 @@ public abstract class LevelParent {
 
 	protected abstract LevelView instantiateLevelView();
 
-	public void startGame() {
-		countdownInProgress = true; // Disable input during countdown
-		background.requestFocus(); // Ensure the background receives focus for key events
-
-		// Use CountdownOverlay to show a 3-2-1-GO sequence
-		CountdownOverlay countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
-		countdownOverlay.showCountdown(() -> {
-			countdownInProgress = false; // Re-enable input after countdown
-			timeline.play(); // Start the timeline after countdown ends
-		});
-	}
-
 	public Scene initializeScene() {
 		initializeBackground(); // Set up the background and add to root
 		initializeFriendlyUnits(); // Add the user plane and other units
 		levelView.showHeartDisplay(); // Show health or level-related UI
+		root.getChildren().add(killCountDisplay.getDisplay()); // Add the kill count display to the root
+		initializeEventHandlers();
+		return scene; // Return the configured scene
+	}
 
-		// Add the kill count display to the root
-		root.getChildren().add(killCountDisplay.getDisplay());
+	private void initializeBackground() {
+		background.setFocusTraversable(true);
+		background.setFitHeight(screenHeight);
+		background.setFitWidth(screenWidth);
 
-		// Add key press and release handlers to the scene
+		root.getChildren().add(background);
+
+		// Add the pause button
+		addPauseButton();
+	}
+
+	protected KillCountDisplay getKillCountDisplay() {
+		return killCountDisplay;
+	}
+
+	private void initializeEventHandlers() {
 		scene.setOnKeyPressed(event -> {
 			if (countdownInProgress) return; // Ignore input during countdown
 
@@ -143,7 +145,6 @@ public abstract class LevelParent {
 			}
 		});
 
-
 		scene.setOnKeyReleased(event -> {
 			if (countdownInProgress) return; // Ignore input during countdown
 
@@ -152,9 +153,22 @@ public abstract class LevelParent {
 				case LEFT, RIGHT -> user.stopHorizontal(); // Stop horizontal movement
 			}
 		});
-
-		return scene; // Return the configured scene
 	}
+
+
+	public void startGame() {
+		countdownInProgress = true; // Disable input during countdown
+		background.requestFocus(); // Ensure the background receives focus for key events
+
+		// Use CountdownOverlay to show a 3-2-1-GO sequence
+		CountdownOverlay countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
+		countdownOverlay.showCountdown(() -> {
+			countdownInProgress = false; // Re-enable input after countdown
+			timeline.play(); // Start the timeline after countdown ends
+		});
+	}
+
+
 
 	private void updateScene() {
 		spawnEnemyUnits();
@@ -172,9 +186,7 @@ public abstract class LevelParent {
 		checkIfGameOver();
 	}
 
-	protected KillCountDisplay getKillCountDisplay() {
-		return killCountDisplay;
-	}
+
 
 	public void goToNextLevel(String levelName) {
 		try {
@@ -207,16 +219,7 @@ public abstract class LevelParent {
 		timeline.getKeyFrames().add(gameLoop);
 	}
 
-	private void initializeBackground() {
-		background.setFocusTraversable(true);
-		background.setFitHeight(screenHeight);
-		background.setFitWidth(screenWidth);
 
-		root.getChildren().add(background);
-
-		// Add the pause button
-		addPauseButton();
-	}
 
 	private void updateActors() {
 		updateActorList(friendlyUnits);
