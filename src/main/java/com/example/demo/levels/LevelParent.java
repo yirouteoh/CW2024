@@ -90,12 +90,15 @@ public abstract class LevelParent {
 		friendlyUnits.add(user);
 	}
 
+	private void initializeTimeline() {
+		timeline.setCycleCount(Timeline.INDEFINITE);
+		KeyFrame gameLoop = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> updateScene());
+		timeline.getKeyFrames().add(gameLoop);
+	}
+
 	protected abstract void initializeFriendlyUnits();
-
 	protected abstract void checkIfGameOver();
-
 	protected abstract void spawnEnemyUnits();
-
 	protected abstract LevelView instantiateLevelView();
 
 	public Scene initializeScene() {
@@ -155,7 +158,6 @@ public abstract class LevelParent {
 		});
 	}
 
-
 	public void startGame() {
 		countdownInProgress = true; // Disable input during countdown
 		background.requestFocus(); // Ensure the background receives focus for key events
@@ -171,55 +173,22 @@ public abstract class LevelParent {
 
 
 	private void updateScene() {
-		spawnEnemyUnits();
+		updateEnemyUnits();
 		updateActors();
-		generateEnemyFire();
-		updateNumberOfEnemies();
-		handleEnemyPenetration();
-		handleUserProjectileCollisions();
-		handleEnemyProjectileCollisions();
-		handlePlaneCollisions();
-		handlePowerUpCollisions(); // Handle power-up collection
-		removeAllDestroyedActors();
-		updateKillCount();
-		updateLevelView();
+		handleAllCollisions();
+		cleanUpDestroyedActors();
+		updateUIElements();
 		checkIfGameOver();
 	}
 
-
-
-	public void goToNextLevel(String levelName) {
-		try {
-			timeline.stop(); // Stop current level's timeline
-			Class<?> nextLevelClass = Class.forName(levelName);
-			LevelParent nextLevel = (LevelParent) nextLevelClass
-					.getConstructor(double.class, double.class)
-					.newInstance(screenHeight, screenWidth);
-
-			Scene nextScene = nextLevel.initializeScene();
-			Stage primaryStage = (Stage) root.getScene().getWindow();
-			primaryStage.setScene(nextScene);
-			nextLevel.startGame();
-		} catch (Throwable t) {
-			showErrorDialog("Error transitioning to next level: " + t.getMessage());
-		}
+	/**
+	 * Updates enemy-related logic, such as spawning and fire generation.
+	 */
+	private void updateEnemyUnits() {
+		spawnEnemyUnits();
+		generateEnemyFire();
+		updateNumberOfEnemies();
 	}
-
-	private void showErrorDialog(String message) {
-		Alert alert = new Alert(AlertType.ERROR);
-		alert.setTitle("Error");
-		alert.setHeaderText(null);
-		alert.setContentText(message);
-		alert.showAndWait();
-	}
-
-	private void initializeTimeline() {
-		timeline.setCycleCount(Timeline.INDEFINITE);
-		KeyFrame gameLoop = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> updateScene());
-		timeline.getKeyFrames().add(gameLoop);
-	}
-
-
 
 	private void updateActors() {
 		updateActorList(friendlyUnits);
@@ -229,10 +198,31 @@ public abstract class LevelParent {
 		updateActorList(powerUps);
 	}
 
-	private void updateActorList(List<ActiveActorDestructible> actors) {
-		actors.forEach(ActiveActorDestructible::updateActor);
+	/**
+	 * Handles all collision-related logic.
+	 */
+	private void handleAllCollisions() {
+		handleEnemyPenetration();
+		handleUserProjectileCollisions();
+		handleEnemyProjectileCollisions();
+		handlePlaneCollisions();
+		handlePowerUpCollisions();
 	}
 
+	/**
+	 * Cleans up destroyed actors from the game.
+	 */
+	private void cleanUpDestroyedActors() {
+		removeAllDestroyedActors();
+	}
+
+	/**
+	 * Updates UI elements like kill counts and level view.
+	 */
+	private void updateUIElements() {
+		updateKillCount();
+		updateLevelView();
+	}
 
 	private void generateEnemyFire() {
 		enemyUnits.forEach(enemy -> spawnEnemyProjectile(((FighterPlane) enemy).fireProjectile()));
@@ -240,6 +230,10 @@ public abstract class LevelParent {
 
 	private void updateNumberOfEnemies() {
 		currentNumberOfEnemies = enemyUnits.size();
+	}
+
+	private void updateActorList(List<ActiveActorDestructible> actors) {
+		actors.forEach(ActiveActorDestructible::updateActor);
 	}
 
 	private void handleEnemyPenetration() {
@@ -254,6 +248,25 @@ public abstract class LevelParent {
 	private void handleUserProjectileCollisions() {
 		handleCollisions(userProjectiles, enemyUnits);
 	}
+
+	private void handleCollisions(List<ActiveActorDestructible> projectiles, List<ActiveActorDestructible> enemies) {
+		for (ActiveActorDestructible projectile : projectiles) {
+			for (ActiveActorDestructible enemy : enemies) {
+				if (enemy instanceof Boss boss) {
+					if (boss.getCustomHitbox().intersects(projectile.getBoundsInParent())) {
+						if (!boss.isShielded()) {
+							projectile.takeDamage();
+							boss.takeDamage();
+						}
+					}
+				} else if (enemy.getBoundsInParent().intersects(projectile.getBoundsInParent())) {
+					projectile.takeDamage();
+					enemy.takeDamage();
+				}
+			}
+		}
+	}
+
 
 	private void handleEnemyProjectileCollisions() {
 		for (ActiveActorDestructible projectile : enemyProjectiles) {
@@ -301,6 +314,15 @@ public abstract class LevelParent {
 		removeDestroyedActors(powerUps);
 	}
 
+	private void removeDestroyedActors(List<ActiveActorDestructible> actors) {
+		List<ActiveActorDestructible> destroyedActors = actors.stream().filter(ActiveActorDestructible::isDestroyed)
+				.collect(Collectors.toList());
+		root.getChildren().removeAll(destroyedActors);
+		actors.removeAll(destroyedActors);
+	}
+
+
+
 	private void updateKillCount() {
 		int kills = currentNumberOfEnemies - enemyUnits.size();
 		for (int i = 0; i < kills; i++) {
@@ -313,29 +335,29 @@ public abstract class LevelParent {
 		levelView.removeHearts(user.getHealth());
 	}
 
-	private void handleCollisions(List<ActiveActorDestructible> projectiles, List<ActiveActorDestructible> enemies) {
-		for (ActiveActorDestructible projectile : projectiles) {
-			for (ActiveActorDestructible enemy : enemies) {
-				if (enemy instanceof Boss boss) {
-					if (boss.getCustomHitbox().intersects(projectile.getBoundsInParent())) {
-						if (!boss.isShielded()) {
-							projectile.takeDamage();
-							boss.takeDamage();
-						}
-					}
-				} else if (enemy.getBoundsInParent().intersects(projectile.getBoundsInParent())) {
-					projectile.takeDamage();
-					enemy.takeDamage();
-				}
-			}
+	public void goToNextLevel(String levelName) {
+		try {
+			timeline.stop(); // Stop current level's timeline
+			Class<?> nextLevelClass = Class.forName(levelName);
+			LevelParent nextLevel = (LevelParent) nextLevelClass
+					.getConstructor(double.class, double.class)
+					.newInstance(screenHeight, screenWidth);
+
+			Scene nextScene = nextLevel.initializeScene();
+			Stage primaryStage = (Stage) root.getScene().getWindow();
+			primaryStage.setScene(nextScene);
+			nextLevel.startGame();
+		} catch (Throwable t) {
+			showErrorDialog("Error transitioning to next level: " + t.getMessage());
 		}
 	}
 
-	private void removeDestroyedActors(List<ActiveActorDestructible> actors) {
-		List<ActiveActorDestructible> destroyedActors = actors.stream().filter(ActiveActorDestructible::isDestroyed)
-				.collect(Collectors.toList());
-		root.getChildren().removeAll(destroyedActors);
-		actors.removeAll(destroyedActors);
+	private void showErrorDialog(String message) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("Error");
+		alert.setHeaderText(null);
+		alert.setContentText(message);
+		alert.showAndWait();
 	}
 
 	private void fireProjectile() {
@@ -482,8 +504,6 @@ public abstract class LevelParent {
 		);
 		root.getChildren().add(gameOverImage);
 	}
-
-
 
 	protected UserPlane getUser() {
 		return user;
