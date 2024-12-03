@@ -47,7 +47,7 @@ public class LevelTwo extends LevelParent {
 			loseGame();
 		} else if (boss.isDestroyed()) {
 			soundManager.stopBackgroundMusic(); // Stop Level Two music
-			goToNextLevel("com.example.demo.levels.LevelThree");
+			goToNextLevel(new LevelThree(getScreenHeight(), getScreenWidth()));
 		}
 	}
 

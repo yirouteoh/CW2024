@@ -39,7 +39,7 @@ public class LevelOne extends LevelParent {
 			loseGame(); // Trigger loss condition
 		} else if (userHasReachedKillTarget()) {
 			soundManager.stopBackgroundMusic(); // Stop music before transitioning
-			goToNextLevel(NEXT_LEVEL); // Advance to Level Two
+			goToNextLevel(new LevelTwo(getScreenHeight(), getScreenWidth())); // Advance to Level Two
 		}
 	}
 

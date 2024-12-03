@@ -321,8 +321,6 @@ public abstract class LevelParent {
 		actors.removeAll(destroyedActors);
 	}
 
-
-
 	private void updateKillCount() {
 		int kills = currentNumberOfEnemies - enemyUnits.size();
 		for (int i = 0; i < kills; i++) {
@@ -335,20 +333,15 @@ public abstract class LevelParent {
 		levelView.removeHearts(user.getHealth());
 	}
 
-	public void goToNextLevel(String levelName) {
+	public void goToNextLevel(LevelParent nextLevel) {
 		try {
-			timeline.stop(); // Stop current level's timeline
-			Class<?> nextLevelClass = Class.forName(levelName);
-			LevelParent nextLevel = (LevelParent) nextLevelClass
-					.getConstructor(double.class, double.class)
-					.newInstance(screenHeight, screenWidth);
-
+			timeline.stop(); // Stop the current level's timeline
 			Scene nextScene = nextLevel.initializeScene();
 			Stage primaryStage = (Stage) root.getScene().getWindow();
 			primaryStage.setScene(nextScene);
-			nextLevel.startGame();
-		} catch (Throwable t) {
-			showErrorDialog("Error transitioning to next level: " + t.getMessage());
+			nextLevel.startGame(); // Start the next level
+		} catch (Exception e) {
+			showErrorDialog("Error transitioning to next level: " + e.getMessage());
 		}
 	}
 
@@ -517,21 +510,20 @@ public abstract class LevelParent {
 		return enemyUnits.size();
 	}
 
-	protected void addEnemyUnit(ActiveActorDestructible enemy) {
-		if (!enemyUnits.contains(enemy) && !getRoot().getChildren().contains(enemy)) {
-			enemyUnits.add(enemy);
-			getRoot().getChildren().add(enemy);
+	private void addActor(ActiveActorDestructible actor, List<ActiveActorDestructible> actorList) {
+		if (!actorList.contains(actor) && !root.getChildren().contains(actor)) {
+			actorList.add(actor);
+			root.getChildren().add(actor);
 		}
 	}
 
+	protected void addEnemyUnit(ActiveActorDestructible enemy) {
+		addActor(enemy, enemyUnits);
+	}
 
 	protected void addPowerUp(PowerUp powerUp) {
-		if (!powerUps.contains(powerUp) && !getRoot().getChildren().contains(powerUp)) {
-			powerUps.add(powerUp);
-			getRoot().getChildren().add(powerUp);
-		}
+		addActor(powerUp, powerUps);
 	}
-
 
 	protected double getEnemyMaximumYPosition() {
 		return enemyMaximumYPosition;
