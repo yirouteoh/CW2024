@@ -7,12 +7,13 @@ import com.example.demo.actors.plane.Boss;
 
 public class LevelTwo extends LevelParent {
 
+	// Constants
 	private static final String BACKGROUND_IMAGE_NAME = "/com/example/demo/images/background3.jpeg";
 	private static final int PLAYER_INITIAL_HEALTH = 5;
-	private static final int TARGET_KILL_COUNT = 1; // Set this to the number of kills required for Level 2 to win
+	private static final int TARGET_KILL_COUNT = 1;
 
 	private final Boss boss;
-	private SoundManager soundManager;
+	private final SoundManager soundManager;
 
 	/**
 	 * Constructor for Level Two
@@ -21,11 +22,14 @@ public class LevelTwo extends LevelParent {
 	 * @param screenWidth  Screen width
 	 */
 	public LevelTwo(double screenHeight, double screenWidth) {
-		// Pass target kill count to LevelParent
 		super(BACKGROUND_IMAGE_NAME, screenHeight, screenWidth, PLAYER_INITIAL_HEALTH, TARGET_KILL_COUNT);
-		this.boss = new Boss();
+		this.boss = createBoss();
 		this.soundManager = SoundManager.getInstance();
+	}
 
+	// Boss creation encapsulated in its own method for flexibility
+	private Boss createBoss() {
+		return new Boss();
 	}
 
 	/**
@@ -33,7 +37,15 @@ public class LevelTwo extends LevelParent {
 	 */
 	@Override
 	protected void initializeFriendlyUnits() {
-		soundManager.playBackgroundMusic(SoundManager.LEVEL_TWO_MUSIC); // Play Level Two music
+		playLevelMusic();
+		addUserPlaneToScene();
+	}
+
+	private void playLevelMusic() {
+		soundManager.playBackgroundMusic(SoundManager.LEVEL_TWO_MUSIC);
+	}
+
+	private void addUserPlaneToScene() {
 		getRoot().getChildren().add(getUser());
 	}
 
@@ -42,13 +54,33 @@ public class LevelTwo extends LevelParent {
 	 */
 	@Override
 	protected void checkIfGameOver() {
-		if (userIsDestroyed()) {
-			soundManager.stopBackgroundMusic(); // Stop Level Two music
-			loseGame();
-		} else if (boss.isDestroyed()) {
-			soundManager.stopBackgroundMusic(); // Stop Level Two music
-			goToNextLevel(new LevelThree(getScreenHeight(), getScreenWidth()));
+		if (isGameLost()) {
+			handleGameLoss();
+		} else if (isBossDefeated()) {
+			handleLevelAdvance();
 		}
+	}
+
+	private boolean isGameLost() {
+		return userIsDestroyed();
+	}
+
+	private void handleGameLoss() {
+		stopLevelMusic();
+		loseGame();
+	}
+
+	private boolean isBossDefeated() {
+		return boss.isDestroyed();
+	}
+
+	private void handleLevelAdvance() {
+		stopLevelMusic();
+		goToNextLevel(new LevelThree(getScreenHeight(), getScreenWidth()));
+	}
+
+	private void stopLevelMusic() {
+		soundManager.stopBackgroundMusic();
 	}
 
 	/**
@@ -56,11 +88,22 @@ public class LevelTwo extends LevelParent {
 	 */
 	@Override
 	protected void spawnEnemyUnits() {
-		if (getCurrentNumberOfEnemies() == 0 && !boss.isDestroyed()) {
-			addEnemyUnit(boss);
-			// Add boss health bar and its background to the scene
-			getRoot().getChildren().addAll(boss.getHealthBarBackground(), boss.getHealthBar());
+		if (shouldSpawnBoss()) {
+			spawnBoss();
 		}
+	}
+
+	private boolean shouldSpawnBoss() {
+		return getCurrentNumberOfEnemies() == 0 && !boss.isDestroyed();
+	}
+
+	private void spawnBoss() {
+		addEnemyUnit(boss);
+		addBossHealthBarToScene();
+	}
+
+	private void addBossHealthBarToScene() {
+		getRoot().getChildren().addAll(boss.getHealthBarBackground(), boss.getHealthBar());
 	}
 
 	/**
