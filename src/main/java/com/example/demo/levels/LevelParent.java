@@ -14,6 +14,7 @@ import com.example.demo.powerups.SpreadshotPowerUp;
 import com.example.demo.screens.*;
 import com.example.demo.sounds.SoundManager;
 import com.example.demo.utils.KillCountDisplay;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Group;
@@ -27,9 +28,11 @@ import javafx.util.Duration;
 
 public abstract class LevelParent {
 
+	// Constants
 	private static final double SCREEN_HEIGHT_ADJUSTMENT = 150;
 	private static final int MILLISECOND_DELAY = 50;
 
+	// Core Properties
 	private final double screenHeight;
 	private final double screenWidth;
 	private final double enemyMaximumYPosition;
@@ -89,14 +92,6 @@ public abstract class LevelParent {
 		friendlyUnits.add(user);
 	}
 
-	public void addPropertyChangeListener(PropertyChangeListener pcl) {
-		support.addPropertyChangeListener(pcl);
-	}
-
-	public void removePropertyChangeListener(PropertyChangeListener pcl) {
-		support.removePropertyChangeListener(pcl);
-	}
-
 	protected abstract void initializeFriendlyUnits();
 
 	protected abstract void checkIfGameOver();
@@ -104,6 +99,18 @@ public abstract class LevelParent {
 	protected abstract void spawnEnemyUnits();
 
 	protected abstract LevelView instantiateLevelView();
+
+	public void startGame() {
+		countdownInProgress = true; // Disable input during countdown
+		background.requestFocus(); // Ensure the background receives focus for key events
+
+		// Use CountdownOverlay to show a 3-2-1-GO sequence
+		CountdownOverlay countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
+		countdownOverlay.showCountdown(() -> {
+			countdownInProgress = false; // Re-enable input after countdown
+			timeline.play(); // Start the timeline after countdown ends
+		});
+	}
 
 	public Scene initializeScene() {
 		initializeBackground(); // Set up the background and add to root
@@ -149,25 +156,25 @@ public abstract class LevelParent {
 		return scene; // Return the configured scene
 	}
 
+	private void updateScene() {
+		spawnEnemyUnits();
+		updateActors();
+		generateEnemyFire();
+		updateNumberOfEnemies();
+		handleEnemyPenetration();
+		handleUserProjectileCollisions();
+		handleEnemyProjectileCollisions();
+		handlePlaneCollisions();
+		handlePowerUpCollisions(); // Handle power-up collection
+		removeAllDestroyedActors();
+		updateKillCount();
+		updateLevelView();
+		checkIfGameOver();
+	}
+
 	protected KillCountDisplay getKillCountDisplay() {
 		return killCountDisplay;
 	}
-
-
-	public void startGame() {
-		countdownInProgress = true; // Disable input during countdown
-		background.requestFocus(); // Ensure the background receives focus for key events
-
-		// Use CountdownOverlay to show a 3-2-1-GO sequence
-		CountdownOverlay countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
-		countdownOverlay.showCountdown(() -> {
-			countdownInProgress = false; // Re-enable input after countdown
-			timeline.play(); // Start the timeline after countdown ends
-		});
-	}
-
-
-
 
 	public void goToNextLevel(String levelName) {
 		try {
@@ -194,22 +201,6 @@ public abstract class LevelParent {
 		alert.showAndWait();
 	}
 
-	private void updateScene() {
-		spawnEnemyUnits();
-		updateActors();
-		generateEnemyFire();
-		updateNumberOfEnemies();
-		handleEnemyPenetration();
-		handleUserProjectileCollisions();
-		handleEnemyProjectileCollisions();
-		handlePlaneCollisions();
-		handlePowerUpCollisions(); // Handle power-up collection
-		removeAllDestroyedActors();
-		updateKillCount();
-		updateLevelView();
-		checkIfGameOver();
-	}
-
 	private void initializeTimeline() {
 		timeline.setCycleCount(Timeline.INDEFINITE);
 		KeyFrame gameLoop = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> updateScene());
@@ -225,6 +216,169 @@ public abstract class LevelParent {
 
 		// Add the pause button
 		addPauseButton();
+	}
+
+	private void updateActors() {
+		updateActorList(friendlyUnits);
+		updateActorList(enemyUnits);
+		updateActorList(userProjectiles);
+		updateActorList(enemyProjectiles);
+		updateActorList(powerUps);
+	}
+
+	private void updateActorList(List<ActiveActorDestructible> actors) {
+		actors.forEach(ActiveActorDestructible::updateActor);
+	}
+
+
+	private void generateEnemyFire() {
+		enemyUnits.forEach(enemy -> spawnEnemyProjectile(((FighterPlane) enemy).fireProjectile()));
+	}
+
+	private void updateNumberOfEnemies() {
+		currentNumberOfEnemies = enemyUnits.size();
+	}
+
+	private void handleEnemyPenetration() {
+		for (ActiveActorDestructible enemy : enemyUnits) {
+			if (enemyHasPenetratedDefenses(enemy)) {
+				user.takeDamage();
+				enemy.destroy();
+			}
+		}
+	}
+
+	private void handleUserProjectileCollisions() {
+		handleCollisions(userProjectiles, enemyUnits);
+	}
+
+	private void handleEnemyProjectileCollisions() {
+		for (ActiveActorDestructible projectile : enemyProjectiles) {
+			if (projectile.getBoundsInParent().intersects(user.getBoundsInParent())) {
+				user.takeDamage();
+				projectile.destroy();
+				soundManager.playCrashSound(); // Play crash sound
+				shakeScreen(); // Trigger screen shake
+			}
+		}
+	}
+
+	private void handlePlaneCollisions() {
+		for (ActiveActorDestructible friendly : friendlyUnits) {
+			for (ActiveActorDestructible enemy : enemyUnits) {
+				if (friendly instanceof UserPlane && friendly.getBoundsInParent().intersects(enemy.getBoundsInParent())) {
+					friendly.takeDamage();
+					enemy.takeDamage();
+					soundManager.playCrashSound(); // Play crash sound
+					shakeScreen(); // Trigger screen shake
+				}
+			}
+		}
+	}
+
+	private void handlePowerUpCollisions() {
+		for (ActiveActorDestructible powerUp : powerUps) {
+			if (powerUp.getBoundsInParent().intersects(user.getBoundsInParent())) {
+				if (powerUp instanceof SpreadshotPowerUp) {
+					((SpreadshotPowerUp) powerUp).activate(user); // Activate spreadshot
+				} else if (powerUp instanceof PowerUp) {
+					((PowerUp) powerUp).activate(user); // Activate default power-ups
+				}
+
+				powerUp.destroy(); // Remove power-up after collection
+			}
+		}
+	}
+
+	private void removeAllDestroyedActors() {
+		removeDestroyedActors(friendlyUnits);
+		removeDestroyedActors(enemyUnits);
+		removeDestroyedActors(userProjectiles);
+		removeDestroyedActors(enemyProjectiles);
+		removeDestroyedActors(powerUps);
+	}
+
+	private void updateKillCount() {
+		int kills = currentNumberOfEnemies - enemyUnits.size();
+		for (int i = 0; i < kills; i++) {
+			killCountDisplay.incrementKillCount();
+			System.out.println("Enemy destroyed! Total kills: " + killCountDisplay.getKillCount());
+		}
+	}
+
+	private void updateLevelView() {
+		levelView.removeHearts(user.getHealth());
+	}
+
+	private void handleCollisions(List<ActiveActorDestructible> projectiles, List<ActiveActorDestructible> enemies) {
+		for (ActiveActorDestructible projectile : projectiles) {
+			for (ActiveActorDestructible enemy : enemies) {
+				if (enemy instanceof Boss boss) {
+					if (boss.getCustomHitbox().intersects(projectile.getBoundsInParent())) {
+						if (!boss.isShielded()) {
+							projectile.takeDamage();
+							boss.takeDamage();
+						}
+					}
+				} else if (enemy.getBoundsInParent().intersects(projectile.getBoundsInParent())) {
+					projectile.takeDamage();
+					enemy.takeDamage();
+				}
+			}
+		}
+	}
+
+	private void removeDestroyedActors(List<ActiveActorDestructible> actors) {
+		List<ActiveActorDestructible> destroyedActors = actors.stream().filter(ActiveActorDestructible::isDestroyed)
+				.collect(Collectors.toList());
+		root.getChildren().removeAll(destroyedActors);
+		actors.removeAll(destroyedActors);
+	}
+
+	private void fireProjectile() {
+		ActiveActorDestructible projectile = user.fireProjectile();
+		if (projectile != null && !root.getChildren().contains(projectile)) {
+			root.getChildren().add(projectile);
+			userProjectiles.add(projectile);
+		}
+	}
+
+	public void addProjectile(ActiveActorDestructible projectile) {
+		if (!userProjectiles.contains(projectile) && !getRoot().getChildren().contains(projectile)) {
+			getRoot().getChildren().add(projectile); // Add to the scene graph
+			userProjectiles.add(projectile);         // Track the projectile
+		}
+	}
+
+	private void spawnEnemyProjectile(ActiveActorDestructible projectile) {
+		if (projectile != null) {
+			root.getChildren().add(projectile);
+			enemyProjectiles.add(projectile);
+		}
+	}
+
+
+
+	public void addPropertyChangeListener(PropertyChangeListener pcl) {
+		support.addPropertyChangeListener(pcl);
+	}
+
+
+	private void shakeScreen() {
+		final double amplitude = 10; // How far the screen moves
+		final int cycles = 5; // Number of back-and-forth movements
+		Timeline timeline = new Timeline();
+		for (int i = 0; i < cycles; i++) {
+			double offset = (i % 2 == 0) ? amplitude : -amplitude; // Alternate directions
+			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(50 * i), e -> root.setTranslateX(offset)));
+		}
+		timeline.getKeyFrames().add(new KeyFrame(Duration.millis(50 * cycles), e -> root.setTranslateX(0))); // Reset position
+		timeline.play();
+	}
+
+
+	private boolean enemyHasPenetratedDefenses(ActiveActorDestructible enemy) {
+		return Math.abs(enemy.getTranslateX()) > screenWidth;
 	}
 
 	private void addPauseButton() {
@@ -266,9 +420,6 @@ public abstract class LevelParent {
 		pauseScreen.show(); // Display the pause screen
 	}
 
-
-
-
 	private void restartGame() {
 		try {
 			isGameWon = false; // Reset the game won flag
@@ -284,9 +435,6 @@ public abstract class LevelParent {
 		}
 	}
 
-
-
-
 	private void returnToMainMenu() {
 		isGameWon = false; // Reset the game won flag
 		isGameOver = false; // Reset game over flag
@@ -298,157 +446,6 @@ public abstract class LevelParent {
 		menuView.showMenu(); // Display the main menu
 	}
 
-
-	private void fireProjectile() {
-		ActiveActorDestructible projectile = user.fireProjectile();
-		if (projectile != null && !root.getChildren().contains(projectile)) {
-			root.getChildren().add(projectile);
-			userProjectiles.add(projectile);
-		}
-	}
-
-
-
-	public void addProjectile(ActiveActorDestructible projectile) {
-		if (!userProjectiles.contains(projectile) && !getRoot().getChildren().contains(projectile)) {
-			getRoot().getChildren().add(projectile); // Add to the scene graph
-			userProjectiles.add(projectile);         // Track the projectile
-		}
-	}
-
-
-	private void generateEnemyFire() {
-		enemyUnits.forEach(enemy -> spawnEnemyProjectile(((FighterPlane) enemy).fireProjectile()));
-	}
-
-	private void spawnEnemyProjectile(ActiveActorDestructible projectile) {
-		if (projectile != null) {
-			root.getChildren().add(projectile);
-			enemyProjectiles.add(projectile);
-		}
-	}
-
-	private void updateActors() {
-		friendlyUnits.forEach(plane -> plane.updateActor());
-		enemyUnits.forEach(enemy -> enemy.updateActor());
-		userProjectiles.forEach(projectile -> projectile.updateActor());
-		enemyProjectiles.forEach(projectile -> projectile.updateActor());
-		powerUps.forEach(powerUp -> powerUp.updateActor());
-	}
-
-	private void removeAllDestroyedActors() {
-		removeDestroyedActors(friendlyUnits);
-		removeDestroyedActors(enemyUnits);
-		removeDestroyedActors(userProjectiles);
-		removeDestroyedActors(enemyProjectiles);
-		removeDestroyedActors(powerUps);
-	}
-
-	private void removeDestroyedActors(List<ActiveActorDestructible> actors) {
-		List<ActiveActorDestructible> destroyedActors = actors.stream().filter(ActiveActorDestructible::isDestroyed)
-				.collect(Collectors.toList());
-		root.getChildren().removeAll(destroyedActors);
-		actors.removeAll(destroyedActors);
-	}
-
-	private void handlePlaneCollisions() {
-		for (ActiveActorDestructible friendly : friendlyUnits) {
-			for (ActiveActorDestructible enemy : enemyUnits) {
-				if (friendly instanceof UserPlane && friendly.getBoundsInParent().intersects(enemy.getBoundsInParent())) {
-					friendly.takeDamage();
-					enemy.takeDamage();
-					soundManager.playCrashSound(); // Play crash sound
-					shakeScreen(); // Trigger screen shake
-				}
-			}
-		}
-	}
-
-	private void handleUserProjectileCollisions() {
-		handleCollisions(userProjectiles, enemyUnits);
-	}
-
-	private void handleEnemyProjectileCollisions() {
-		for (ActiveActorDestructible projectile : enemyProjectiles) {
-			if (projectile.getBoundsInParent().intersects(user.getBoundsInParent())) {
-				user.takeDamage();
-				projectile.destroy();
-				soundManager.playCrashSound(); // Play crash sound
-				shakeScreen(); // Trigger screen shake
-			}
-		}
-	}
-
-
-	private void handleCollisions(List<ActiveActorDestructible> projectiles, List<ActiveActorDestructible> enemies) {
-		for (ActiveActorDestructible projectile : projectiles) {
-			for (ActiveActorDestructible enemy : enemies) {
-				if (enemy instanceof Boss boss) {
-					if (boss.getCustomHitbox().intersects(projectile.getBoundsInParent())) {
-						if (!boss.isShielded()) {
-							projectile.takeDamage();
-							boss.takeDamage();
-						}
-					}
-				} else if (enemy.getBoundsInParent().intersects(projectile.getBoundsInParent())) {
-					projectile.takeDamage();
-					enemy.takeDamage();
-				}
-			}
-		}
-	}
-
-	private void handleEnemyPenetration() {
-		for (ActiveActorDestructible enemy : enemyUnits) {
-			if (enemyHasPenetratedDefenses(enemy)) {
-				user.takeDamage();
-				enemy.destroy();
-			}
-		}
-	}
-
-	private void handlePowerUpCollisions() {
-		for (ActiveActorDestructible powerUp : powerUps) {
-			if (powerUp.getBoundsInParent().intersects(user.getBoundsInParent())) {
-				if (powerUp instanceof SpreadshotPowerUp) {
-					((SpreadshotPowerUp) powerUp).activate(user); // Activate spreadshot
-				} else if (powerUp instanceof PowerUp) {
-					((PowerUp) powerUp).activate(user); // Activate default power-ups
-				}
-
-				powerUp.destroy(); // Remove power-up after collection
-			}
-		}
-	}
-
-	private void shakeScreen() {
-		final double amplitude = 10; // How far the screen moves
-		final int cycles = 5; // Number of back-and-forth movements
-		Timeline timeline = new Timeline();
-		for (int i = 0; i < cycles; i++) {
-			double offset = (i % 2 == 0) ? amplitude : -amplitude; // Alternate directions
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(50 * i), e -> root.setTranslateX(offset)));
-		}
-		timeline.getKeyFrames().add(new KeyFrame(Duration.millis(50 * cycles), e -> root.setTranslateX(0))); // Reset position
-		timeline.play();
-	}
-
-
-	private void updateLevelView() {
-		levelView.removeHearts(user.getHealth());
-	}
-
-	private void updateKillCount() {
-		int kills = currentNumberOfEnemies - enemyUnits.size();
-		for (int i = 0; i < kills; i++) {
-			killCountDisplay.incrementKillCount();
-			System.out.println("Enemy destroyed! Total kills: " + killCountDisplay.getKillCount());
-		}
-	}
-
-	private boolean enemyHasPenetratedDefenses(ActiveActorDestructible enemy) {
-		return Math.abs(enemy.getTranslateX()) > screenWidth;
-	}
 
 	protected void winGame() {
 		timeline.stop();
@@ -530,7 +527,4 @@ public abstract class LevelParent {
 		return user.isDestroyed();
 	}
 
-	private void updateNumberOfEnemies() {
-		currentNumberOfEnemies = enemyUnits.size();
-	}
 }
