@@ -16,52 +16,41 @@ public class PauseScreen {
     private final Runnable returnToMenuAction; // Action to return to the main menu
     private final SoundManager soundManager; // Sound manager for controlling background music
 
-    // Constructor for PauseScreen
+    // Preloaded images for buttons
+    private final Image resumeImage;
+    private final Image restartImage;
+    private final Image mainMenuImage;
+
+    /**
+     * Constructor for PauseScreen.
+     *
+     * @param root               Root node of the current scene.
+     * @param resumeAction       Action to resume the game.
+     * @param restartAction      Action to restart the game.
+     * @param returnToMenuAction Action to return to the main menu.
+     * @param soundManager       Sound manager for controlling background music.
+     */
     public PauseScreen(Group root, Runnable resumeAction, Runnable restartAction, Runnable returnToMenuAction, SoundManager soundManager) {
         this.root = root;
         this.resumeAction = resumeAction;
         this.restartAction = restartAction;
         this.returnToMenuAction = returnToMenuAction;
         this.soundManager = soundManager;
+
+        // Preload button images to improve performance
+        this.resumeImage = loadImage("/com/example/demo/images/resume.png");
+        this.restartImage = loadImage("/com/example/demo/images/restart.png");
+        this.mainMenuImage = loadImage("/com/example/demo/images/exit.jpg");
     }
 
+    /**
+     * Displays the pause screen overlay.
+     */
     public void show() {
         soundManager.pauseBackgroundMusic(); // Pause music
 
         // Create a semi-transparent overlay
-        VBox pauseOverlay = new VBox(20); // 20px spacing between buttons
-        pauseOverlay.setAlignment(Pos.CENTER); // Center the buttons horizontally and vertically
-        pauseOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7);"); // Semi-transparent black background
-
-        // Bind the size of the overlay to the scene dimensions
-        pauseOverlay.prefWidthProperty().bind(root.getScene().widthProperty());
-        pauseOverlay.prefHeightProperty().bind(root.getScene().heightProperty());
-
-        // Resume button
-        Button resumeButton = createButtonWithImage("/com/example/demo/images/resume.png");
-        resumeButton.setOnAction(event -> {
-            soundManager.resumeBackgroundMusic(); // Resume background music
-            resumeAction.run(); // Call the resume action (e.g., resume the timeline)
-            root.getChildren().remove(pauseOverlay); // Remove the pause overlay
-        });
-
-        // Restart button
-        Button restartButton = createButtonWithImage("/com/example/demo/images/restart.png");
-        restartButton.setOnAction(event -> {
-            soundManager.stopBackgroundMusic(); // Stop background music
-            restartAction.run(); // Call the restart action
-            root.getChildren().remove(pauseOverlay); // Remove the pause overlay
-        });
-
-        // Main Menu button
-        Button mainMenuButton = createButtonWithImage("/com/example/demo/images/exit.jpg");
-        mainMenuButton.setOnAction(event -> {
-            returnToMenuAction.run(); // Call the main menu action
-            root.getChildren().remove(pauseOverlay); // Remove the pause overlay
-        });
-
-        // Add buttons to the overlay
-        pauseOverlay.getChildren().addAll(resumeButton, restartButton, mainMenuButton);
+        VBox pauseOverlay = createPauseOverlay();
 
         // Clear previous overlays to prevent stacking
         root.getChildren().removeIf(node -> node instanceof VBox);
@@ -70,21 +59,104 @@ public class PauseScreen {
         root.getChildren().add(pauseOverlay);
     }
 
+    /**
+     * Creates the pause overlay.
+     *
+     * @return A VBox containing the pause overlay.
+     */
+    private VBox createPauseOverlay() {
+        VBox pauseOverlay = new VBox(20); // 20px spacing between buttons
+        pauseOverlay.setAlignment(Pos.CENTER); // Center the buttons horizontally and vertically
+        pauseOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7);"); // Semi-transparent black background
 
-    // Helper method to create a button with an image
-    private Button createButtonWithImage(String imagePath) {
-        // Load the image
-        Image buttonImage = new Image(getClass().getResource(imagePath).toExternalForm());
-        ImageView buttonImageView = new ImageView(buttonImage);
+        // Bind the size of the overlay to the scene dimensions
+        pauseOverlay.prefWidthProperty().bind(root.getScene().widthProperty());
+        pauseOverlay.prefHeightProperty().bind(root.getScene().heightProperty());
 
-        // Set image size
+        // Create and add buttons
+        pauseOverlay.getChildren().addAll(
+                createResumeButton(),
+                createRestartButton(),
+                createMainMenuButton()
+        );
+
+        return pauseOverlay;
+    }
+
+    /**
+     * Creates the resume button.
+     *
+     * @return A Button to resume the game.
+     */
+    private Button createResumeButton() {
+        Button resumeButton = createButtonWithImage(resumeImage);
+        resumeButton.setOnAction(event -> {
+            soundManager.resumeBackgroundMusic(); // Resume background music
+            resumeAction.run(); // Call the resume action
+            removePauseOverlay(); // Remove the pause overlay
+        });
+        return resumeButton;
+    }
+
+    /**
+     * Creates the restart button.
+     *
+     * @return A Button to restart the game.
+     */
+    private Button createRestartButton() {
+        Button restartButton = createButtonWithImage(restartImage);
+        restartButton.setOnAction(event -> {
+            soundManager.stopBackgroundMusic(); // Stop background music
+            restartAction.run(); // Call the restart action
+            removePauseOverlay(); // Remove the pause overlay
+        });
+        return restartButton;
+    }
+
+    /**
+     * Creates the main menu button.
+     *
+     * @return A Button to return to the main menu.
+     */
+    private Button createMainMenuButton() {
+        Button mainMenuButton = createButtonWithImage(mainMenuImage);
+        mainMenuButton.setOnAction(event -> {
+            returnToMenuAction.run(); // Call the return to menu action
+            removePauseOverlay(); // Remove the pause overlay
+        });
+        return mainMenuButton;
+    }
+
+    /**
+     * Helper method to remove the pause overlay from the root.
+     */
+    private void removePauseOverlay() {
+        root.getChildren().removeIf(node -> node instanceof VBox);
+    }
+
+    /**
+     * Helper method to create a button with an image.
+     *
+     * @param image The image to set on the button.
+     * @return A Button instance with the specified image.
+     */
+    private Button createButtonWithImage(Image image) {
+        ImageView buttonImageView = new ImageView(image);
         buttonImageView.setFitWidth(70);
         buttonImageView.setFitHeight(70);
 
-        // Create a button and set the image as its graphic
         Button button = new Button();
         button.setGraphic(buttonImageView);
-
         return button;
+    }
+
+    /**
+     * Helper method to load an image.
+     *
+     * @param imagePath The path to the image resource.
+     * @return The loaded Image instance.
+     */
+    private Image loadImage(String imagePath) {
+        return new Image(getClass().getResource(imagePath).toExternalForm());
     }
 }
