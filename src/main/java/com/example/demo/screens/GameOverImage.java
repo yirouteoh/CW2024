@@ -10,6 +10,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.Scene;
 import javafx.util.Duration;
 
 public class GameOverImage extends Group {
@@ -17,64 +18,111 @@ public class GameOverImage extends Group {
 	private static final String RESTART_IMAGE_NAME = "/com/example/demo/images/restart.png";
 	private static final String EXIT_IMAGE_NAME = "/com/example/demo/images/exit.jpg";
 
+	private final double screenWidth;
+	private final double screenHeight;
+
+	/**
+	 * Constructor for the GameOverImage class.
+	 *
+	 * @param screenWidth   The width of the screen.
+	 * @param screenHeight  The height of the screen.
+	 * @param onRestart     Action to perform on restart.
+	 * @param onExitToMenu  Action to perform on exiting to the menu.
+	 */
 	public GameOverImage(double screenWidth, double screenHeight, Runnable onRestart, Runnable onExitToMenu) {
-		// Dimmed background overlay
+		this.screenWidth = screenWidth;
+		this.screenHeight = screenHeight;
+
+		// Add all elements to the Group
+		this.getChildren().addAll(
+				createBackgroundOverlay(),
+				createGameOverText(),
+				createMotivationalText(),
+				createButtonContainer(onRestart, onExitToMenu)
+		);
+	}
+
+	/**
+	 * Creates a semi-transparent background overlay.
+	 *
+	 * @return A Rectangle representing the overlay.
+	 */
+	private Rectangle createBackgroundOverlay() {
 		Rectangle overlay = new Rectangle(screenWidth, screenHeight);
 		overlay.setFill(Color.BLACK);
 		overlay.setOpacity(0.7); // Semi-transparent black
+		return overlay;
+	}
 
-		// "Game Over" text
+	/**
+	 * Creates the "Game Over" text with a fade-in effect.
+	 *
+	 * @return A Text node for the "Game Over" message.
+	 */
+	private Text createGameOverText() {
 		Text gameOverText = new Text("GAME OVER");
 		gameOverText.setFont(Font.font("Arial", 80));
 		gameOverText.setFill(Color.RED);
 		gameOverText.setTranslateY(screenHeight / 3); // Centered vertically
-		gameOverText.setTranslateX((screenWidth - gameOverText.getLayoutBounds().getWidth()) / 2); // Centered horizontally
+		gameOverText.setTranslateX((screenWidth - getTextWidth(gameOverText)) / 2); // Centered horizontally
 
-		// Motivational text
-		Text motivationalText = new Text("Don’t give up! Try again and show them who's the boss!");
-		motivationalText.setFont(Font.font("Arial", 20));
-		motivationalText.setFill(Color.WHITE);
-		motivationalText.setTranslateY(screenHeight / 2.5); // Position below "Game Over" text
-		motivationalText.setTranslateX((screenWidth - motivationalText.getLayoutBounds().getWidth()) / 2); // Centered horizontally
-
-		// Buttons container
-		VBox buttonContainer = new VBox(20); // Vertical box with 20px spacing
-		buttonContainer.setTranslateX((screenWidth - 200) / 2); // Centered horizontally
-		buttonContainer.setTranslateY(screenHeight / 2); // Below the motivational text
-
-		// Restart Button
-		Button restartButton = createImageButton(RESTART_IMAGE_NAME, "Restart", onRestart);
-
-		// Exit Button
-		Button exitButton = createImageButton(EXIT_IMAGE_NAME, "Exit", onExitToMenu);
-
-		// Add buttons to the container
-		buttonContainer.getChildren().addAll(restartButton, exitButton);
-
-		// Fade-in effect for the "Game Over" text
+		// Fade-in effect
 		FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), gameOverText);
 		fadeTransition.setFromValue(0);
 		fadeTransition.setToValue(1);
 		fadeTransition.play();
 
-		// Add all elements to the Group
-		this.getChildren().addAll(overlay, gameOverText, motivationalText, buttonContainer);
+		return gameOverText;
 	}
 
-	private Button createImageButton(String imagePath, String text, Runnable onClickAction) {
-		// Load the image
-		ImageView imageView = new ImageView();
-		java.net.URL imageUrl = getClass().getResource(imagePath);
-		if (imageUrl != null) {
-			imageView.setImage(new Image(imageUrl.toExternalForm()));
-			imageView.setFitWidth(30); // Set icon width
-			imageView.setFitHeight(30); // Set icon height
-		} else {
-			System.err.println("Image not found: " + imagePath);
-		}
+	/**
+	 * Creates motivational text displayed below the "Game Over" text.
+	 *
+	 * @return A Text node for the motivational message.
+	 */
+	private Text createMotivationalText() {
+		Text motivationalText = new Text("Don’t give up! Try again and show them who's the boss!");
+		motivationalText.setFont(Font.font("Arial", 20));
+		motivationalText.setFill(Color.WHITE);
+		motivationalText.setTranslateY(screenHeight / 2.5); // Positioned below "Game Over" text
+		motivationalText.setTranslateX((screenWidth - getTextWidth(motivationalText)) / 2); // Centered horizontally
+		return motivationalText;
+	}
 
-		// Create a button with text and image
+	/**
+	 * Creates a container with buttons for restarting and exiting to the menu.
+	 *
+	 * @param onRestart    Action to perform on restart.
+	 * @param onExitToMenu Action to perform on exiting to the menu.
+	 * @return A VBox containing the buttons.
+	 */
+	private VBox createButtonContainer(Runnable onRestart, Runnable onExitToMenu) {
+		VBox buttonContainer = new VBox(20); // Vertical box with 20px spacing
+		buttonContainer.setTranslateX((screenWidth - 200) / 2); // Centered horizontally
+		buttonContainer.setTranslateY(screenHeight / 2); // Below the motivational text
+
+		// Add buttons to the container
+		buttonContainer.getChildren().addAll(
+				createImageButton(RESTART_IMAGE_NAME, "Restart", onRestart),
+				createImageButton(EXIT_IMAGE_NAME, "Exit", onExitToMenu)
+		);
+
+		return buttonContainer;
+	}
+
+	/**
+	 * Creates a button with an image and text.
+	 *
+	 * @param imagePath     The path to the button image.
+	 * @param text          The text to display on the button.
+	 * @param onClickAction The action to perform when the button is clicked.
+	 * @return A Button with the specified image and text.
+	 */
+	private Button createImageButton(String imagePath, String text, Runnable onClickAction) {
+		ImageView imageView = loadImageView(imagePath);
 		Button button = new Button(text, imageView);
+
+		// Button styling
 		button.setStyle(
 				"-fx-font-size: 18px; -fx-background-color: #FFFFFF; -fx-text-fill: #000000; " +
 						"-fx-border-color: #000000; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;"
@@ -83,5 +131,36 @@ public class GameOverImage extends Group {
 		button.setOnAction(event -> onClickAction.run());
 
 		return button;
+	}
+
+	/**
+	 * Loads an image into an ImageView.
+	 *
+	 * @param imagePath The path to the image resource.
+	 * @return An ImageView containing the loaded image.
+	 */
+	private ImageView loadImageView(String imagePath) {
+		ImageView imageView = new ImageView();
+		try {
+			Image image = new Image(getClass().getResource(imagePath).toExternalForm());
+			imageView.setImage(image);
+			imageView.setFitWidth(30); // Set icon width
+			imageView.setFitHeight(30); // Set icon height
+		} catch (NullPointerException | IllegalArgumentException e) {
+			System.err.println("Image not found: " + imagePath);
+		}
+		return imageView;
+	}
+
+	/**
+	 * Calculates the width of a Text node.
+	 *
+	 * @param text The Text node.
+	 * @return The width of the Text node.
+	 */
+	private double getTextWidth(Text text) {
+		new Scene(new Group(text)); // Assign a dummy scene to calculate layout bounds
+		text.applyCss();
+		return text.getLayoutBounds().getWidth();
 	}
 }
