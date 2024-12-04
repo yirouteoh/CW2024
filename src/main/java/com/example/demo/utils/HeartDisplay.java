@@ -9,45 +9,84 @@ public class HeartDisplay {
 	private static final String HEART_IMAGE_NAME = "/com/example/demo/images/heart.png";
 	private static final int HEART_HEIGHT = 50;
 	private static final int INDEX_OF_FIRST_ITEM = 0;
-	private final HBox container = new HBox();
+
+	private final HBox container;
 	private final double containerXPosition;
 	private final double containerYPosition;
-	private final int numberOfHeartsToDisplay;
+	private final int totalHearts;
 
-	public HeartDisplay(double xPosition, double yPosition, int heartsToDisplay) {
+	/**
+	 * Constructor for HeartDisplay.
+	 *
+	 * @param xPosition      The x-coordinate of the heart container.
+	 * @param yPosition      The y-coordinate of the heart container.
+	 * @param numberOfHearts The total number of hearts to display.
+	 */
+	public HeartDisplay(double xPosition, double yPosition, int numberOfHearts) {
 		this.containerXPosition = xPosition;
 		this.containerYPosition = yPosition;
-		this.numberOfHeartsToDisplay = heartsToDisplay;
-		initializeContainer();
-		initializeHearts();
+		this.totalHearts = numberOfHearts;
+		this.container = createContainer();
+		addHeartsToContainer();
 	}
 
-	private void initializeContainer() {
-		container.setLayoutX(containerXPosition);
-		container.setLayoutY(containerYPosition);
+	/**
+	 * Initializes the heart container with the correct position.
+	 *
+	 * @return The initialized HBox container.
+	 */
+	private HBox createContainer() {
+		HBox heartContainer = new HBox();
+		heartContainer.setLayoutX(containerXPosition);
+		heartContainer.setLayoutY(containerYPosition);
+		return heartContainer;
 	}
 
-	private void initializeHearts() {
-		for (int i = 0; i < numberOfHeartsToDisplay; i++) {
-			java.net.URL imageUrl = getClass().getResource(HEART_IMAGE_NAME);
-			if (imageUrl == null) {
-				System.err.println("Heart image resource not found: " + HEART_IMAGE_NAME);
-				continue; // Skip adding this heart
+	/**
+	 * Adds the specified number of hearts to the container.
+	 */
+	private void addHeartsToContainer() {
+		for (int i = 0; i < totalHearts; i++) {
+			ImageView heart = createHeartImageView();
+			if (heart != null) {
+				container.getChildren().add(heart);
 			}
-			ImageView heart = new ImageView(new Image(imageUrl.toExternalForm()));
-			heart.setFitHeight(HEART_HEIGHT);
-			heart.setPreserveRatio(true);
-			container.getChildren().add(heart);
 		}
 	}
 
-	public void removeHeart() {
-		if (!container.getChildren().isEmpty())
-			container.getChildren().remove(INDEX_OF_FIRST_ITEM);
+	/**
+	 * Creates an ImageView for the heart icon.
+	 *
+	 * @return The ImageView for the heart, or null if the image resource is not found.
+	 */
+	private ImageView createHeartImageView() {
+		java.net.URL imageUrl = getClass().getResource(HEART_IMAGE_NAME);
+		if (imageUrl == null) {
+			System.err.println("Heart image resource not found: " + HEART_IMAGE_NAME);
+			return null; // Return null to skip adding the heart
+		}
+
+		ImageView heart = new ImageView(new Image(imageUrl.toExternalForm()));
+		heart.setFitHeight(HEART_HEIGHT);
+		heart.setPreserveRatio(true);
+		return heart;
 	}
 
+	/**
+	 * Removes one heart from the container, if available.
+	 */
+	public void removeHeart() {
+		if (!container.getChildren().isEmpty()) {
+			container.getChildren().remove(INDEX_OF_FIRST_ITEM);
+		}
+	}
+
+	/**
+	 * Gets the heart container.
+	 *
+	 * @return The HBox containing the hearts.
+	 */
 	public HBox getContainer() {
 		return container;
 	}
-
 }
