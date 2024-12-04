@@ -16,36 +16,83 @@ public class Controller implements PropertyChangeListener {
 	private static final String LEVEL_ONE_CLASS_NAME = "com.example.demo.levels.LevelOne";
 	private final Stage stage;
 
+	/**
+	 * Constructor to initialize the Controller.
+	 *
+	 * @param stage The primary Stage for the game.
+	 */
 	public Controller(Stage stage) {
 		this.stage = stage;
 	}
 
-	public void launchGame() throws ClassNotFoundException, NoSuchMethodException, SecurityException,
-			InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	/**
+	 * Launches the game starting at level one.
+	 */
+	public void launchGame() {
 		stage.show();
-		goToLevel(LEVEL_ONE_CLASS_NAME);
+		try {
+			goToLevel(LEVEL_ONE_CLASS_NAME);
+		} catch (ReflectiveOperationException e) {
+			showErrorAlert("Error launching game", e);
+		}
 	}
 
-	private void goToLevel(String className) throws ClassNotFoundException, NoSuchMethodException, SecurityException,
-			InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Class<?> myClass = Class.forName(className);
-		Constructor<?> constructor = myClass.getConstructor(double.class, double.class);
-		LevelParent myLevel = (LevelParent) constructor.newInstance(stage.getHeight(), stage.getWidth());
-		myLevel.addPropertyChangeListener(this);
-		Scene scene = myLevel.initializeScene();
+	/**
+	 * Navigates to the specified level by dynamically loading its class.
+	 *
+	 * @param className The fully qualified class name of the level to load.
+	 * @throws ReflectiveOperationException If an error occurs during class loading or instantiation.
+	 */
+	private void goToLevel(String className) throws ReflectiveOperationException {
+		LevelParent level = instantiateLevel(className);
+		level.addPropertyChangeListener(this);
+
+		Scene scene = level.initializeScene();
 		stage.setScene(scene);
-		myLevel.startGame();
+
+		level.startGame();
 	}
 
+	/**
+	 * Instantiates a level dynamically using reflection.
+	 *
+	 * @param className The fully qualified class name of the level to instantiate.
+	 * @return An instance of the LevelParent class.
+	 * @throws ReflectiveOperationException If an error occurs during instantiation.
+	 */
+	private LevelParent instantiateLevel(String className) throws ReflectiveOperationException {
+		Class<?> levelClass = Class.forName(className);
+		Constructor<?> constructor = levelClass.getConstructor(double.class, double.class);
+		return (LevelParent) constructor.newInstance(stage.getHeight(), stage.getWidth());
+	}
+
+	/**
+	 * Handles property change events to navigate to a new level.
+	 *
+	 * @param evt The PropertyChangeEvent containing the new level class name.
+	 */
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
+		String nextLevelClass = (String) evt.getNewValue();
 		try {
-			goToLevel((String) evt.getNewValue());
-		} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
-				 | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setContentText(e.getClass().toString());
-			alert.show();
+			goToLevel(nextLevelClass);
+		} catch (ReflectiveOperationException e) {
+			showErrorAlert("Error loading next level", e);
 		}
+	}
+
+	/**
+	 * Displays an error alert with the exception details.
+	 *
+	 * @param headerText The header text for the alert.
+	 * @param exception  The exception to display details about.
+	 */
+	private void showErrorAlert(String headerText, Exception exception) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("Error");
+		alert.setHeaderText(headerText);
+		alert.setContentText(exception.getMessage());
+		alert.show();
+		exception.printStackTrace(); // Log stack trace for debugging
 	}
 }
