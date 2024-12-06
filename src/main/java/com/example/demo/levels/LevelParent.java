@@ -13,6 +13,7 @@ import com.example.demo.managers.ActorManager;
 import com.example.demo.managers.GameLoopManager;
 import com.example.demo.managers.GameStateManager;
 import com.example.demo.managers.CollisionManager;
+import com.example.demo.managers.InputManager;
 
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -46,7 +47,7 @@ public abstract class LevelParent {
 	private GameLoopManager gameLoopManager;
 	private final GameStateManager gameStateManager = new GameStateManager();
 	private CollisionManager collisionManager;
-
+	private InputManager inputManager;
 
 	private ImageView pauseButton; // Pause button ImageView
 	private SoundManager soundManager;
@@ -91,6 +92,7 @@ public abstract class LevelParent {
 		this.soundManager = SoundManager.getInstance();
 		this.countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
 		this.collisionManager = new CollisionManager(actorManager, soundManager, user, root, screenWidth);
+		this.inputManager = new InputManager(user, this, soundManager);
 
 		initializeGameLoop();
 		actorManager.addFriendlyUnit(user, root);
@@ -120,7 +122,7 @@ public abstract class LevelParent {
 		initializeFriendlyUnits(); // Add the user plane and other units
 		levelView.showHeartDisplay(); // Show health or level-related UI
 		root.getChildren().add(killCountDisplay.getDisplay()); // Add the kill count display to the root
-		initializeEventHandlers();
+		inputManager.initializeInputHandlers(scene);
 		return scene; // Return the configured scene
 	}
 
@@ -144,42 +146,6 @@ public abstract class LevelParent {
 		return killCountDisplay;
 	}
 
-	/**
-	 * Adds event handlers for user inputs such as movement, firing, and pausing.
-	 */
-	private void initializeEventHandlers() {
-		scene.setOnKeyPressed(event -> {
-			if (countdownInProgress || !gameStateManager.isState(GameStateManager.GameState.PLAYING)) return; // Ignore input if not playing
-
-			switch (event.getCode()) {
-				case UP -> user.moveUp();
-				case DOWN -> user.moveDown();
-				case LEFT -> user.moveLeft();
-				case RIGHT -> user.moveRight();
-				case SPACE -> {
-					fireProjectile(); // Fire projectile
-					soundManager.playShootSound(); // Play shooting sound effect
-				}
-				case ESCAPE -> {
-					if (!gameStateManager.isGameOver() && !gameStateManager.isWin() && !gameLoopManager.isPaused()) {
-						gameLoopManager.pause();
-						soundManager.pauseBackgroundMusic();
-						showPauseScreen();
-					}
-
-				}
-			}
-		});
-
-		scene.setOnKeyReleased(event -> {
-			if (countdownInProgress) return; // Ignore input during countdown
-
-			switch (event.getCode()) {
-				case UP, DOWN -> user.stop(); // Stop vertical movement
-				case LEFT, RIGHT -> user.stopHorizontal(); // Stop horizontal movement
-			}
-		});
-	}
 
 	public void startGame() {
 		countdownInProgress = true; // Disable input during countdown
@@ -267,9 +233,6 @@ public abstract class LevelParent {
 		currentNumberOfEnemies = actorManager.getEnemyUnits().size();
 	}
 
-
-
-
 	private void updateKillCount() {
 		int kills = currentNumberOfEnemies - actorManager.getEnemyUnits().size();
 		for (int i = 0; i < kills; i++) {
@@ -305,7 +268,7 @@ public abstract class LevelParent {
 	}
 
 
-	private void fireProjectile() {
+	public void fireProjectile() {
 		ActiveActorDestructible projectile = user.fireProjectile();
 		if (projectile != null) {
 			actorManager.addUserProjectile(projectile, root);
@@ -350,7 +313,7 @@ public abstract class LevelParent {
 		root.getChildren().add(pauseButton);
 	}
 
-	private void showPauseScreen() {
+	public void showPauseScreen() {
 		gameLoopManager.pause(); // Pause the game timeline
 		soundManager.pauseBackgroundMusic(); // Pause the music
 		gameStateManager.changeState(GameStateManager.GameState.PAUSED); // Update state to PAUSED
@@ -450,6 +413,21 @@ public abstract class LevelParent {
 
 	// ==================== Utility Methods =====================
 	// Miscellaneous methods, including getters and utility functions for game logic.
+
+	// Getter for GameStateManager
+	public GameStateManager getGameStateManager() {
+		return gameStateManager;
+	}
+
+	// Getter for GameLoopManager
+	public GameLoopManager getGameLoopManager() {
+		return gameLoopManager;
+	}
+
+	// Getter for countdownInProgress
+	public boolean isCountdownInProgress() {
+		return countdownInProgress;
+	}
 
 	protected UserPlane getUser() {
 		return user;
