@@ -71,8 +71,11 @@ public class LevelOne extends LevelParent {
 	}
 
 	private void addUserToScene() {
-		getRoot().getChildren().add(getUser());
+		if (!getRoot().getChildren().contains(getUser())) { // Check if already added
+			getRoot().getChildren().add(getUser());
+		}
 	}
+
 
 	/**
 	 * Spawn enemy units based on the spawn probability and current number of enemies

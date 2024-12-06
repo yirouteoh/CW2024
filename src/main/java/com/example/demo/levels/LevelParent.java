@@ -14,6 +14,7 @@ import com.example.demo.powerups.SpreadshotPowerUp;
 import com.example.demo.screens.*;
 import com.example.demo.sounds.SoundManager;
 import com.example.demo.utils.KillCountDisplay;
+import com.example.demo.managers.ActorManager;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -47,11 +48,7 @@ public abstract class LevelParent {
 	private final ImageView background;
 	private final KillCountDisplay killCountDisplay;
 
-	private final List<ActiveActorDestructible> friendlyUnits;
-	private final List<ActiveActorDestructible> enemyUnits;
-	private final List<ActiveActorDestructible> userProjectiles;
-	private final List<ActiveActorDestructible> enemyProjectiles;
-	private final List<ActiveActorDestructible> powerUps;
+	private final ActorManager actorManager = new ActorManager();
 
 	private ImageView pauseButton; // Pause button ImageView
 	private SoundManager soundManager;
@@ -84,11 +81,7 @@ public abstract class LevelParent {
 		this.timeline = new Timeline();
 		this.user = new UserPlane(playerInitialHealth);
 		this.user.setLevelParent(this);
-		this.friendlyUnits = new ArrayList<>();
-		this.enemyUnits = new ArrayList<>();
-		this.userProjectiles = new ArrayList<>();
-		this.enemyProjectiles = new ArrayList<>();
-		this.powerUps = new ArrayList<>();
+		actorManager.addFriendlyUnit(user, root);
 
 		this.background = new ImageView(new Image(getClass().getResource(backgroundImageName).toExternalForm()));
 		this.screenHeight = screenHeight;
@@ -103,7 +96,7 @@ public abstract class LevelParent {
 		this.countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
 
 		initializeTimeline();
-		friendlyUnits.add(user);
+		actorManager.addFriendlyUnit(user, root);
 	}
 
 	/**
@@ -127,6 +120,7 @@ public abstract class LevelParent {
 	 * @return The fully configured game scene.
 	 */
 	public Scene initializeScene() {
+		root.getChildren().clear(); // Clear all children from the root before initializing
 		initializeBackground(); // Set up the background and add to root
 		initializeFriendlyUnits(); // Add the user plane and other units
 		levelView.showHeartDisplay(); // Show health or level-related UI
@@ -134,6 +128,7 @@ public abstract class LevelParent {
 		initializeEventHandlers();
 		return scene; // Return the configured scene
 	}
+
 
 	/**
 	 * Configures the level background, including its dimensions and position in the scene graph.
@@ -233,11 +228,7 @@ public abstract class LevelParent {
 	 * Updates all actors in the game, including their movement and actions.
 	 */
 	private void updateActors() {
-		updateActorList(friendlyUnits);
-		updateActorList(enemyUnits);
-		updateActorList(userProjectiles);
-		updateActorList(enemyProjectiles);
-		updateActorList(powerUps);
+		actorManager.updateActors();
 	}
 
 	/**
@@ -255,7 +246,7 @@ public abstract class LevelParent {
 	 * Cleans up destroyed actors from the game.
 	 */
 	private void cleanUpDestroyedActors() {
-		removeAllDestroyedActors();
+		actorManager.cleanUpDestroyedActors(root);
 	}
 
 	/**
@@ -267,15 +258,19 @@ public abstract class LevelParent {
 	}
 
 	private void generateEnemyFire() {
-		enemyUnits.forEach(enemy -> spawnEnemyProjectile(((FighterPlane) enemy).fireProjectile()));
+		actorManager.getEnemyUnits().forEach(enemy -> {
+			if (enemy instanceof FighterPlane fighter) {
+				ActiveActorDestructible projectile = fighter.fireProjectile();
+				if (projectile != null) {
+					actorManager.addEnemyProjectile(projectile, root);
+				}
+			}
+		});
 	}
+
 
 	private void updateNumberOfEnemies() {
-		currentNumberOfEnemies = enemyUnits.size();
-	}
-
-	private void updateActorList(List<ActiveActorDestructible> actors) {
-		actors.forEach(ActiveActorDestructible::updateActor);
+		currentNumberOfEnemies = actorManager.getEnemyUnits().size();
 	}
 
 	// Methods responsible for detecting and handling collisions between actors, projectiles, and power-ups.
@@ -285,7 +280,7 @@ public abstract class LevelParent {
 	 */
 
 	private void handleEnemyPenetration() {
-		for (ActiveActorDestructible enemy : enemyUnits) {
+		for (ActiveActorDestructible enemy : actorManager.getEnemyUnits()) {
 			if (enemyHasPenetratedDefenses(enemy)) {
 				user.takeDamage();
 				enemy.destroy();
@@ -294,7 +289,7 @@ public abstract class LevelParent {
 	}
 
 	private void handleUserProjectileCollisions() {
-		handleCollisions(userProjectiles, enemyUnits);
+		handleCollisions(actorManager.getUserProjectiles(), actorManager.getEnemyUnits());
 	}
 
 	private void handleCollisions(List<ActiveActorDestructible> projectiles, List<ActiveActorDestructible> enemies) {
@@ -317,60 +312,48 @@ public abstract class LevelParent {
 
 
 	private void handleEnemyProjectileCollisions() {
-		for (ActiveActorDestructible projectile : enemyProjectiles) {
+		actorManager.getEnemyProjectiles().forEach(projectile -> {
 			if (projectile.getBoundsInParent().intersects(user.getBoundsInParent())) {
 				user.takeDamage();
 				projectile.destroy();
 				soundManager.playCrashSound(); // Play crash sound
 				shakeScreen(); // Trigger screen shake
 			}
-		}
+		});
 	}
 
+
 	private void handlePlaneCollisions() {
-		for (ActiveActorDestructible friendly : friendlyUnits) {
-			for (ActiveActorDestructible enemy : enemyUnits) {
+		actorManager.getFriendlyUnits().forEach(friendly -> {
+			actorManager.getEnemyUnits().forEach(enemy -> {
 				if (friendly instanceof UserPlane && friendly.getBoundsInParent().intersects(enemy.getBoundsInParent())) {
 					friendly.takeDamage();
 					enemy.takeDamage();
 					soundManager.playCrashSound(); // Play crash sound
 					shakeScreen(); // Trigger screen shake
 				}
-			}
-		}
+			});
+		});
 	}
+
 
 	private void handlePowerUpCollisions() {
-		for (ActiveActorDestructible powerUp : powerUps) {
+		actorManager.getPowerUps().forEach(powerUp -> {
 			if (powerUp.getBoundsInParent().intersects(user.getBoundsInParent())) {
-				if (powerUp instanceof SpreadshotPowerUp) {
-					((SpreadshotPowerUp) powerUp).activate(user); // Activate spreadshot
-				} else if (powerUp instanceof PowerUp) {
-					((PowerUp) powerUp).activate(user); // Activate default power-ups
+				if (powerUp instanceof SpreadshotPowerUp spreadshot) {
+					spreadshot.activate(user); // Activate spreadshot
+				} else if (powerUp instanceof PowerUp defaultPowerUp) {
+					defaultPowerUp.activate(user); // Activate default power-ups
 				}
-
 				powerUp.destroy(); // Remove power-up after collection
 			}
-		}
+		});
 	}
 
-	private void removeAllDestroyedActors() {
-		removeDestroyedActors(friendlyUnits);
-		removeDestroyedActors(enemyUnits);
-		removeDestroyedActors(userProjectiles);
-		removeDestroyedActors(enemyProjectiles);
-		removeDestroyedActors(powerUps);
-	}
 
-	private void removeDestroyedActors(List<ActiveActorDestructible> actors) {
-		List<ActiveActorDestructible> destroyedActors = actors.stream().filter(ActiveActorDestructible::isDestroyed)
-				.collect(Collectors.toList());
-		root.getChildren().removeAll(destroyedActors);
-		actors.removeAll(destroyedActors);
-	}
 
 	private void updateKillCount() {
-		int kills = currentNumberOfEnemies - enemyUnits.size();
+		int kills = currentNumberOfEnemies - actorManager.getEnemyUnits().size();
 		for (int i = 0; i < kills; i++) {
 			killCountDisplay.incrementKillCount();
 			System.out.println("Enemy destroyed! Total kills: " + killCountDisplay.getKillCount());
@@ -384,6 +367,7 @@ public abstract class LevelParent {
 	public void goToNextLevel(LevelParent nextLevel) {
 		try {
 			timeline.stop(); // Stop the current level's timeline
+			root.getChildren().clear(); // Clear the current root to avoid duplicates
 			Scene nextScene = nextLevel.initializeScene();
 			Stage primaryStage = (Stage) root.getScene().getWindow();
 			primaryStage.setScene(nextScene);
@@ -393,37 +377,32 @@ public abstract class LevelParent {
 		}
 	}
 
+
 	private void showErrorDialog(String message) {
-		Alert alert = new Alert(AlertType.ERROR);
+		Alert alert = new Alert(Alert.AlertType.ERROR);
 		alert.setTitle("Error");
 		alert.setHeaderText(null);
 		alert.setContentText(message);
-		alert.showAndWait();
+		alert.show(); // Use non-blocking show() instead of showAndWait()
 	}
+
 
 	private void fireProjectile() {
 		ActiveActorDestructible projectile = user.fireProjectile();
-		if (projectile != null && !root.getChildren().contains(projectile)) {
-			root.getChildren().add(projectile);
-			userProjectiles.add(projectile);
+		if (projectile != null) {
+			actorManager.addUserProjectile(projectile, root);
 		}
 	}
 
 	public void addProjectile(ActiveActorDestructible projectile) {
-		if (!userProjectiles.contains(projectile) && !getRoot().getChildren().contains(projectile)) {
-			getRoot().getChildren().add(projectile); // Add to the scene graph
-			userProjectiles.add(projectile);         // Track the projectile
-		}
+		actorManager.addUserProjectile(projectile, root); // Use ActorManager to add the projectile
 	}
 
 	private void spawnEnemyProjectile(ActiveActorDestructible projectile) {
 		if (projectile != null) {
-			root.getChildren().add(projectile);
-			enemyProjectiles.add(projectile);
+			actorManager.addEnemyProjectile(projectile, root);
 		}
 	}
-
-
 
 	public void addPropertyChangeListener(PropertyChangeListener pcl) {
 		support.addPropertyChangeListener(pcl);
@@ -555,31 +534,18 @@ public abstract class LevelParent {
 
 
 	protected int getCurrentNumberOfEnemies() {
-		return enemyUnits.size();
+		return actorManager.getEnemyUnits().size();
 	}
 
 	// ==================== Actor & Projectile Management =====================
 	// Methods responsible for adding, removing, or interacting with actors and projectiles.
 
-	/**
-	 * Adds a generic actor to the scene and tracks it in the specified list.
-	 *
-	 * @param actor     The actor to be added.
-	 * @param actorList The list in which the actor should be tracked.
-	 */
-	private void addActor(ActiveActorDestructible actor, List<ActiveActorDestructible> actorList) {
-		if (!actorList.contains(actor) && !root.getChildren().contains(actor)) {
-			actorList.add(actor);
-			root.getChildren().add(actor);
-		}
+	public void addEnemyUnit(ActiveActorDestructible enemy) {
+		actorManager.addEnemyUnit(enemy, root); // Use ActorManager to add the enemy
 	}
 
-	protected void addEnemyUnit(ActiveActorDestructible enemy) {
-		addActor(enemy, enemyUnits);
-	}
-
-	protected void addPowerUp(PowerUp powerUp) {
-		addActor(powerUp, powerUps);
+	public void addPowerUp(ActiveActorDestructible powerUp) {
+		actorManager.addPowerUp(powerUp, root); // Use ActorManager to add the power-up
 	}
 
 	// ==================== Utility Methods =====================
