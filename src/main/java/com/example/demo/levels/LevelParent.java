@@ -15,6 +15,7 @@ import com.example.demo.sounds.SoundManager;
 import com.example.demo.utils.KillCountDisplay;
 import com.example.demo.managers.ActorManager;
 import com.example.demo.managers.GameLoopManager;
+import com.example.demo.managers.GameStateManager;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -48,11 +49,10 @@ public abstract class LevelParent {
 
 	private final ActorManager actorManager = new ActorManager();
 	private GameLoopManager gameLoopManager;
+	private final GameStateManager gameStateManager = new GameStateManager();
 
 	private ImageView pauseButton; // Pause button ImageView
 	private SoundManager soundManager;
-	private boolean isGameOver = false;
-	private boolean isGameWon = false;
 
 	private PropertyChangeSupport support = new PropertyChangeSupport(this);
 
@@ -151,7 +151,7 @@ public abstract class LevelParent {
 	 */
 	private void initializeEventHandlers() {
 		scene.setOnKeyPressed(event -> {
-			if (countdownInProgress) return; // Ignore input during countdown
+			if (countdownInProgress || !gameStateManager.isState(GameStateManager.GameState.PLAYING)) return; // Ignore input if not playing
 
 			switch (event.getCode()) {
 				case UP -> user.moveUp();
@@ -163,11 +163,12 @@ public abstract class LevelParent {
 					soundManager.playShootSound(); // Play shooting sound effect
 				}
 				case ESCAPE -> {
-					if (!isGameOver && !isGameWon && !gameLoopManager.isPaused()) {
+					if (!gameStateManager.isGameOver() && !gameStateManager.isWin() && !gameLoopManager.isPaused()) {
 						gameLoopManager.pause();
 						soundManager.pauseBackgroundMusic();
 						showPauseScreen();
 					}
+
 				}
 			}
 		});
@@ -190,9 +191,11 @@ public abstract class LevelParent {
 		CountdownOverlay countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
 		countdownOverlay.showCountdown(() -> {
 			countdownInProgress = false; // Re-enable input after countdown
+			gameStateManager.changeState(GameStateManager.GameState.PLAYING); // Update state to PLAYING
 			gameLoopManager.start(); // Start the game loop
 		});
 	}
+
 
 
 	// ==================== Game Loop =====================
@@ -455,11 +458,13 @@ public abstract class LevelParent {
 	private void showPauseScreen() {
 		gameLoopManager.pause(); // Pause the game timeline
 		soundManager.pauseBackgroundMusic(); // Pause the music
+		gameStateManager.changeState(GameStateManager.GameState.PAUSED); // Update state to PAUSED
 
 		PauseScreen pauseScreen = new PauseScreen(
 				root, // Pass the root Group
 				() -> {
-					gameLoopManager.resume();// Resume the game timeline
+					gameLoopManager.resume(); // Resume the game timeline
+					gameStateManager.changeState(GameStateManager.GameState.PLAYING); // Update state to PLAYING
 					soundManager.resumeBackgroundMusic(); // Resume the music
 				},
 				this::restartGame, // Restart the game
@@ -469,11 +474,11 @@ public abstract class LevelParent {
 		pauseScreen.show(); // Display the pause screen
 	}
 
+
 	private void restartGame() {
 		try {
-			isGameWon = false; // Reset the game won flag
-			isGameOver = false; // Reset game over flag
-			gameLoopManager.stop();// Stop the current game timeline
+			gameStateManager.changeState(GameStateManager.GameState.PLAYING); // Reset to PLAYING state
+			gameLoopManager.stop(); // Stop the current game timeline
 			soundManager.stopBackgroundMusic(); // Stop the music
 
 			// Assuming Controller handles restarting
@@ -484,9 +489,9 @@ public abstract class LevelParent {
 		}
 	}
 
+
 	private void returnToMainMenu() {
-		isGameWon = false; // Reset the game won flag
-		isGameOver = false; // Reset game over flag
+		gameStateManager.changeState(GameStateManager.GameState.PAUSED); // Set the state to PAUSED
 		gameLoopManager.stop(); // Stop the game
 		Stage stage = (Stage) scene.getWindow(); // Get the current stage
 
@@ -495,39 +500,42 @@ public abstract class LevelParent {
 		menuView.showMenu(); // Display the main menu
 	}
 
-
 	protected void winGame() {
-		gameLoopManager.stop();
-		soundManager.stopBackgroundMusic();
-		soundManager.playBackgroundMusic(SoundManager.WIN_GAME_MUSIC); // Play the win music
-		isGameWon = true; // Set the game won flag
+		if (!gameStateManager.isWin()) { // Prevent duplicate calls
+			gameLoopManager.stop();
+			soundManager.stopBackgroundMusic();
+			soundManager.playBackgroundMusic(SoundManager.WIN_GAME_MUSIC); // Play the win music
+			gameStateManager.changeState(GameStateManager.GameState.WIN); // Update state to WIN
 
-		// Add the enhanced WinImage to the root
-		WinImage winScreen = new WinImage(
-				screenWidth,
-				screenHeight,
-				this::restartGame,       // Restart callback
-				this::returnToMainMenu   // Exit callback
-		);
-		root.getChildren().add(winScreen);
+			// Add the enhanced WinImage to the root
+			WinImage winScreen = new WinImage(
+					screenWidth,
+					screenHeight,
+					this::restartGame,       // Restart callback
+					this::returnToMainMenu   // Exit callback
+			);
+			root.getChildren().add(winScreen);
+		}
 	}
-
 
 	protected void loseGame() {
-		gameLoopManager.stop();
-		soundManager.stopBackgroundMusic();
-		soundManager.playBackgroundMusic(SoundManager.GAME_OVER_MUSIC); // Play the Game Over music
-		isGameOver = true; // Set game over flag
+		if (!gameStateManager.isGameOver()) { // Prevent duplicate calls
+			gameLoopManager.stop();
+			soundManager.stopBackgroundMusic();
+			soundManager.playBackgroundMusic(SoundManager.GAME_OVER_MUSIC); // Play the Game Over music
+			gameStateManager.changeState(GameStateManager.GameState.GAME_OVER); // Update state to GAME_OVER
 
-		// Add the GameOverImage to the root
-		GameOverImage gameOverImage = new GameOverImage(
-				screenWidth,
-				screenHeight,
-				this::restartGame,       // Pass the restart callback
-				this::returnToMainMenu   // Pass the exit callback
-		);
-		root.getChildren().add(gameOverImage);
+			// Add the GameOverImage to the root
+			GameOverImage gameOverImage = new GameOverImage(
+					screenWidth,
+					screenHeight,
+					this::restartGame,       // Pass the restart callback
+					this::returnToMainMenu   // Pass the exit callback
+			);
+			root.getChildren().add(gameOverImage);
+		}
 	}
+
 
 
 	protected int getCurrentNumberOfEnemies() {
