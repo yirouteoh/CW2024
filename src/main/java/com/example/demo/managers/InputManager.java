@@ -2,8 +2,8 @@ package com.example.demo.managers;
 
 import com.example.demo.actors.plane.UserPlane;
 import com.example.demo.levels.LevelParent;
-import com.example.demo.sounds.SoundManager;
 
+import com.example.demo.sounds.SoundManager;
 import javafx.scene.Scene;
 
 public class InputManager {
