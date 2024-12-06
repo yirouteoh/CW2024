@@ -1,24 +1,19 @@
 package com.example.demo.levels;
 
-import java.util.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import com.example.demo.actors.ActiveActorDestructible;
-import com.example.demo.actors.plane.Boss;
 import com.example.demo.actors.plane.FighterPlane;
 import com.example.demo.actors.plane.UserPlane;
-import com.example.demo.powerups.PowerUp;
-import com.example.demo.powerups.SpreadshotPowerUp;
 import com.example.demo.screens.*;
 import com.example.demo.sounds.SoundManager;
 import com.example.demo.utils.KillCountDisplay;
 import com.example.demo.managers.ActorManager;
 import com.example.demo.managers.GameLoopManager;
 import com.example.demo.managers.GameStateManager;
+import com.example.demo.managers.CollisionManager;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -50,6 +45,8 @@ public abstract class LevelParent {
 	private final ActorManager actorManager = new ActorManager();
 	private GameLoopManager gameLoopManager;
 	private final GameStateManager gameStateManager = new GameStateManager();
+	private CollisionManager collisionManager;
+
 
 	private ImageView pauseButton; // Pause button ImageView
 	private SoundManager soundManager;
@@ -93,6 +90,7 @@ public abstract class LevelParent {
 		this.killCountDisplay = new KillCountDisplay(600, 55, targetKillCount);
 		this.soundManager = SoundManager.getInstance();
 		this.countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
+		this.collisionManager = new CollisionManager(actorManager, soundManager, user, root, screenWidth);
 
 		initializeGameLoop();
 		actorManager.addFriendlyUnit(user, root);
@@ -235,11 +233,7 @@ public abstract class LevelParent {
 	 * Handles all collision-related logic.
 	 */
 	private void handleAllCollisions() {
-		handleEnemyPenetration();
-		handleUserProjectileCollisions();
-		handleEnemyProjectileCollisions();
-		handlePlaneCollisions();
-		handlePowerUpCollisions();
+		collisionManager.handleAllCollisions();
 	}
 
 	/**
@@ -273,82 +267,6 @@ public abstract class LevelParent {
 		currentNumberOfEnemies = actorManager.getEnemyUnits().size();
 	}
 
-	// Methods responsible for detecting and handling collisions between actors, projectiles, and power-ups.
-
-	/**
-	 * Processes all collision-related logic in the game, including projectile, plane, and power-up interactions.
-	 */
-
-	private void handleEnemyPenetration() {
-		for (ActiveActorDestructible enemy : actorManager.getEnemyUnits()) {
-			if (enemyHasPenetratedDefenses(enemy)) {
-				user.takeDamage();
-				enemy.destroy();
-			}
-		}
-	}
-
-	private void handleUserProjectileCollisions() {
-		handleCollisions(actorManager.getUserProjectiles(), actorManager.getEnemyUnits());
-	}
-
-	private void handleCollisions(List<ActiveActorDestructible> projectiles, List<ActiveActorDestructible> enemies) {
-		for (ActiveActorDestructible projectile : projectiles) {
-			for (ActiveActorDestructible enemy : enemies) {
-				if (enemy instanceof Boss boss) {
-					if (boss.getCustomHitbox().intersects(projectile.getBoundsInParent())) {
-						if (!boss.isShielded()) {
-							projectile.takeDamage();
-							boss.takeDamage();
-						}
-					}
-				} else if (enemy.getBoundsInParent().intersects(projectile.getBoundsInParent())) {
-					projectile.takeDamage();
-					enemy.takeDamage();
-				}
-			}
-		}
-	}
-
-
-	private void handleEnemyProjectileCollisions() {
-		actorManager.getEnemyProjectiles().forEach(projectile -> {
-			if (projectile.getBoundsInParent().intersects(user.getBoundsInParent())) {
-				user.takeDamage();
-				projectile.destroy();
-				soundManager.playCrashSound(); // Play crash sound
-				shakeScreen(); // Trigger screen shake
-			}
-		});
-	}
-
-
-	private void handlePlaneCollisions() {
-		actorManager.getFriendlyUnits().forEach(friendly -> {
-			actorManager.getEnemyUnits().forEach(enemy -> {
-				if (friendly instanceof UserPlane && friendly.getBoundsInParent().intersects(enemy.getBoundsInParent())) {
-					friendly.takeDamage();
-					enemy.takeDamage();
-					soundManager.playCrashSound(); // Play crash sound
-					shakeScreen(); // Trigger screen shake
-				}
-			});
-		});
-	}
-
-
-	private void handlePowerUpCollisions() {
-		actorManager.getPowerUps().forEach(powerUp -> {
-			if (powerUp.getBoundsInParent().intersects(user.getBoundsInParent())) {
-				if (powerUp instanceof SpreadshotPowerUp spreadshot) {
-					spreadshot.activate(user); // Activate spreadshot
-				} else if (powerUp instanceof PowerUp defaultPowerUp) {
-					defaultPowerUp.activate(user); // Activate default power-ups
-				}
-				powerUp.destroy(); // Remove power-up after collection
-			}
-		});
-	}
 
 
 
@@ -398,33 +316,10 @@ public abstract class LevelParent {
 		actorManager.addUserProjectile(projectile, root); // Use ActorManager to add the projectile
 	}
 
-	private void spawnEnemyProjectile(ActiveActorDestructible projectile) {
-		if (projectile != null) {
-			actorManager.addEnemyProjectile(projectile, root);
-		}
-	}
-
 	public void addPropertyChangeListener(PropertyChangeListener pcl) {
 		support.addPropertyChangeListener(pcl);
 	}
 
-
-	private void shakeScreen() {
-		final double amplitude = 10; // How far the screen moves
-		final int cycles = 5; // Number of back-and-forth movements
-		Timeline timeline = new Timeline();
-		for (int i = 0; i < cycles; i++) {
-			double offset = (i % 2 == 0) ? amplitude : -amplitude; // Alternate directions
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(50 * i), e -> root.setTranslateX(offset)));
-		}
-		timeline.getKeyFrames().add(new KeyFrame(Duration.millis(50 * cycles), e -> root.setTranslateX(0))); // Reset position
-		timeline.play();
-	}
-
-
-	private boolean enemyHasPenetratedDefenses(ActiveActorDestructible enemy) {
-		return Math.abs(enemy.getTranslateX()) > screenWidth;
-	}
 
 	// ==================== Pause & Game State Management =====================
 	// Methods for pausing, resuming, and managing game-over conditions.
