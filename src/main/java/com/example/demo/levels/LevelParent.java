@@ -1,7 +1,6 @@
 package com.example.demo.levels;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -15,13 +14,13 @@ import com.example.demo.screens.*;
 import com.example.demo.sounds.SoundManager;
 import com.example.demo.utils.KillCountDisplay;
 import com.example.demo.managers.ActorManager;
+import com.example.demo.managers.GameLoopManager;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
@@ -42,13 +41,13 @@ public abstract class LevelParent {
 	private final double enemyMaximumYPosition;
 
 	private final Group root;
-	private final Timeline timeline;
 	private final UserPlane user;
 	private final Scene scene;
 	private final ImageView background;
 	private final KillCountDisplay killCountDisplay;
 
 	private final ActorManager actorManager = new ActorManager();
+	private GameLoopManager gameLoopManager;
 
 	private ImageView pauseButton; // Pause button ImageView
 	private SoundManager soundManager;
@@ -78,7 +77,7 @@ public abstract class LevelParent {
 	public LevelParent(String backgroundImageName, double screenHeight, double screenWidth, int playerInitialHealth, int targetKillCount) {
 		this.root = new Group();
 		this.scene = new Scene(root, screenWidth, screenHeight);
-		this.timeline = new Timeline();
+		this.gameLoopManager = new GameLoopManager(Duration.millis(MILLISECOND_DELAY), this::updateScene);
 		this.user = new UserPlane(playerInitialHealth);
 		this.user.setLevelParent(this);
 		actorManager.addFriendlyUnit(user, root);
@@ -95,7 +94,7 @@ public abstract class LevelParent {
 		this.soundManager = SoundManager.getInstance();
 		this.countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
 
-		initializeTimeline();
+		initializeGameLoop();
 		actorManager.addFriendlyUnit(user, root);
 	}
 
@@ -103,10 +102,8 @@ public abstract class LevelParent {
 	 * Initializes the timeline that controls the game loop.
 	 * The timeline runs indefinitely and invokes the `updateScene` method at fixed intervals.
 	 */
-	private void initializeTimeline() {
-		timeline.setCycleCount(Timeline.INDEFINITE);
-		KeyFrame gameLoop = new KeyFrame(Duration.millis(MILLISECOND_DELAY), e -> updateScene());
-		timeline.getKeyFrames().add(gameLoop);
+	private void initializeGameLoop() {
+		gameLoopManager = new GameLoopManager(Duration.millis(MILLISECOND_DELAY), this::updateScene);
 	}
 
 	protected abstract void initializeFriendlyUnits();
@@ -166,8 +163,8 @@ public abstract class LevelParent {
 					soundManager.playShootSound(); // Play shooting sound effect
 				}
 				case ESCAPE -> {
-					if (!isGameOver && !isGameWon && !timeline.getStatus().equals(Timeline.Status.PAUSED)) {
-						timeline.pause();
+					if (!isGameOver && !isGameWon && !gameLoopManager.isPaused()) {
+						gameLoopManager.pause();
 						soundManager.pauseBackgroundMusic();
 						showPauseScreen();
 					}
@@ -193,7 +190,7 @@ public abstract class LevelParent {
 		CountdownOverlay countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
 		countdownOverlay.showCountdown(() -> {
 			countdownInProgress = false; // Re-enable input after countdown
-			timeline.play(); // Start the timeline after countdown ends
+			gameLoopManager.start(); // Start the game loop
 		});
 	}
 
@@ -366,7 +363,7 @@ public abstract class LevelParent {
 
 	public void goToNextLevel(LevelParent nextLevel) {
 		try {
-			timeline.stop(); // Stop the current level's timeline
+			gameLoopManager.stop();
 			root.getChildren().clear(); // Clear the current root to avoid duplicates
 			Scene nextScene = nextLevel.initializeScene();
 			Stage primaryStage = (Stage) root.getScene().getWindow();
@@ -447,7 +444,7 @@ public abstract class LevelParent {
 		pauseButton.setMouseTransparent(false);
 
 		pauseButton.setOnMouseClicked(event -> {
-			timeline.pause();
+			gameLoopManager.pause();
 			soundManager.pauseBackgroundMusic(); // Pause music
 			showPauseScreen();
 		});
@@ -456,13 +453,13 @@ public abstract class LevelParent {
 	}
 
 	private void showPauseScreen() {
-		timeline.pause(); // Pause the game timeline
+		gameLoopManager.pause(); // Pause the game timeline
 		soundManager.pauseBackgroundMusic(); // Pause the music
 
 		PauseScreen pauseScreen = new PauseScreen(
 				root, // Pass the root Group
 				() -> {
-					timeline.play(); // Resume the game timeline
+					gameLoopManager.resume();// Resume the game timeline
 					soundManager.resumeBackgroundMusic(); // Resume the music
 				},
 				this::restartGame, // Restart the game
@@ -476,7 +473,7 @@ public abstract class LevelParent {
 		try {
 			isGameWon = false; // Reset the game won flag
 			isGameOver = false; // Reset game over flag
-			timeline.stop(); // Stop the current game timeline
+			gameLoopManager.stop();// Stop the current game timeline
 			soundManager.stopBackgroundMusic(); // Stop the music
 
 			// Assuming Controller handles restarting
@@ -490,7 +487,7 @@ public abstract class LevelParent {
 	private void returnToMainMenu() {
 		isGameWon = false; // Reset the game won flag
 		isGameOver = false; // Reset game over flag
-		timeline.stop(); // Stop the game
+		gameLoopManager.stop(); // Stop the game
 		Stage stage = (Stage) scene.getWindow(); // Get the current stage
 
 		// Assuming MenuView handles showing the main menu
@@ -500,7 +497,7 @@ public abstract class LevelParent {
 
 
 	protected void winGame() {
-		timeline.stop();
+		gameLoopManager.stop();
 		soundManager.stopBackgroundMusic();
 		soundManager.playBackgroundMusic(SoundManager.WIN_GAME_MUSIC); // Play the win music
 		isGameWon = true; // Set the game won flag
@@ -517,7 +514,7 @@ public abstract class LevelParent {
 
 
 	protected void loseGame() {
-		timeline.stop();
+		gameLoopManager.stop();
 		soundManager.stopBackgroundMusic();
 		soundManager.playBackgroundMusic(SoundManager.GAME_OVER_MUSIC); // Play the Game Over music
 		isGameOver = true; // Set game over flag
