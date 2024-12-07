@@ -28,6 +28,14 @@ public class PauseManager {
      * @param levelParent The current LevelParent for callbacks like restart or return to menu.
      */
     public void showPauseScreen(LevelParent levelParent) {
+        if (levelParent == null) {
+            throw new IllegalArgumentException("LevelParent cannot be null when showing the pause screen.");
+        }
+
+        if (root.getScene() == null) {
+            throw new IllegalStateException("The root group must be added to a Scene before showing the pause screen.");
+        }
+
         gameLoopManager.pause();
         soundManager.pauseBackgroundMusic();
         gameStateManager.changeState(GameStateManager.GameState.PAUSED);
@@ -41,6 +49,8 @@ public class PauseManager {
         );
         pauseScreen.show();
     }
+
+
 
     /**
      * Resumes the game from a paused state.
@@ -60,17 +70,28 @@ public class PauseManager {
      */
     public void restartGame(LevelParent levelParent) {
         try {
+            if (levelParent == null) {
+                throw new IllegalArgumentException("LevelParent is null. Cannot restart the game.");
+            }
+
             gameStateManager.changeState(GameStateManager.GameState.PLAYING);
             gameLoopManager.stop();
             soundManager.stopBackgroundMusic();
 
-            // Assuming Controller handles restarting
-            com.example.demo.controller.Controller controller = new com.example.demo.controller.Controller((Stage) levelParent.getScene().getWindow());
+            com.example.demo.controller.Controller controller = new com.example.demo.controller.Controller(
+                    (Stage) levelParent.getScene().getWindow()
+            );
             controller.launchGame(); // Restart the game from Level One
         } catch (Exception e) {
-            levelParent.showErrorDialog("Error restarting the game: " + e.getMessage());
+            if (levelParent != null) {
+                levelParent.showErrorDialog("Error restarting the game: " + e.getMessage());
+            } else {
+                System.err.println("Error restarting the game: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
+
 
     /**
      * Returns to the main menu by stopping the game and loading the menu view.
@@ -78,6 +99,10 @@ public class PauseManager {
      * @param levelParent The current LevelParent for context.
      */
     public void returnToMainMenu(LevelParent levelParent) {
+        if (levelParent == null) {
+            throw new IllegalArgumentException("LevelParent cannot be null when returning to the main menu.");
+        }
+
         gameStateManager.changeState(GameStateManager.GameState.PAUSED);
         gameLoopManager.stop();
 
@@ -85,4 +110,5 @@ public class PauseManager {
         MenuView menuView = new MenuView(stage, new com.example.demo.controller.Controller(stage));
         menuView.showMenu();
     }
+
 }

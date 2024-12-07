@@ -15,15 +15,13 @@ import com.example.demo.managers.GameStateManager;
 import com.example.demo.managers.CollisionManager;
 import com.example.demo.managers.InputManager;
 import com.example.demo.managers.PauseManager;
+import com.example.demo.managers.SceneManager;
 
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import javafx.application.Platform;
+
 
 public abstract class LevelParent {
 
@@ -39,10 +37,8 @@ public abstract class LevelParent {
 	private final double screenWidth;
 	private final double enemyMaximumYPosition;
 
-	private final Group root;
 	private final UserPlane user;
-	private final Scene scene;
-	private final ImageView background;
+	private final SceneManager sceneManager;
 	private final KillCountDisplay killCountDisplay;
 
 	private final ActorManager actorManager = new ActorManager();
@@ -52,7 +48,6 @@ public abstract class LevelParent {
 	private InputManager inputManager;
 	private PauseManager pauseManager;
 
-	private ImageView pauseButton; // Pause button ImageView
 	private SoundManager soundManager;
 
 	private PropertyChangeSupport support = new PropertyChangeSupport(this);
@@ -75,36 +70,42 @@ public abstract class LevelParent {
 	 * @param targetKillCount     The number of kills required to complete the level.
 	 */
 
-	public LevelParent(String backgroundImageName, double screenHeight, double screenWidth, int playerInitialHealth, int targetKillCount) {
-		this.root = new Group();
-		this.scene = new Scene(root, screenWidth, screenHeight);
-		this.gameLoopManager = new GameLoopManager(Duration.millis(MILLISECOND_DELAY), this::updateScene);
-		this.user = new UserPlane(playerInitialHealth);
-		this.user.setLevelParent(this);
-		actorManager.addFriendlyUnit(user, root);
-
-		this.background = new ImageView(new Image(getClass().getResource(backgroundImageName).toExternalForm()));
+	public LevelParent(String backgroundImageName, double screenHeight, double screenWidth,
+					   int playerInitialHealth, int targetKillCount) {
 		this.screenHeight = screenHeight;
 		this.screenWidth = screenWidth;
 		this.enemyMaximumYPosition = screenHeight - SCREEN_HEIGHT_ADJUSTMENT;
+
+		this.gameLoopManager = new GameLoopManager(Duration.millis(MILLISECOND_DELAY), this::updateScene);
+		this.soundManager = SoundManager.getInstance();
+
+		// Pass 'this' (current LevelParent instance)
+		this.sceneManager = new SceneManager(backgroundImageName, screenHeight, screenWidth,
+				gameLoopManager, soundManager, null, this);
+
+		this.pauseManager = new PauseManager(gameLoopManager, gameStateManager, soundManager, sceneManager.getRoot());
+		this.sceneManager.setPauseManager(pauseManager);
+
+		this.user = new UserPlane(playerInitialHealth);
+		this.user.setLevelParent(this);
+		actorManager.addFriendlyUnit(user, sceneManager.getRoot());
+
 		this.levelView = instantiateLevelView();
 		this.currentNumberOfEnemies = 0;
 
-		// Initialize KillCountDisplay with the target kill count
 		this.killCountDisplay = new KillCountDisplay(600, 55, targetKillCount);
-		this.soundManager = SoundManager.getInstance();
-		this.countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
-		this.collisionManager = new CollisionManager(actorManager, soundManager, user, root, screenWidth);
+		this.countdownOverlay = new CountdownOverlay(sceneManager.getRoot(), screenWidth, screenHeight);
+		this.collisionManager = new CollisionManager(actorManager, soundManager, user, sceneManager.getRoot(), screenWidth);
 		this.inputManager = new InputManager(user, this, soundManager);
-		this.pauseManager = new PauseManager(gameLoopManager, gameStateManager, soundManager, root);
-
 	}
+
+
+
 
 	/**
 	 * Initializes the timeline that controls the game loop.
-	 * The timeline runs indefinitely and invokes the `updateScene` method at fixed intervals.
+	 * The timeline runs indefinitely and invokes the updateScene method at fixed intervals.
 	 */
-
 	protected abstract void initializeFriendlyUnits();
 	protected abstract void checkIfGameOver();
 	protected abstract void spawnEnemyUnits();
@@ -116,50 +117,29 @@ public abstract class LevelParent {
 	 * @return The fully configured game scene.
 	 */
 	public Scene initializeScene() {
-		root.getChildren().clear(); // Clear all children from the root before initializing
-		initializeBackground(); // Set up the background and add to root
+		Scene scene = sceneManager.initializeScene();
 		initializeFriendlyUnits(); // Add the user plane and other units
 		levelView.showHeartDisplay(); // Show health or level-related UI
-		root.getChildren().add(killCountDisplay.getDisplay()); // Add the kill count display to the root
+		sceneManager.getRoot().getChildren().add(killCountDisplay.getDisplay()); // Add the kill count display to the root
 		inputManager.initializeInputHandlers(scene);
-		return scene; // Return the configured scene
+		sceneManager.addPauseButton(this::pauseGame); // Add pause button
+		return scene;
 	}
 
 
-	/**
-	 * Configures the level background, including its dimensions and position in the scene graph.
-	 * Also adds the pause button to the scene.
-	 */
-	private void initializeBackground() {
-		background.setFocusTraversable(true);
-		background.setFitHeight(screenHeight);
-		background.setFitWidth(screenWidth);
+	public void startGame(Stage primaryStage) {
+		Scene scene = initializeScene();
+		primaryStage.setScene(scene); // Set the Scene on the Stage
+		primaryStage.show();
 
-		root.getChildren().add(background);
+		countdownInProgress = true; // Lock input during countdown
 
-		// Add the pause button
-		addPauseButton();
-	}
-
-	protected KillCountDisplay getKillCountDisplay() {
-		return killCountDisplay;
-	}
-
-
-	public void startGame() {
-		countdownInProgress = true; // Disable input during countdown
-		background.requestFocus(); // Ensure the background receives focus for key events
-
-		// Use CountdownOverlay to show a 3-2-1-GO sequence
-		CountdownOverlay countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
 		countdownOverlay.showCountdown(() -> {
-			countdownInProgress = false; // Re-enable input after countdown
-			gameStateManager.changeState(GameStateManager.GameState.PLAYING); // Update state to PLAYING
-			gameLoopManager.start(); // Start the game loop
+			countdownInProgress = false;
+			gameStateManager.changeState(GameStateManager.GameState.PLAYING);
+			gameLoopManager.start();
 		});
 	}
-
-
 
 	// ==================== Game Loop =====================
 	// Methods that define and update the game loop, including actor updates, collisions, and UI refresh.
@@ -173,7 +153,7 @@ public abstract class LevelParent {
 		updateEnemyUnits();
 		actorManager.updateActors();
 		collisionManager.handleAllCollisions();
-		actorManager.cleanUpDestroyedActors(root);
+		actorManager.cleanUpDestroyedActors(sceneManager.getRoot());
 		updateUIElements();
 		checkIfGameOver();
 	}
@@ -200,7 +180,7 @@ public abstract class LevelParent {
 			if (enemy instanceof FighterPlane fighter) {
 				ActiveActorDestructible projectile = fighter.fireProjectile();
 				if (projectile != null) {
-					actorManager.addEnemyProjectile(projectile, root);
+					actorManager.addEnemyProjectile(projectile, sceneManager.getRoot());
 				}
 			}
 		});
@@ -226,15 +206,15 @@ public abstract class LevelParent {
 	public void goToNextLevel(LevelParent nextLevel) {
 		try {
 			gameLoopManager.stop();
-			root.getChildren().clear(); // Clear the current root to avoid duplicates
+			sceneManager.getRoot().getChildren().clear(); // Clear the current root to avoid duplicates
 			Scene nextScene = nextLevel.initializeScene();
 			if (nextScene == null) { // Null check for safety
 				showErrorDialog("Failed to load the next level: Scene is null.");
 				return;
 			}
-			Stage primaryStage = (Stage) root.getScene().getWindow();
+			Stage primaryStage = (Stage) sceneManager.getRoot().getScene().getWindow();
 			primaryStage.setScene(nextScene);
-			nextLevel.startGame(); // Start the next level
+			nextLevel.startGame(primaryStage); // Pass the Stage to startGame
 		} catch (Exception e) {
 			showErrorDialog("Error transitioning to next level: " + e.getMessage());
 		}
@@ -242,26 +222,25 @@ public abstract class LevelParent {
 
 
 
+
 	public void showErrorDialog(String message) {
-		Platform.runLater(() -> {
-			Alert alert = new Alert(Alert.AlertType.ERROR);
-			alert.setTitle("Error");
-			alert.setHeaderText(null);
-			alert.setContentText(message);
-			alert.show(); // Use non-blocking show()
-		});
+		sceneManager.showErrorDialog(message);
+	}
+
+	protected KillCountDisplay getKillCountDisplay() {
+		return killCountDisplay;
 	}
 
 
 	public void fireProjectile() {
 		ActiveActorDestructible projectile = user.fireProjectile();
 		if (projectile != null) {
-			actorManager.addUserProjectile(projectile, root);
+			actorManager.addUserProjectile(projectile, sceneManager.getRoot());
 		}
 	}
 
 	public void addProjectile(ActiveActorDestructible projectile) {
-		actorManager.addUserProjectile(projectile, root); // Use ActorManager to add the projectile
+		actorManager.addUserProjectile(projectile, sceneManager.getRoot()); // Use ActorManager to add the projectile
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener pcl) {
@@ -276,31 +255,18 @@ public abstract class LevelParent {
 	 * Pauses the game and displays the pause menu.
 	 */
 
-	private void addPauseButton() {
-		Image pauseImage = new Image(getClass().getResource("/com/example/demo/images/pause.png").toExternalForm());
-		pauseButton = new ImageView(pauseImage);
-
-		pauseButton.setFitWidth(50);
-		pauseButton.setFitHeight(50);
-		pauseButton.setX(screenWidth - 70);
-		pauseButton.setY(20);
-
-		pauseButton.setPickOnBounds(true);
-		pauseButton.setFocusTraversable(true);
-		pauseButton.setMouseTransparent(false);
-
-		pauseButton.setOnMouseClicked(event -> {
-			gameLoopManager.pause();
-			soundManager.pauseBackgroundMusic(); // Pause music
-			showPauseScreen();
-		});
-
-		root.getChildren().add(pauseButton);
-	}
-
 	public void showPauseScreen() {
 		pauseManager.showPauseScreen(this);
 	}
+
+	protected void pauseGame() {
+		// Pause the game loop
+		gameLoopManager.pause();
+
+		// Show the pause menu using PauseManager
+		pauseManager.showPauseScreen(this);
+	}
+
 
 
 	private void restartGame() {
@@ -326,7 +292,7 @@ public abstract class LevelParent {
 					this::restartGame,       // Restart callback
 					this::returnToMainMenu   // Exit callback
 			);
-			root.getChildren().add(winScreen);
+			sceneManager.getRoot().getChildren().add(winScreen);
 		}
 	}
 
@@ -344,7 +310,7 @@ public abstract class LevelParent {
 					this::restartGame,       // Pass the restart callback
 					this::returnToMainMenu   // Pass the exit callback
 			);
-			root.getChildren().add(gameOverImage);
+			sceneManager.getRoot().getChildren().add(gameOverImage);
 		}
 	}
 
@@ -358,11 +324,11 @@ public abstract class LevelParent {
 	// Methods responsible for adding, removing, or interacting with actors and projectiles.
 
 	public void addEnemyUnit(ActiveActorDestructible enemy) {
-		actorManager.addEnemyUnit(enemy, root); // Use ActorManager to add the enemy
+		actorManager.addEnemyUnit(enemy, sceneManager.getRoot()); // Use ActorManager to add the enemy
 	}
 
 	public void addPowerUp(ActiveActorDestructible powerUp) {
-		actorManager.addPowerUp(powerUp, root); // Use ActorManager to add the power-up
+		actorManager.addPowerUp(powerUp, sceneManager.getRoot()); // Use ActorManager to add the power-up
 	}
 
 	// ==================== Utility Methods =====================
@@ -387,14 +353,13 @@ public abstract class LevelParent {
 		return user;
 	}
 
-	protected Group getRoot() {
-		return root;
+	public Group getRoot() {
+		return sceneManager.getRoot();
 	}
 
 	public Scene getScene() {
-		return scene;
+		return sceneManager.getScene();
 	}
-
 
 	protected double getEnemyMaximumYPosition() {
 		return enemyMaximumYPosition;

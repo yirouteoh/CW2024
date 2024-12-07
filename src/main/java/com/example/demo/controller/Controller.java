@@ -50,8 +50,9 @@ public class Controller implements PropertyChangeListener {
 		Scene scene = level.initializeScene();
 		stage.setScene(scene);
 
-		level.startGame();
+		level.startGame(stage); // Pass the stage to the startGame method
 	}
+
 
 	/**
 	 * Instantiates a level dynamically using reflection.
