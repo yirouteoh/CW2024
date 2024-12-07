@@ -14,6 +14,7 @@ import com.example.demo.managers.GameLoopManager;
 import com.example.demo.managers.GameStateManager;
 import com.example.demo.managers.CollisionManager;
 import com.example.demo.managers.InputManager;
+import com.example.demo.managers.PauseManager;
 
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -22,6 +23,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.application.Platform;
 
 public abstract class LevelParent {
 
@@ -48,6 +50,7 @@ public abstract class LevelParent {
 	private final GameStateManager gameStateManager = new GameStateManager();
 	private CollisionManager collisionManager;
 	private InputManager inputManager;
+	private PauseManager pauseManager;
 
 	private ImageView pauseButton; // Pause button ImageView
 	private SoundManager soundManager;
@@ -93,18 +96,14 @@ public abstract class LevelParent {
 		this.countdownOverlay = new CountdownOverlay(root, screenWidth, screenHeight);
 		this.collisionManager = new CollisionManager(actorManager, soundManager, user, root, screenWidth);
 		this.inputManager = new InputManager(user, this, soundManager);
+		this.pauseManager = new PauseManager(gameLoopManager, gameStateManager, soundManager, root);
 
-		initializeGameLoop();
-		actorManager.addFriendlyUnit(user, root);
 	}
 
 	/**
 	 * Initializes the timeline that controls the game loop.
 	 * The timeline runs indefinitely and invokes the `updateScene` method at fixed intervals.
 	 */
-	private void initializeGameLoop() {
-		gameLoopManager = new GameLoopManager(Duration.millis(MILLISECOND_DELAY), this::updateScene);
-	}
 
 	protected abstract void initializeFriendlyUnits();
 	protected abstract void checkIfGameOver();
@@ -250,6 +249,10 @@ public abstract class LevelParent {
 			gameLoopManager.stop();
 			root.getChildren().clear(); // Clear the current root to avoid duplicates
 			Scene nextScene = nextLevel.initializeScene();
+			if (nextScene == null) { // Null check for safety
+				showErrorDialog("Failed to load the next level: Scene is null.");
+				return;
+			}
 			Stage primaryStage = (Stage) root.getScene().getWindow();
 			primaryStage.setScene(nextScene);
 			nextLevel.startGame(); // Start the next level
@@ -259,12 +262,15 @@ public abstract class LevelParent {
 	}
 
 
-	private void showErrorDialog(String message) {
-		Alert alert = new Alert(Alert.AlertType.ERROR);
-		alert.setTitle("Error");
-		alert.setHeaderText(null);
-		alert.setContentText(message);
-		alert.show(); // Use non-blocking show() instead of showAndWait()
+
+	public void showErrorDialog(String message) {
+		Platform.runLater(() -> {
+			Alert alert = new Alert(Alert.AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setHeaderText(null);
+			alert.setContentText(message);
+			alert.show(); // Use non-blocking show()
+		});
 	}
 
 
@@ -314,48 +320,17 @@ public abstract class LevelParent {
 	}
 
 	public void showPauseScreen() {
-		gameLoopManager.pause(); // Pause the game timeline
-		soundManager.pauseBackgroundMusic(); // Pause the music
-		gameStateManager.changeState(GameStateManager.GameState.PAUSED); // Update state to PAUSED
-
-		PauseScreen pauseScreen = new PauseScreen(
-				root, // Pass the root Group
-				() -> {
-					gameLoopManager.resume(); // Resume the game timeline
-					gameStateManager.changeState(GameStateManager.GameState.PLAYING); // Update state to PLAYING
-					soundManager.resumeBackgroundMusic(); // Resume the music
-				},
-				this::restartGame, // Restart the game
-				this::returnToMainMenu, // Return to the main menu
-				soundManager // Pass the SoundManager instance
-		);
-		pauseScreen.show(); // Display the pause screen
+		pauseManager.showPauseScreen(this);
 	}
 
 
 	private void restartGame() {
-		try {
-			gameStateManager.changeState(GameStateManager.GameState.PLAYING); // Reset to PLAYING state
-			gameLoopManager.stop(); // Stop the current game timeline
-			soundManager.stopBackgroundMusic(); // Stop the music
-
-			// Assuming Controller handles restarting
-			com.example.demo.controller.Controller controller = new com.example.demo.controller.Controller((Stage) scene.getWindow());
-			controller.launchGame(); // Restart the game from Level One
-		} catch (Exception e) {
-			showErrorDialog("Error restarting the game: " + e.getMessage());
-		}
+		pauseManager.restartGame(this);
 	}
 
 
 	private void returnToMainMenu() {
-		gameStateManager.changeState(GameStateManager.GameState.PAUSED); // Set the state to PAUSED
-		gameLoopManager.stop(); // Stop the game
-		Stage stage = (Stage) scene.getWindow(); // Get the current stage
-
-		// Assuming MenuView handles showing the main menu
-		MenuView menuView = new MenuView(stage, new com.example.demo.controller.Controller(stage));
-		menuView.showMenu(); // Display the main menu
+		pauseManager.returnToMainMenu(this);
 	}
 
 	protected void winGame() {
@@ -436,6 +411,11 @@ public abstract class LevelParent {
 	protected Group getRoot() {
 		return root;
 	}
+
+	public Scene getScene() {
+		return scene;
+	}
+
 
 	protected double getEnemyMaximumYPosition() {
 		return enemyMaximumYPosition;
