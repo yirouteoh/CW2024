@@ -171,9 +171,9 @@ public abstract class LevelParent {
 
 	private void updateScene() {
 		updateEnemyUnits();
-		updateActors();
-		handleAllCollisions();
-		cleanUpDestroyedActors();
+		actorManager.updateActors();
+		collisionManager.handleAllCollisions();
+		actorManager.cleanUpDestroyedActors(root);
 		updateUIElements();
 		checkIfGameOver();
 	}
@@ -185,27 +185,6 @@ public abstract class LevelParent {
 		spawnEnemyUnits();
 		generateEnemyFire();
 		updateNumberOfEnemies();
-	}
-
-	/**
-	 * Updates all actors in the game, including their movement and actions.
-	 */
-	private void updateActors() {
-		actorManager.updateActors();
-	}
-
-	/**
-	 * Handles all collision-related logic.
-	 */
-	private void handleAllCollisions() {
-		collisionManager.handleAllCollisions();
-	}
-
-	/**
-	 * Cleans up destroyed actors from the game.
-	 */
-	private void cleanUpDestroyedActors() {
-		actorManager.cleanUpDestroyedActors(root);
 	}
 
 	/**
