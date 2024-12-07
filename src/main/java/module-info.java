@@ -13,6 +13,6 @@ module com.example.demo {
     opens com.example.demo.powerups to javafx.fxml;
     opens com.example.demo.sounds to javafx.fxml;
     opens com.example.demo.utils to javafx.fxml;
-    opens com.example.demo.screens to javafx.fxml;
     opens com.example.demo.managers to javafx.fxml;
+    opens com.example.demo.screens to javafx.fxml;
 }
