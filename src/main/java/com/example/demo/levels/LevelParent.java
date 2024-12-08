@@ -4,7 +4,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import com.example.demo.actors.ActiveActorDestructible;
-import com.example.demo.actors.plane.FighterPlane;
+import com.example.demo.actors.factory.BasicFighterPlaneFactory;
 import com.example.demo.actors.plane.UserPlane;
 import com.example.demo.screens.*;
 import com.example.demo.sounds.SoundManager;
@@ -16,6 +16,7 @@ import com.example.demo.managers.CollisionManager;
 import com.example.demo.managers.InputManager;
 import com.example.demo.managers.PauseManager;
 import com.example.demo.managers.SceneManager;
+import com.example.demo.managers.EnemyManager;
 
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -47,7 +48,7 @@ public abstract class LevelParent {
 	private CollisionManager collisionManager;
 	private InputManager inputManager;
 	private PauseManager pauseManager;
-
+	private EnemyManager enemyManager;
 	private SoundManager soundManager;
 
 	private PropertyChangeSupport support = new PropertyChangeSupport(this);
@@ -70,8 +71,7 @@ public abstract class LevelParent {
 	 * @param targetKillCount     The number of kills required to complete the level.
 	 */
 
-	public LevelParent(String backgroundImageName, double screenHeight, double screenWidth,
-					   int playerInitialHealth, int targetKillCount) {
+	public LevelParent(String backgroundImageName, double screenHeight, double screenWidth, int playerInitialHealth, int targetKillCount) {
 		this.screenHeight = screenHeight;
 		this.screenWidth = screenWidth;
 		this.enemyMaximumYPosition = screenHeight - SCREEN_HEIGHT_ADJUSTMENT;
@@ -97,10 +97,16 @@ public abstract class LevelParent {
 		this.countdownOverlay = new CountdownOverlay(sceneManager.getRoot(), screenWidth, screenHeight);
 		this.collisionManager = new CollisionManager(actorManager, soundManager, user, sceneManager.getRoot(), screenWidth);
 		this.inputManager = new InputManager(user, this, soundManager);
+		this.enemyManager = new EnemyManager(
+				actorManager,
+				sceneManager.getRoot(),
+				new BasicFighterPlaneFactory(), // Factory
+				screenWidth,                    // Pass screenWidth
+				enemyMaximumYPosition,          // Pass enemyMaximumYPosition
+				0.25,                           // Spawn probability
+				10                              // Max enemies
+		);
 	}
-
-
-
 
 	/**
 	 * Initializes the timeline that controls the game loop.
@@ -108,7 +114,11 @@ public abstract class LevelParent {
 	 */
 	protected abstract void initializeFriendlyUnits();
 	protected abstract void checkIfGameOver();
-	protected abstract void spawnEnemyUnits();
+
+	protected void spawnEnemyUnits() {
+		enemyManager.spawnEnemies();
+	}
+
 	protected abstract LevelView instantiateLevelView();
 
 	/**
@@ -176,20 +186,14 @@ public abstract class LevelParent {
 	}
 
 	private void generateEnemyFire() {
-		actorManager.getEnemyUnits().forEach(enemy -> {
-			if (enemy instanceof FighterPlane fighter) {
-				ActiveActorDestructible projectile = fighter.fireProjectile();
-				if (projectile != null) {
-					actorManager.addEnemyProjectile(projectile, sceneManager.getRoot());
-				}
-			}
-		});
+		enemyManager.generateEnemyFire();
 	}
 
 
 	private void updateNumberOfEnemies() {
-		currentNumberOfEnemies = actorManager.getEnemyUnits().size();
+		currentNumberOfEnemies = enemyManager.getCurrentEnemyCount();
 	}
+
 
 	private void updateKillCount() {
 		int kills = currentNumberOfEnemies - actorManager.getEnemyUnits().size();
