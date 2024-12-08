@@ -17,6 +17,7 @@ import com.example.demo.managers.InputManager;
 import com.example.demo.managers.PauseManager;
 import com.example.demo.managers.SceneManager;
 import com.example.demo.managers.EnemyManager;
+import com.example.demo.managers.EventHandler;
 
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -50,6 +51,7 @@ public abstract class LevelParent {
 	private PauseManager pauseManager;
 	private EnemyManager enemyManager;
 	private SoundManager soundManager;
+	private EventHandler eventHandler;
 
 	private PropertyChangeSupport support = new PropertyChangeSupport(this);
 
@@ -106,6 +108,8 @@ public abstract class LevelParent {
 				0.25,                           // Spawn probability
 				10                              // Max enemies
 		);
+		this.eventHandler = new EventHandler(gameStateManager, soundManager, pauseManager, this);
+
 	}
 
 	/**
@@ -231,9 +235,6 @@ public abstract class LevelParent {
 		}
 	}
 
-
-
-
 	public void showErrorDialog(String message) {
 		sceneManager.showErrorDialog(message);
 	}
@@ -258,6 +259,10 @@ public abstract class LevelParent {
 		support.addPropertyChangeListener(pcl);
 	}
 
+	protected int getCurrentNumberOfEnemies() {
+		return actorManager.getEnemyUnits().size();
+	}
+
 
 	// ==================== Pause & Game State Management =====================
 	// Methods for pausing, resuming, and managing game-over conditions.
@@ -278,57 +283,12 @@ public abstract class LevelParent {
 		pauseManager.showPauseScreen(this);
 	}
 
-
-
-	private void restartGame() {
-		pauseManager.restartGame(this);
-	}
-
-
-	private void returnToMainMenu() {
-		pauseManager.returnToMainMenu(this);
-	}
-
 	protected void winGame() {
-		if (!gameStateManager.isWin()) { // Prevent duplicate calls
-			gameLoopManager.stop();
-			soundManager.stopBackgroundMusic();
-			soundManager.playBackgroundMusic(SoundManager.WIN_GAME_MUSIC); // Play the win music
-			gameStateManager.changeState(GameStateManager.GameState.WIN); // Update state to WIN
-
-			// Add the enhanced WinImage to the root
-			WinImage winScreen = new WinImage(
-					screenWidth,
-					screenHeight,
-					this::restartGame,       // Restart callback
-					this::returnToMainMenu   // Exit callback
-			);
-			sceneManager.getRoot().getChildren().add(winScreen);
-		}
+		eventHandler.handleWin();
 	}
 
 	protected void loseGame() {
-		if (!gameStateManager.isGameOver()) { // Prevent duplicate calls
-			gameLoopManager.stop();
-			soundManager.stopBackgroundMusic();
-			soundManager.playBackgroundMusic(SoundManager.GAME_OVER_MUSIC); // Play the Game Over music
-			gameStateManager.changeState(GameStateManager.GameState.GAME_OVER); // Update state to GAME_OVER
-
-			// Add the GameOverImage to the root
-			GameOverImage gameOverImage = new GameOverImage(
-					screenWidth,
-					screenHeight,
-					this::restartGame,       // Pass the restart callback
-					this::returnToMainMenu   // Pass the exit callback
-			);
-			sceneManager.getRoot().getChildren().add(gameOverImage);
-		}
-	}
-
-
-
-	protected int getCurrentNumberOfEnemies() {
-		return actorManager.getEnemyUnits().size();
+		eventHandler.handleLose();
 	}
 
 	// ==================== Actor & Projectile Management =====================
@@ -376,11 +336,11 @@ public abstract class LevelParent {
 		return enemyMaximumYPosition;
 	}
 
-	protected double getScreenWidth() {
+	public double getScreenWidth() {
 		return screenWidth;
 	}
 
-	protected double getScreenHeight() {
+	public double getScreenHeight() {
 		return screenHeight;
 	}
 
