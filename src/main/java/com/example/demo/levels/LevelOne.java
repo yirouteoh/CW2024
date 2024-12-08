@@ -67,7 +67,7 @@ public class LevelOne extends LevelParent {
 	}
 
 	private void playLevelMusic() {
-		soundManager.playBackgroundMusic(SoundManager.LEVEL_ONE_MUSIC);
+		playLevelMusic(SoundManager.LEVEL_ONE_MUSIC);
 	}
 
 	private void addUserToScene() {

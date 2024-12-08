@@ -68,7 +68,7 @@ public class LevelThree extends LevelParent {
      */
     @Override
     protected void initializeFriendlyUnits() {
-        soundManager.playBackgroundMusic(SoundManager.LEVEL_THREE_MUSIC);
+        playLevelMusic(SoundManager.LEVEL_THREE_MUSIC);
         addUserToScene();
     }
 

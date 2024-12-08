@@ -42,7 +42,7 @@ public class LevelTwo extends LevelParent {
 	}
 
 	private void playLevelMusic() {
-		soundManager.playBackgroundMusic(SoundManager.LEVEL_TWO_MUSIC);
+		playLevelMusic(SoundManager.LEVEL_TWO_MUSIC);
 	}
 
 	private void addUserPlaneToScene() {

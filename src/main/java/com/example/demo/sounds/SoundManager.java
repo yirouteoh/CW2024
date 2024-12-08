@@ -12,6 +12,8 @@ public class SoundManager {
     private AudioClip shootingSound; // For shooting sound effect
     private AudioClip crashSound; // For crash sound effect
     private static final double DEFAULT_VOLUME = 0.5; // Default volume (50%)
+    private boolean isBackgroundMusicMuted = false;
+    private boolean isSoundEffectsMuted = false;
 
     // Audio file paths
     public static final String MENU_MUSIC = "/com/example/demo/audios/menumusic.mp3";
@@ -61,13 +63,16 @@ public class SoundManager {
             mediaPlayer = createMediaPlayer(audioFilePath);
             if (mediaPlayer != null) {
                 mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop background music
-                mediaPlayer.setVolume(DEFAULT_VOLUME);
-                mediaPlayer.play();
+                mediaPlayer.setVolume(isBackgroundMusicMuted ? 0 : DEFAULT_VOLUME);
+                if (!isBackgroundMusicMuted) {
+                    mediaPlayer.play();
+                }
             }
         } catch (Exception e) {
             System.err.println("Error playing background music: " + e.getMessage());
         }
     }
+
 
     /**
      * Stops the currently playing background music.
@@ -98,18 +103,23 @@ public class SoundManager {
     }
 
     /**
-     * Plays the shooting sound effect.
+     * Plays the shooting sound effect if sound effects are not muted.
      */
     public void playShootSound() {
-        playAudioClip(shootingSound, "Shooting sound");
+        if (!isSoundEffectsMuted && shootingSound != null) {
+            shootingSound.play();
+        }
     }
 
     /**
-     * Plays the crash sound effect.
+     * Plays the crash sound effect if sound effects are not muted.
      */
     public void playCrashSound() {
-        playAudioClip(crashSound, "Crash sound");
+        if (!isSoundEffectsMuted && crashSound != null) {
+            crashSound.play();
+        }
     }
+
 
     /**
      * Loads an audio clip for sound effects.
@@ -164,5 +174,35 @@ public class SoundManager {
         } else {
             System.err.println(soundName + " not initialized!");
         }
+    }
+
+    public void muteBackgroundMusic() {
+        isBackgroundMusicMuted = true;
+        if (mediaPlayer != null) {
+            mediaPlayer.setVolume(0);
+        }
+    }
+
+    public void unmuteBackgroundMusic() {
+        isBackgroundMusicMuted = false;
+        if (mediaPlayer != null) {
+            mediaPlayer.setVolume(DEFAULT_VOLUME);
+        }
+    }
+
+    public void muteSoundEffects() {
+        isSoundEffectsMuted = true;
+    }
+
+    public void unmuteSoundEffects() {
+        isSoundEffectsMuted = false;
+    }
+
+    public boolean isBackgroundMusicMuted() {
+        return isBackgroundMusicMuted;
+    }
+
+    public boolean isSoundEffectsMuted() {
+        return isSoundEffectsMuted;
     }
 }

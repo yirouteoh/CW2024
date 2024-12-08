@@ -151,6 +151,13 @@ public abstract class LevelParent {
 		});
 	}
 
+	protected void playLevelMusic(String musicFilePath) {
+		if (!soundManager.isBackgroundMusicMuted()) {
+			soundManager.playBackgroundMusic(musicFilePath);
+		}
+	}
+
+
 	// ==================== Game Loop =====================
 	// Methods that define and update the game loop, including actor updates, collisions, and UI refresh.
 

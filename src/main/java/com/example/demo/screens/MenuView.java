@@ -86,10 +86,10 @@ public class MenuView {
 
         Button playButton = createStyledButton("Play", e -> launchGame());
         Button instructionsButton = createStyledButton("Instructions", e -> showInstructionsOverlay());
-        Button muteButton = createStyledButton("Mute", e -> toggleMute((Button) e.getSource()));
+        Button audioSettingsButton = createStyledButton("Audio Settings", e -> showAudioSettingsOverlay());
         Button exitButton = createStyledButton("Exit", e -> System.exit(0));
 
-        VBox panel = new VBox(20, title, playButton, instructionsButton, muteButton, exitButton);
+        VBox panel = new VBox(20, title, playButton, instructionsButton, audioSettingsButton, exitButton);
         panel.setAlignment(Pos.CENTER);
         panel.getStyleClass().add("menu-panel");
         panel.setPadding(new javafx.geometry.Insets(20));
@@ -125,22 +125,6 @@ public class MenuView {
         button.getStyleClass().add("menu-button");
         button.setOnAction(action);
         return button;
-    }
-
-    /**
-     * Toggles the mute state of the background music.
-     *
-     * @param muteButton The mute button instance.
-     */
-    private void toggleMute(Button muteButton) {
-        isMuted = !isMuted;
-        if (isMuted) {
-            soundManager.stopBackgroundMusic();
-            muteButton.setText("Unmute");
-        } else {
-            soundManager.playBackgroundMusic(SoundManager.MENU_MUSIC);
-            muteButton.setText("Mute");
-        }
     }
 
     /**
@@ -310,6 +294,69 @@ public class MenuView {
 
         return buttons;
     }
+
+    private void showAudioSettingsOverlay() {
+        StackPane overlay = new StackPane();
+        overlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7);"); // Semi-transparent dark background
+        overlay.setAlignment(Pos.CENTER);
+
+        VBox container = new VBox(20); // Adjust spacing for a balanced look
+        container.setStyle("-fx-background-color: #f1f2f6; -fx-padding: 20; -fx-border-color: #74b9ff; -fx-border-width: 2; -fx-border-radius: 10; -fx-background-radius: 10;");
+        container.setAlignment(Pos.CENTER);
+        container.setMaxWidth(600);
+        container.setMaxHeight(400); // Size similar to the instruction page
+
+        // Title Text
+        Text title = new Text("Audio Settings");
+        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-fill: #2d3436; -fx-font-family: 'Arial';");
+
+        // Mute Background Music Button
+        Button muteBackgroundMusicButton = new Button(soundManager.isBackgroundMusicMuted() ? "Unmute Background Music" : "Mute Background Music");
+        muteBackgroundMusicButton.setStyle("-fx-background-color: #74b9ff; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8 16; -fx-border-radius: 10; -fx-background-radius: 10;");
+        muteBackgroundMusicButton.setOnAction(e -> {
+            if (soundManager.isBackgroundMusicMuted()) {
+                soundManager.unmuteBackgroundMusic();
+                muteBackgroundMusicButton.setText("Mute Background Music");
+                soundManager.playBackgroundMusic(SoundManager.MENU_MUSIC);
+            } else {
+                soundManager.muteBackgroundMusic();
+                muteBackgroundMusicButton.setText("Unmute Background Music");
+                soundManager.stopBackgroundMusic();
+            }
+        });
+
+        // Mute Sound Effects Button
+        Button muteSoundEffectsButton = new Button(soundManager.isSoundEffectsMuted() ? "Unmute Sound Effects" : "Mute Sound Effects");
+        muteSoundEffectsButton.setStyle("-fx-background-color: #ff7675; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8 16; -fx-border-radius: 10; -fx-background-radius: 10;");
+        muteSoundEffectsButton.setOnAction(e -> {
+            if (soundManager.isSoundEffectsMuted()) {
+                soundManager.unmuteSoundEffects();
+                muteSoundEffectsButton.setText("Mute Sound Effects");
+            } else {
+                soundManager.muteSoundEffects();
+                muteSoundEffectsButton.setText("Unmute Sound Effects");
+            }
+        });
+
+        // Close Button
+        Button closeButton = new Button("Close");
+        closeButton.setStyle("-fx-background-color: #81ecec; -fx-text-fill: #2d3436; -fx-font-size: 14px; -fx-padding: 8 16; -fx-border-radius: 10; -fx-background-radius: 10;");
+        closeButton.setOnAction(e -> overlay.setVisible(false));
+
+        // Add elements to the container
+        container.getChildren().addAll(title, muteBackgroundMusicButton, muteSoundEffectsButton, closeButton);
+        overlay.getChildren().add(container);
+
+        // Add overlay to the root
+        StackPane root = (StackPane) stage.getScene().getRoot();
+        if (!root.getChildren().contains(overlay)) {
+            root.getChildren().add(overlay);
+        }
+        overlay.setVisible(true);
+    }
+
+
+
 
 
     /**
