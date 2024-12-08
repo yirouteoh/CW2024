@@ -29,6 +29,7 @@ public class LevelThree extends LevelParent {
 
     private final Boss finalBoss; // The final boss of the level
     private final SoundManager soundManager; // Handles background music and sounds
+    private javafx.animation.SequentialTransition finalBossMessageTimeline;
     private int currentWave; // Current wave number
     private int totalSpawnedEnemies; // Total number of spawned enemies
     private final int[] waveEnemyCounts = {5, 8, 11}; // Number of enemies per wave
@@ -230,13 +231,30 @@ public class LevelThree extends LevelParent {
         Text bossMessage = createFinalBossMessageText();
         getRoot().getChildren().add(bossMessage);
 
-        javafx.animation.SequentialTransition sequence = createFinalBossMessageAnimation(bossMessage);
-        sequence.setOnFinished(event -> {
+        finalBossMessageTimeline = createFinalBossMessageAnimation(bossMessage);
+        finalBossMessageTimeline.setOnFinished(event -> {
             getRoot().getChildren().remove(bossMessage);
             spawnFinalBoss();
         });
-        sequence.play();
+
+        finalBossMessageTimeline.play();
     }
+
+
+
+    public void pauseFinalBossMessage() {
+        if (finalBossMessageTimeline != null && finalBossMessageTimeline.getStatus() == javafx.animation.Animation.Status.RUNNING) {
+            finalBossMessageTimeline.pause();
+        }
+    }
+
+    public void resumeFinalBossMessage() {
+        if (finalBossMessageTimeline != null && finalBossMessageTimeline.getStatus() == javafx.animation.Animation.Status.PAUSED) {
+            finalBossMessageTimeline.play();
+        }
+    }
+
+
 
     /**
      * Creates the text for the final boss entry message.

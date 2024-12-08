@@ -1,6 +1,7 @@
 package com.example.demo.managers;
 
 import com.example.demo.levels.LevelParent;
+import com.example.demo.levels.LevelThree;
 import com.example.demo.sounds.SoundManager;
 import com.example.demo.screens.PauseScreen;
 import com.example.demo.screens.MenuView;
@@ -40,15 +41,26 @@ public class PauseManager {
         soundManager.pauseBackgroundMusic();
         gameStateManager.changeState(GameStateManager.GameState.PAUSED);
 
+        // Check if levelParent is LevelThree and pause "Final Boss Message"
+        if (levelParent instanceof LevelThree levelThree) {
+            levelThree.pauseFinalBossMessage();
+        }
+
         PauseScreen pauseScreen = new PauseScreen(
                 root,
-                () -> resumeGame(levelParent),
+                () -> {
+                    resumeGame(levelParent);
+                    if (levelParent instanceof LevelThree levelThree) {
+                        levelThree.resumeFinalBossMessage();
+                    }
+                },
                 () -> restartGame(levelParent),
                 () -> returnToMainMenu(levelParent),
                 soundManager
         );
         pauseScreen.show();
     }
+
 
 
 
