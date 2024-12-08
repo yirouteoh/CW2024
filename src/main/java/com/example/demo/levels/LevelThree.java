@@ -304,6 +304,7 @@ public class LevelThree extends LevelParent {
         addEnemyUnit(finalBoss);
         finalBossSpawned = true;
         addFinalBossHealthBarToScene();
+        getRoot().getChildren().add(finalBoss.getShieldImage()); // Add the shield image
     }
 
     /**

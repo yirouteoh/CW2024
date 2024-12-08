@@ -5,6 +5,7 @@ import java.util.*;
 import com.example.demo.actors.projectile.BossProjectile;
 import com.example.demo.utils.HealthBar;
 import com.example.demo.actors.ActiveActorDestructible;
+import com.example.demo.powerups.ShieldImage;
 import javafx.geometry.Bounds;
 import javafx.geometry.BoundingBox;
 import javafx.scene.effect.Glow;
@@ -40,6 +41,7 @@ public class Boss extends FighterPlane {
 
 	private final List<Integer> movePattern; // List of vertical movement patterns
 	private final HealthBar healthBar;       // Displays the boss's health
+	private final ShieldImage shieldImage;
 
 	private boolean isShielded;              // Indicates if the boss is shielded
 	private int consecutiveMovesInSameDirection; // Tracks consecutive frames in the same movement
@@ -65,6 +67,8 @@ public class Boss extends FighterPlane {
 
 		// Initialize health bar
 		healthBar = new HealthBar(200, 20); // Width: 200, Height: 20
+		shieldImage = new ShieldImage(getLayoutX(), getLayoutY());
+
 	}
 
 	/**
@@ -98,6 +102,15 @@ public class Boss extends FighterPlane {
 
 		// Apply shield effect
 		setEffect(isShielded ? new Glow(0.8) : null);
+
+		if (isShielded) {
+			shieldImage.showShield();
+			shieldImage.setLayoutX(getLayoutX() + getTranslateX() - shieldImage.getFitWidth() / 2);
+			shieldImage.setLayoutY(getLayoutY() + getTranslateY() - shieldImage.getFitHeight() / 2);
+			shieldImage.toFront();
+		} else {
+			shieldImage.hideShield();
+		}
 	}
 
 	@Override
@@ -294,5 +307,9 @@ public class Boss extends FighterPlane {
 		isShielded = false;
 		framesWithShieldActivated = 0;       // Reset the shield activation timer
 		framesSinceShieldDeactivated = 0;   // Reset the cooldown timer
+	}
+
+	public ShieldImage getShieldImage() {
+		return shieldImage;
 	}
 }

@@ -39,17 +39,4 @@ public class LevelViewLevelTwo extends LevelView {
 		root.getChildren().add(shieldImage);
 	}
 
-	/**
-	 * Displays the shield on the screen.
-	 */
-	public void showShield() {
-		shieldImage.showShield();
-	}
-
-	/**
-	 * Hides the shield from the screen.
-	 */
-	public void hideShield() {
-		shieldImage.hideShield();
-	}
 }

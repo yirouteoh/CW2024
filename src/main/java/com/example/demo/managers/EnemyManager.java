@@ -2,7 +2,10 @@ package com.example.demo.managers;
 
 import com.example.demo.actors.ActiveActorDestructible;
 import com.example.demo.actors.plane.FighterPlane;
+import com.example.demo.actors.plane.Boss;
+
 import com.example.demo.actors.factory.FighterPlaneFactory;
+
 import javafx.scene.Group;
 
 import java.util.Random;
@@ -35,9 +38,16 @@ public class EnemyManager {
             ActiveActorDestructible enemy = createEnemy();
             if (enemy != null) {
                 actorManager.addEnemyUnit(enemy, root);
+
+                // Check if the spawned enemy is a Boss
+                if (enemy instanceof Boss boss) {
+                    root.getChildren().add(boss);  // Add the boss first
+                    root.getChildren().add(boss.getShieldImage());  // Add the shield image after the boss
+                }
             }
         }
     }
+
 
     /**
      * Handles enemy firing logic.

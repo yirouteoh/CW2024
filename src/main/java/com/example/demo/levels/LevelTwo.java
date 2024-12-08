@@ -100,6 +100,7 @@ public class LevelTwo extends LevelParent {
 	private void spawnBoss() {
 		addEnemyUnit(boss);
 		addBossHealthBarToScene();
+		getRoot().getChildren().add(boss.getShieldImage()); // Add the shield image
 	}
 
 	private void addBossHealthBarToScene() {
