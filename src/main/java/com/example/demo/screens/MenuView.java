@@ -297,22 +297,37 @@ public class MenuView {
 
     private void showAudioSettingsOverlay() {
         StackPane overlay = new StackPane();
-        overlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7);"); // Semi-transparent dark background
+        overlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.8);"); // Semi-transparent darker background
         overlay.setAlignment(Pos.CENTER);
 
         VBox container = new VBox(20); // Adjust spacing for a balanced look
-        container.setStyle("-fx-background-color: #f1f2f6; -fx-padding: 20; -fx-border-color: #74b9ff; -fx-border-width: 2; -fx-border-radius: 10; -fx-background-radius: 10;");
+        container.setStyle("-fx-background-color: #ffffff; -fx-padding: 30; -fx-border-color: #3498db; -fx-border-width: 3; -fx-border-radius: 15; -fx-background-radius: 15;");
         container.setAlignment(Pos.CENTER);
-        container.setMaxWidth(600);
-        container.setMaxHeight(400); // Size similar to the instruction page
+        container.setMaxWidth(500);
+        container.setMaxHeight(300); // Refined size
 
         // Title Text
         Text title = new Text("Audio Settings");
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-fill: #2d3436; -fx-font-family: 'Arial';");
+        title.setStyle("-fx-font-size: 26px; -fx-font-weight: bold; -fx-fill: #34495e; -fx-font-family: 'Verdana';");
 
-        // Mute Background Music Button
-        Button muteBackgroundMusicButton = new Button(soundManager.isBackgroundMusicMuted() ? "Unmute Background Music" : "Mute Background Music");
-        muteBackgroundMusicButton.setStyle("-fx-background-color: #74b9ff; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8 16; -fx-border-radius: 10; -fx-background-radius: 10;");
+        // Mute Background Music Button with Icon
+        ImageView musicIcon = new ImageView(new Image(getClass().getResource("/com/example/demo/images/music.png").toExternalForm()));
+        musicIcon.setFitHeight(30);
+        musicIcon.setFitWidth(30);
+
+        Button muteBackgroundMusicButton = new Button(
+                soundManager.isBackgroundMusicMuted() ? "Unmute Background Music" : "Mute Background Music",
+                musicIcon
+        );
+        muteBackgroundMusicButton.setOnMouseEntered(e -> {
+            muteBackgroundMusicButton.setScaleX(1.1);
+            muteBackgroundMusicButton.setScaleY(1.1);
+        });
+        muteBackgroundMusicButton.setOnMouseExited(e -> {
+            muteBackgroundMusicButton.setScaleX(1.0);
+            muteBackgroundMusicButton.setScaleY(1.0);
+        });
+        muteBackgroundMusicButton.setStyle("-fx-background-color: #74b9ff; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10 20; -fx-border-radius: 15; -fx-background-radius: 15;");
         muteBackgroundMusicButton.setOnAction(e -> {
             if (soundManager.isBackgroundMusicMuted()) {
                 soundManager.unmuteBackgroundMusic();
@@ -325,9 +340,24 @@ public class MenuView {
             }
         });
 
-        // Mute Sound Effects Button
-        Button muteSoundEffectsButton = new Button(soundManager.isSoundEffectsMuted() ? "Unmute Sound Effects" : "Mute Sound Effects");
-        muteSoundEffectsButton.setStyle("-fx-background-color: #ff7675; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8 16; -fx-border-radius: 10; -fx-background-radius: 10;");
+        // Mute Sound Effects Button with Icon
+        ImageView speakerIcon = new ImageView(new Image(getClass().getResource("/com/example/demo/images/speaker.png").toExternalForm()));
+        speakerIcon.setFitHeight(30);
+        speakerIcon.setFitWidth(30);
+
+        Button muteSoundEffectsButton = new Button(
+                soundManager.isSoundEffectsMuted() ? "Unmute Sound Effects" : "Mute Sound Effects",
+                speakerIcon
+        );
+        muteSoundEffectsButton.setOnMouseEntered(e -> {
+            muteSoundEffectsButton.setScaleX(1.1);
+            muteSoundEffectsButton.setScaleY(1.1);
+        });
+        muteSoundEffectsButton.setOnMouseExited(e -> {
+            muteSoundEffectsButton.setScaleX(1.0);
+            muteSoundEffectsButton.setScaleY(1.0);
+        });
+        muteSoundEffectsButton.setStyle("-fx-background-color: #ff69b4; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10 20; -fx-border-radius: 15; -fx-background-radius: 15;");
         muteSoundEffectsButton.setOnAction(e -> {
             if (soundManager.isSoundEffectsMuted()) {
                 soundManager.unmuteSoundEffects();
@@ -340,7 +370,15 @@ public class MenuView {
 
         // Close Button
         Button closeButton = new Button("Close");
-        closeButton.setStyle("-fx-background-color: #81ecec; -fx-text-fill: #2d3436; -fx-font-size: 14px; -fx-padding: 8 16; -fx-border-radius: 10; -fx-background-radius: 10;");
+        closeButton.setOnMouseEntered(e -> {
+            closeButton.setScaleX(1.1);
+            closeButton.setScaleY(1.1);
+        });
+        closeButton.setOnMouseExited(e -> {
+            closeButton.setScaleX(1.0);
+            closeButton.setScaleY(1.0);
+        });
+        closeButton.setStyle("-fx-background-color: #1abc9c; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10 20; -fx-border-radius: 15; -fx-background-radius: 15;");
         closeButton.setOnAction(e -> overlay.setVisible(false));
 
         // Add elements to the container
@@ -354,10 +392,6 @@ public class MenuView {
         }
         overlay.setVisible(true);
     }
-
-
-
-
 
     /**
      * Retrieves a resource or throws an exception if not found.
