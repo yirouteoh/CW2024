@@ -22,101 +22,89 @@ public class UserPlane extends FighterPlane {
 	private static final double INITIAL_X_POSITION = 5.0;
 	private static final double INITIAL_Y_POSITION = 300.0;
 	private static final int IMAGE_HEIGHT = 150;
-	private static final int VERTICAL_VELOCITY = 5;
 
-	private int velocityMultiplier = 0;  // Controls vertical movement
-	private int horizontalVelocityMultiplier = 0;  // Controls horizontal movement
+	private static final double VELOCITY_SCALE = 6.0;
+	private double verticalVelocity = 0; // Current vertical speed
+	private double horizontalVelocity = 0; // Current horizontal speed
+	private final double acceleration = 1.0; // Acceleration rate
+	private final double deceleration = 0.5; // Deceleration rate
+	private final double maxSpeed = 10.0; // Maximum speed
+
 	private int spreadshotCount = 0;  // Counter for spreadshot power-ups
 	private LevelParent levelParent; // Reference to the LevelParent for managing projectiles
 
-	/**
-	 * Constructs a UserPlane with the specified initial health.
-	 *
-	 * @param initialHealth the initial health of the user plane
-	 */
 	public UserPlane(int initialHealth) {
 		super(IMAGE_NAME, IMAGE_HEIGHT, INITIAL_X_POSITION, INITIAL_Y_POSITION, initialHealth);
 	}
 
-	/**
-	 * Updates the position of the user plane based on velocity multipliers.
-	 * Ensures the plane does not move outside the defined screen boundaries.
-	 */
 	@Override
 	public void updatePosition() {
 		double initialTranslateY = getTranslateY();
 		double initialTranslateX = getTranslateX();
 
-		// Move vertically
-		if (velocityMultiplier != 0) {
-			moveVertically(VERTICAL_VELOCITY * velocityMultiplier);
-			double newPositionY = getLayoutY() + getTranslateY();
-			if (newPositionY < Y_UPPER_BOUND || newPositionY > Y_LOWER_BOUND) {
-				setTranslateY(initialTranslateY); // Revert if out of bounds
-			}
+		// Apply velocity to position
+		moveVertically(verticalVelocity * VELOCITY_SCALE);
+		moveHorizontally(horizontalVelocity * VELOCITY_SCALE);
+
+		// Check bounds for vertical movement
+		double newPositionY = getLayoutY() + getTranslateY();
+		if (newPositionY < Y_UPPER_BOUND || newPositionY > Y_LOWER_BOUND) {
+			setTranslateY(initialTranslateY); // Revert if out of bounds
 		}
 
-		// Move horizontally
-		if (horizontalVelocityMultiplier != 0) {
-			moveHorizontally(VERTICAL_VELOCITY * horizontalVelocityMultiplier);
-			double newPositionX = getLayoutX() + getTranslateX();
-			if (newPositionX < X_LEFT_BOUND || newPositionX > X_RIGHT_BOUND) {
-				setTranslateX(initialTranslateX); // Revert if out of bounds
-			}
+		// Check bounds for horizontal movement
+		double newPositionX = getLayoutX() + getTranslateX();
+		if (newPositionX < X_LEFT_BOUND || newPositionX > X_RIGHT_BOUND) {
+			setTranslateX(initialTranslateX); // Revert if out of bounds
+		}
+
+		// Decelerate when no input
+		applyDeceleration();
+	}
+
+	private void applyDeceleration() {
+		// Vertical deceleration
+		if (verticalVelocity > 0) {
+			verticalVelocity = Math.max(0, verticalVelocity - deceleration);
+		} else if (verticalVelocity < 0) {
+			verticalVelocity = Math.min(0, verticalVelocity + deceleration);
+		}
+
+		// Horizontal deceleration
+		if (horizontalVelocity > 0) {
+			horizontalVelocity = Math.max(0, horizontalVelocity - deceleration);
+		} else if (horizontalVelocity < 0) {
+			horizontalVelocity = Math.min(0, horizontalVelocity + deceleration);
 		}
 	}
 
-	/**
-	 * Updates the actor's state, including its position.
-	 */
 	@Override
 	public void updateActor() {
 		updatePosition();
 	}
 
-	/**
-	 * Fires a projectile from the user plane.
-	 * If the spreadshot power-up is active, multiple projectiles are fired simultaneously.
-	 * Otherwise, a single projectile is fired.
-	 *
-	 * @return the fired projectile (center projectile if spreadshot is active)
-	 */
 	@Override
 	public ActiveActorDestructible fireProjectile() {
 		double currentX = getLayoutX() + getTranslateX();
 		double currentY = getLayoutY() + getTranslateY();
 
 		if (spreadshotCount > 0) {
-			// Create and add spreadshot projectiles
 			List<ActiveActorDestructible> spreadshotProjectiles = createSpreadshotProjectiles(currentX, currentY);
 			spreadshotProjectiles.forEach(levelParent::addProjectile);
 
 			spreadshotCount--; // Decrease the spreadshot count after firing
 			return spreadshotProjectiles.get(2); // Return the center projectile for compatibility
 		} else {
-			// Create and add a single projectile
 			ActiveActorDestructible projectile = new UserProjectile(currentX + 100, currentY);
 			levelParent.addProjectile(projectile);
 			return projectile;
 		}
 	}
 
-	/**
-	 * Activates the spreadshot power-up, allowing the plane to fire multiple projectiles at once.
-	 */
 	public void activateOneTimeSpreadshot() {
 		spreadshotCount++;
 	}
 
-
-
-	/**
-	 * Creates a list of spreadshot projectiles.
-	 *
-	 * @param currentX the X position of the plane
-	 * @param currentY the Y position of the plane
-	 * @return a list of spreadshot projectiles
-	 */
 	private List<ActiveActorDestructible> createSpreadshotProjectiles(double currentX, double currentY) {
 		List<ActiveActorDestructible> projectiles = new ArrayList<>();
 		projectiles.add(new UserProjectile(currentX + 100, currentY - 30)); // Left
@@ -127,57 +115,25 @@ public class UserPlane extends FighterPlane {
 		return projectiles;
 	}
 
-	/**
-	 * Sets the parent level for managing projectiles.
-	 *
-	 * @param levelParent the LevelParent instance
-	 */
 	public void setLevelParent(LevelParent levelParent) {
 		this.levelParent = levelParent;
 	}
 
-	// Movement controls
-
-	/**
-	 * Moves the user plane upward.
-	 */
-	public void moveUp() {
-		velocityMultiplier = -2;
+	public void setVerticalVelocity(int multiplier) {
+		verticalVelocity += multiplier * acceleration;
+		verticalVelocity = Math.max(-maxSpeed, Math.min(maxSpeed, verticalVelocity)); // Limit speed
 	}
 
-	/**
-	 * Moves the user plane downward.
-	 */
-	public void moveDown() {
-		velocityMultiplier = 2;
+	public void setHorizontalVelocity(int multiplier) {
+		horizontalVelocity += multiplier * acceleration;
+		horizontalVelocity = Math.max(-maxSpeed, Math.min(maxSpeed, horizontalVelocity)); // Limit speed
 	}
 
-	/**
-	 * Moves the user plane to the left.
-	 */
-	public void moveLeft() {
-		horizontalVelocityMultiplier = -2;
+	public void stopVerticalMovement() {
+		verticalVelocity = 0;
 	}
 
-	/**
-	 * Moves the user plane to the right.
-	 */
-	public void moveRight() {
-		horizontalVelocityMultiplier = 2;
+	public void stopHorizontalMovement() {
+		horizontalVelocity = 0;
 	}
-
-	/**
-	 * Stops the vertical movement of the user plane.
-	 */
-	public void stop() {
-		velocityMultiplier = 0;
-	}
-
-	/**
-	 * Stops the horizontal movement of the user plane.
-	 */
-	public void stopHorizontal() {
-		horizontalVelocityMultiplier = 0;
-	}
-
 }

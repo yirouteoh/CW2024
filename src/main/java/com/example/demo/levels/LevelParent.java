@@ -171,6 +171,7 @@ public abstract class LevelParent {
 	 */
 
 	private void updateScene() {
+		inputManager.processInput();
 		updateEnemyUnits();
 		actorManager.updateActors();
 		collisionManager.handleAllCollisions();
