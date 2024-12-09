@@ -2,6 +2,10 @@ package com.example.demo.managers;
 
 import com.example.demo.levels.LevelParent;
 import com.example.demo.sounds.SoundManager;
+import com.example.demo.screens.AudioControlPanel;
+import com.example.demo.screens.MenuView;
+
+import javafx.scene.layout.HBox;
 
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -18,23 +22,25 @@ public class SceneManager {
     private final double screenHeight;
 
     private ImageView pauseButton;
-    private GameLoopManager gameLoopManager;
-    private SoundManager soundManager;
+    private final AudioControlPanel audioControlPanel;
+    private final GameLoopManager gameLoopManager;
+    private final SoundManager soundManager;
     private PauseManager pauseManager;
-    private LevelParent levelParent; // Reference to LevelParent
+    private final LevelParent levelParent; // Reference to LevelParent
 
     public SceneManager(String backgroundImageName, double screenHeight, double screenWidth,
                         GameLoopManager gameLoopManager, SoundManager soundManager,
                         PauseManager pauseManager, LevelParent levelParent) {
         this.root = new Group();
         this.scene = new Scene(root, screenWidth, screenHeight);
-        this.background = new ImageView(new Image(getClass().getResource(backgroundImageName).toExternalForm()));
+        this.background = new ImageView(new Image(MenuView.getResourceOrThrow(backgroundImageName).toExternalForm()));
         this.screenHeight = screenHeight;
         this.screenWidth = screenWidth;
         this.gameLoopManager = gameLoopManager;
         this.soundManager = soundManager;
         this.pauseManager = pauseManager;
         this.levelParent = levelParent; // Store LevelParent instance
+        this.audioControlPanel = new AudioControlPanel(levelParent);
     }
 
     /**
@@ -45,6 +51,7 @@ public class SceneManager {
     public Scene initializeScene() {
         root.getChildren().clear(); // Clear all children from the root before initializing
         initializeBackground(); // Set up the background and add to root
+        addControlPanel();
         return scene; // Return the configured scene
     }
 
@@ -57,9 +64,23 @@ public class SceneManager {
         background.setFitWidth(screenWidth);
 
         root.getChildren().add(background);
+    }
 
-        // Add the pause button
+    private void addControlPanel() {
+        // Create an HBox to align the pause button and audio control panel horizontally
+        HBox controlPanel = new HBox(10); // 10px spacing between elements
+        controlPanel.setLayoutX(screenWidth - 200); // Position near the top-right corner
+        controlPanel.setLayoutY(20); // Position vertically at the top
+
+        // Ensure the pause button is created
         addPauseButton(null);
+
+        // Add the pause button and audio control panel to the HBox
+        controlPanel.getChildren().add(audioControlPanel);
+        controlPanel.getChildren().add(pauseButton);
+
+        // Add the control panel to the root
+        root.getChildren().add(controlPanel);
     }
 
     /**
@@ -68,7 +89,7 @@ public class SceneManager {
      * @param pauseAction The action to execute when the pause button is clicked.
      */
     public void addPauseButton(Runnable pauseAction) {
-        Image pauseImage = new Image(getClass().getResource("/com/example/demo/images/pause.png").toExternalForm());
+        Image pauseImage = new Image(MenuView.getResourceOrThrow("/com/example/demo/images/pause.png").toExternalForm());
         pauseButton = new ImageView(pauseImage);
 
         pauseButton.setFitWidth(50);
@@ -81,21 +102,23 @@ public class SceneManager {
         pauseButton.setMouseTransparent(false);
 
         pauseButton.setOnMouseClicked(event -> {
-            if (levelParent == null) {
-                System.err.println("LevelParent is null. Cannot pause the game.");
-                return;
-            }
+            if (pauseAction != null) {
+                pauseAction.run(); // Use the custom pause behavior
+            } else {
+                if (levelParent == null) {
+                    System.err.println("LevelParent is null. Cannot pause the game.");
+                    return;
+                }
 
-            if (levelParent.isCountdownInProgress()) { // Check countdown state
-                return; // Disable pausing during countdown
-            }
+                if (levelParent.isCountdownInProgress()) { // Check countdown state
+                    return; // Disable pausing during countdown
+                }
 
-            gameLoopManager.pause();
-            soundManager.pauseBackgroundMusic(); // Pause music
-            pauseManager.showPauseScreen(levelParent); // Pass LevelParent reference
+                gameLoopManager.pause();
+                soundManager.pauseBackgroundMusic(); // Pause music
+                pauseManager.showPauseScreen(levelParent); // Pass LevelParent reference
+            }
         });
-
-        root.getChildren().add(pauseButton);
     }
 
 

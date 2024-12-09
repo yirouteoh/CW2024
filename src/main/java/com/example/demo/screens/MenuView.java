@@ -11,6 +11,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import java.util.logging.Logger;
 
 import java.net.URL;
 
@@ -23,8 +24,7 @@ public class MenuView {
     private final Image settingsImage;
     private final Image unmuteMusicImage;
     private final Image unmuteSoundImage;
-
-    private boolean isMuted = false; // Tracks mute state
+    private static final Logger logger = Logger.getLogger(MenuView.class.getName());
 
     // Constructor
     public MenuView(Stage stage, com.example.demo.controller.Controller controller) {
@@ -139,7 +139,7 @@ public class MenuView {
             soundManager.stopBackgroundMusic();
             controller.launchGame();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.severe("Error launching game: " + ex.getMessage());
         }
     }
 
@@ -315,7 +315,7 @@ public class MenuView {
         title.setStyle("-fx-font-size: 26px; -fx-font-weight: bold; -fx-fill: #34495e; -fx-font-family: 'Verdana';");
 
         // Mute Background Music Button with Icon
-        ImageView musicIcon = new ImageView(soundManager.isBackgroundMusicMuted() ? unmuteMusicImage : new Image(getClass().getResource("/com/example/demo/images/music.png").toExternalForm()));
+        ImageView musicIcon = new ImageView(soundManager.isBackgroundMusicMuted() ? unmuteMusicImage : new Image(getResourceOrThrow("/com/example/demo/images/music.png").toExternalForm()));
         musicIcon.setFitHeight(30);
         musicIcon.setFitWidth(30);
 
@@ -335,9 +335,9 @@ public class MenuView {
         muteBackgroundMusicButton.setStyle("-fx-background-color: #74b9ff; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10 20; -fx-border-radius: 15; -fx-background-radius: 15;");
         muteBackgroundMusicButton.setOnAction(e -> {
             if (soundManager.isBackgroundMusicMuted()) {
-                soundManager.unmuteBackgroundMusic();
+                soundManager.unmuteBackgroundMusic(SoundManager.MENU_MUSIC);
                 muteBackgroundMusicButton.setText("Mute Background Music");
-                musicIcon.setImage(new Image(getClass().getResource("/com/example/demo/images/music.png").toExternalForm()));
+                musicIcon.setImage(new Image(getResourceOrThrow("/com/example/demo/images/music.png").toExternalForm()));
                 soundManager.playBackgroundMusic(SoundManager.MENU_MUSIC);
             } else {
                 soundManager.muteBackgroundMusic();
@@ -348,7 +348,7 @@ public class MenuView {
         });
 
         // Mute Sound Effects Button with Icon
-        ImageView speakerIcon = new ImageView(soundManager.isSoundEffectsMuted() ? unmuteSoundImage : new Image(getClass().getResource("/com/example/demo/images/speaker.png").toExternalForm()));
+        ImageView speakerIcon = new ImageView(soundManager.isSoundEffectsMuted() ? unmuteSoundImage : new Image(getResourceOrThrow("/com/example/demo/images/speaker.png").toExternalForm()));
         speakerIcon.setFitHeight(30);
         speakerIcon.setFitWidth(30);
 
@@ -370,7 +370,7 @@ public class MenuView {
             if (soundManager.isSoundEffectsMuted()) {
                 soundManager.unmuteSoundEffects();
                 muteSoundEffectsButton.setText("Mute Sound Effects");
-                speakerIcon.setImage(new Image(getClass().getResource("/com/example/demo/images/speaker.png").toExternalForm()));
+                speakerIcon.setImage(new Image(getResourceOrThrow("/com/example/demo/images/speaker.png").toExternalForm()));
             } else {
                 soundManager.muteSoundEffects();
                 muteSoundEffectsButton.setText("Unmute Sound Effects");
@@ -409,8 +409,8 @@ public class MenuView {
      * @param resourcePath The resource path.
      * @return The resource URL.
      */
-    private URL getResourceOrThrow(String resourcePath) {
-        URL resourceUrl = getClass().getResource(resourcePath);
+    public static URL getResourceOrThrow(String resourcePath) {
+        URL resourceUrl = MenuView.class.getResource(resourcePath);
         if (resourceUrl == null) {
             throw new IllegalArgumentException("Resource not found: " + resourcePath);
         }

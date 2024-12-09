@@ -3,6 +3,7 @@ module com.example.demo {
     requires javafx.fxml;
     requires java.desktop;
     requires javafx.media;
+    requires java.logging;
 
 
     exports com.example.demo.controller;

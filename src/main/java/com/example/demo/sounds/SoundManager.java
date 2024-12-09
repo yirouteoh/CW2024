@@ -162,20 +162,6 @@ public class SoundManager {
         }
     }
 
-    /**
-     * Plays an AudioClip and handles potential null references.
-     *
-     * @param audioClip  The AudioClip to play.
-     * @param soundName  Name of the sound (for logging).
-     */
-    private void playAudioClip(AudioClip audioClip, String soundName) {
-        if (audioClip != null) {
-            audioClip.play();
-        } else {
-            System.err.println(soundName + " not initialized!");
-        }
-    }
-
     public void muteBackgroundMusic() {
         isBackgroundMusicMuted = true;
         if (mediaPlayer != null) {
@@ -183,12 +169,18 @@ public class SoundManager {
         }
     }
 
-    public void unmuteBackgroundMusic() {
+    public void unmuteBackgroundMusic(String currentMusicFile) {
         isBackgroundMusicMuted = false;
         if (mediaPlayer != null) {
             mediaPlayer.setVolume(DEFAULT_VOLUME);
+            if (mediaPlayer.getStatus() != MediaPlayer.Status.PLAYING) {
+                mediaPlayer.play();
+            }
+        } else {
+            playBackgroundMusic(currentMusicFile); // Ensure music starts if not already playing
         }
     }
+
 
     public void muteSoundEffects() {
         isSoundEffectsMuted = true;
