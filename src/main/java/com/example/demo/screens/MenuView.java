@@ -21,7 +21,8 @@ public class MenuView {
     private final SoundManager soundManager;
     private final Image instructionsImage;
     private final Image settingsImage;
-
+    private final Image unmuteMusicImage;
+    private final Image unmuteSoundImage;
 
     private boolean isMuted = false; // Tracks mute state
 
@@ -34,6 +35,9 @@ public class MenuView {
         // Preload images
         this.instructionsImage = new Image(getResourceOrThrow("/com/example/demo/images/instructions.png").toExternalForm());
         this.settingsImage = new Image(getResourceOrThrow("/com/example/demo/images/settings.png").toExternalForm());
+        // In the constructor
+        this.unmuteMusicImage = new Image(getResourceOrThrow("/com/example/demo/images/unmutemusic.png").toExternalForm());
+        this.unmuteSoundImage = new Image(getResourceOrThrow("/com/example/demo/images/unmuteeffect.png").toExternalForm());
     }
 
     /**
@@ -311,7 +315,7 @@ public class MenuView {
         title.setStyle("-fx-font-size: 26px; -fx-font-weight: bold; -fx-fill: #34495e; -fx-font-family: 'Verdana';");
 
         // Mute Background Music Button with Icon
-        ImageView musicIcon = new ImageView(new Image(getClass().getResource("/com/example/demo/images/music.png").toExternalForm()));
+        ImageView musicIcon = new ImageView(soundManager.isBackgroundMusicMuted() ? unmuteMusicImage : new Image(getClass().getResource("/com/example/demo/images/music.png").toExternalForm()));
         musicIcon.setFitHeight(30);
         musicIcon.setFitWidth(30);
 
@@ -319,6 +323,7 @@ public class MenuView {
                 soundManager.isBackgroundMusicMuted() ? "Unmute Background Music" : "Mute Background Music",
                 musicIcon
         );
+
         muteBackgroundMusicButton.setOnMouseEntered(e -> {
             muteBackgroundMusicButton.setScaleX(1.1);
             muteBackgroundMusicButton.setScaleY(1.1);
@@ -332,16 +337,18 @@ public class MenuView {
             if (soundManager.isBackgroundMusicMuted()) {
                 soundManager.unmuteBackgroundMusic();
                 muteBackgroundMusicButton.setText("Mute Background Music");
+                musicIcon.setImage(new Image(getClass().getResource("/com/example/demo/images/music.png").toExternalForm()));
                 soundManager.playBackgroundMusic(SoundManager.MENU_MUSIC);
             } else {
                 soundManager.muteBackgroundMusic();
                 muteBackgroundMusicButton.setText("Unmute Background Music");
+                musicIcon.setImage(unmuteMusicImage);
                 soundManager.stopBackgroundMusic();
             }
         });
 
         // Mute Sound Effects Button with Icon
-        ImageView speakerIcon = new ImageView(new Image(getClass().getResource("/com/example/demo/images/speaker.png").toExternalForm()));
+        ImageView speakerIcon = new ImageView(soundManager.isSoundEffectsMuted() ? unmuteSoundImage : new Image(getClass().getResource("/com/example/demo/images/speaker.png").toExternalForm()));
         speakerIcon.setFitHeight(30);
         speakerIcon.setFitWidth(30);
 
@@ -349,6 +356,7 @@ public class MenuView {
                 soundManager.isSoundEffectsMuted() ? "Unmute Sound Effects" : "Mute Sound Effects",
                 speakerIcon
         );
+
         muteSoundEffectsButton.setOnMouseEntered(e -> {
             muteSoundEffectsButton.setScaleX(1.1);
             muteSoundEffectsButton.setScaleY(1.1);
@@ -362,9 +370,11 @@ public class MenuView {
             if (soundManager.isSoundEffectsMuted()) {
                 soundManager.unmuteSoundEffects();
                 muteSoundEffectsButton.setText("Mute Sound Effects");
+                speakerIcon.setImage(new Image(getClass().getResource("/com/example/demo/images/speaker.png").toExternalForm()));
             } else {
                 soundManager.muteSoundEffects();
                 muteSoundEffectsButton.setText("Unmute Sound Effects");
+                speakerIcon.setImage(unmuteSoundImage);
             }
         });
 
