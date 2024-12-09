@@ -6,7 +6,7 @@ import com.example.demo.actors.projectile.EnemyProjectile;
 public class BasicFighterPlane extends FighterPlane {
 
     public BasicFighterPlane(double initialXPos, double initialYPos) {
-        super("basic_fighter.png", 50, initialXPos, initialYPos, 3); // Replace with your actual image name and properties
+        super("enemyplane.png", 50, initialXPos, initialYPos, 3); // Replace with your actual image name and properties
     }
 
     @Override
