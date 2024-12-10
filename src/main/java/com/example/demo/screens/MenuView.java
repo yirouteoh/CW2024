@@ -11,7 +11,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import javafx.animation.ScaleTransition;
+import javafx.util.Duration;
 import java.util.logging.Logger;
+
 
 import java.net.URL;
 
@@ -46,11 +50,21 @@ public class MenuView {
     public void showMenu() {
         soundManager.playBackgroundMusic(SoundManager.MENU_MUSIC);
 
+        // Create root pane and menu panel
         StackPane root = createRootPane();
         VBox menuPanel = createMenuPanel();
 
-        root.getChildren().add(menuPanel);
+        // Create the exit button
+        Button exitButton = createExitButton();
 
+        // Align and add the exit button to the root
+        StackPane.setAlignment(exitButton, Pos.TOP_LEFT);
+        StackPane.setMargin(exitButton, new javafx.geometry.Insets(10)); // Margin from top-left corner
+
+        // Add menu panel and exit button to the root
+        root.getChildren().addAll(menuPanel, exitButton);
+
+        // Set up the scene
         Scene menuScene = new Scene(root, 800, 600);
         menuScene.getStylesheets().add(getResourceOrThrow("/style.css").toExternalForm());
 
@@ -58,6 +72,46 @@ public class MenuView {
         stage.setTitle("Sky Battle Menu");
         stage.show();
     }
+
+
+    /**
+     * Creates an exit button and attaches a close action.
+     *
+     * @return Button configured as the exit button.
+     */
+    private Button createExitButton() {
+        // Load the exit icon
+        ImageView exitIcon = new ImageView(new Image(getResourceOrThrow("/com/example/demo/images/cross.png").toExternalForm()));
+        exitIcon.setFitHeight(60);
+        exitIcon.setFitWidth(60);
+
+        // Create the button and set the icon
+        Button exitButton = new Button();
+        exitButton.setGraphic(exitIcon);
+        exitButton.setStyle("-fx-background-color: transparent; -fx-cursor: hand;");
+
+        // Add smooth scaling effects with animations
+        ScaleTransition scaleUp = new ScaleTransition(Duration.millis(200), exitButton);
+        scaleUp.setToX(1.2); // Scale to 120%
+        scaleUp.setToY(1.2);
+
+        ScaleTransition scaleDown = new ScaleTransition(Duration.millis(200), exitButton);
+        scaleDown.setToX(1.0); // Scale back to normal size
+        scaleDown.setToY(1.0);
+
+        exitButton.setOnMouseEntered(e -> scaleUp.playFromStart());
+        exitButton.setOnMouseExited(e -> scaleDown.playFromStart());
+
+        // Set button action
+        exitButton.setOnAction(e -> {
+            soundManager.stopBackgroundMusic();
+            stage.close();
+        });
+
+        return exitButton;
+    }
+
+
 
     /**
      * Creates the root pane with a background image.
