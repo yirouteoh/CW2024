@@ -33,10 +33,19 @@ public class UserPlane extends FighterPlane {
 	private int spreadshotCount = 0;  // Counter for spreadshot power-ups
 	private LevelParent levelParent; // Reference to the LevelParent for managing projectiles
 
+	/**
+	 * Constructs a new UserPlane instance with the specified initial health.
+	 *
+	 * @param initialHealth The initial health of the plane.
+	 */
 	public UserPlane(int initialHealth) {
 		super(IMAGE_NAME, IMAGE_HEIGHT, INITIAL_X_POSITION, INITIAL_Y_POSITION, initialHealth);
 	}
 
+	/**
+	 * Updates the position of the user plane based on its velocity,
+	 * ensuring it stays within the defined bounds.
+	 */
 	@Override
 	public void updatePosition() {
 		double initialTranslateY = getTranslateY();
@@ -62,6 +71,9 @@ public class UserPlane extends FighterPlane {
 		applyDeceleration();
 	}
 
+	/**
+	 * Applies deceleration to the plane's vertical and horizontal velocity when no input is given.
+	 */
 	private void applyDeceleration() {
 		// Vertical deceleration
 		if (verticalVelocity > 0) {
@@ -78,11 +90,20 @@ public class UserPlane extends FighterPlane {
 		}
 	}
 
+	/**
+	 * Updates the state of the user plane, including position and other behaviors.
+	 */
 	@Override
 	public void updateActor() {
 		updatePosition();
 	}
 
+	/**
+	 * Fires a projectile from the user plane. If spreadshot power-ups are active,
+	 * multiple projectiles are fired simultaneously.
+	 *
+	 * @return The primary projectile fired.
+	 */
 	@Override
 	public ActiveActorDestructible fireProjectile() {
 		double currentX = getLayoutX() + getTranslateX();
@@ -106,11 +127,20 @@ public class UserPlane extends FighterPlane {
 		}
 	}
 
-
+	/**
+	 * Activates a one-time spreadshot power-up, allowing the plane to fire multiple projectiles.
+	 */
 	public void activateOneTimeSpreadshot() {
 		spreadshotCount++;
 	}
 
+	/**
+	 * Creates a list of projectiles for a spreadshot power-up.
+	 *
+	 * @param currentX The current X-coordinate of the plane.
+	 * @param currentY The current Y-coordinate of the plane.
+	 * @return A list of spreadshot projectiles.
+	 */
 	private List<ActiveActorDestructible> createSpreadshotProjectiles(double currentX, double currentY) {
 		List<ActiveActorDestructible> projectiles = new ArrayList<>();
 		projectiles.add(ProjectileFactory.createProjectile(ProjectileFactory.ProjectileType.USER, currentX + 100, currentY - 30)); // Left
@@ -121,25 +151,45 @@ public class UserPlane extends FighterPlane {
 		return projectiles;
 	}
 
-
+	/**
+	 * Sets the level parent to manage the plane's projectiles.
+	 *
+	 * @param levelParent The {@link LevelParent} instance to set.
+	 */
 	public void setLevelParent(LevelParent levelParent) {
 		this.levelParent = levelParent;
 	}
 
+	/**
+	 * Adjusts the vertical velocity based on the given multiplier.
+	 *
+	 * @param multiplier The direction and speed multiplier (-1 for up, 1 for down).
+	 */
 	public void setVerticalVelocity(int multiplier) {
 		verticalVelocity += multiplier * acceleration;
 		verticalVelocity = Math.max(-maxSpeed, Math.min(maxSpeed, verticalVelocity)); // Limit speed
 	}
 
+	/**
+	 * Adjusts the horizontal velocity based on the given multiplier.
+	 *
+	 * @param multiplier The direction and speed multiplier (-1 for left, 1 for right).
+	 */
 	public void setHorizontalVelocity(int multiplier) {
 		horizontalVelocity += multiplier * acceleration;
 		horizontalVelocity = Math.max(-maxSpeed, Math.min(maxSpeed, horizontalVelocity)); // Limit speed
 	}
 
+	/**
+	 * Stops all vertical movement by setting the vertical velocity to zero.
+	 */
 	public void stopVerticalMovement() {
 		verticalVelocity = 0;
 	}
 
+	/**
+	 * Stops all horizontal movement by setting the horizontal velocity to zero.
+	 */
 	public void stopHorizontalMovement() {
 		horizontalVelocity = 0;
 	}

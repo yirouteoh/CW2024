@@ -80,6 +80,10 @@ public class Boss extends FighterPlane {
 		return isShielded;
 	}
 
+	/**
+	 * Updates the position of the boss by following its predefined movement pattern.
+	 * Reverts movement if the boss goes out of bounds.
+	 */
 	@Override
 	public void updatePosition() {
 		double initialTranslateY = getTranslateY();
@@ -90,6 +94,10 @@ public class Boss extends FighterPlane {
 		}
 	}
 
+	/**
+	 * Updates the boss's state, including its position, shield status, and visual effects.
+	 * Also updates the positions of the health bar and shield visuals.
+	 */
 	@Override
 	public void updateActor() {
 		updatePosition();
@@ -113,6 +121,13 @@ public class Boss extends FighterPlane {
 		}
 	}
 
+	/**
+	 * Fires a projectile from the boss. The firing logic uses a probability defined by
+	 * the BOSS_FIRE_RATE constant.
+	 *
+	 * @return a new {@link ActiveActorDestructible} representing the boss's projectile,
+	 * or null if no projectile is fired in the current frame.
+	 */
 	@Override
 	public ActiveActorDestructible fireProjectile() {
 		if (bossFiresInCurrentFrame()) { // Keep your existing firing logic
@@ -127,8 +142,10 @@ public class Boss extends FighterPlane {
 		return null; // No projectile fired
 	}
 
-
-
+	/**
+	 * Handles damage to the boss. If the boss is not shielded, reduces its health
+	 * and updates the health bar.
+	 */
 	@Override
 	public void takeDamage() {
 		if (!isShielded) {
@@ -176,9 +193,6 @@ public class Boss extends FighterPlane {
 	public Rectangle getHealthBar() {
 		return healthBar.getHealthBar();
 	}
-
-
-	// Private helper methods
 
 	/**
 	 * Initializes the movement pattern for the boss.
@@ -319,7 +333,11 @@ public class Boss extends FighterPlane {
 		framesWithShieldActivated = 0;       // Reset the shield activation timer
 		framesSinceShieldDeactivated = 0;   // Reset the cooldown timer
 	}
-
+	/**
+	 * Retrieves the shield image object for rendering or other operations.
+	 *
+	 * @return the {@link ShieldImage} associated with the boss.
+	 */
 	public ShieldImage getShieldImage() {
 		return shieldImage;
 	}
