@@ -176,14 +176,36 @@ public class MenuView {
      *
      * @param text Button text.
      * @param action Event handler for the button.
-     * @return Button instance.
+     * @return Button instance with hover effects.
      */
     private Button createStyledButton(String text, javafx.event.EventHandler<javafx.event.ActionEvent> action) {
         Button button = new Button(text);
         button.getStyleClass().add("menu-button");
         button.setOnAction(action);
+
+        // Create ScaleTransitions for hover effect
+        ScaleTransition scaleUp = new ScaleTransition(Duration.millis(150), button);
+        scaleUp.setToX(1.2); // Scale to 120%
+        scaleUp.setToY(1.2);
+
+        ScaleTransition scaleDown = new ScaleTransition(Duration.millis(150), button);
+        scaleDown.setToX(1.0); // Scale back to original size
+        scaleDown.setToY(1.0);
+
+        // Add hover event handlers
+        button.setOnMouseEntered(e -> {
+            scaleDown.stop(); // Stop any ongoing scaleDown animation
+            scaleUp.playFromStart(); // Play scaleUp animation immediately
+        });
+
+        button.setOnMouseExited(e -> {
+            scaleUp.stop(); // Stop any ongoing scaleUp animation
+            scaleDown.playFromStart(); // Play scaleDown animation immediately
+        });
+
         return button;
     }
+
 
     /**
      * Launches the game by notifying the controller.
