@@ -5,6 +5,12 @@ import com.example.demo.sounds.SoundManager;
 import com.example.demo.actors.ActiveActorDestructible;
 import com.example.demo.actors.plane.EnemyPlane;
 
+/**
+ * Represents the first level of the game.
+ * <p>
+ * In this level, the player must defeat a set number of enemies to advance to the next level.
+ * </p>
+ */
 public class LevelOne extends LevelParent {
 
 	// Constants
@@ -39,19 +45,35 @@ public class LevelOne extends LevelParent {
 		}
 	}
 
+	/**
+	 * Determines if the user has lost the game.
+	 *
+	 * @return true if the user's plane is destroyed, false otherwise.
+	 */
 	private boolean isGameLost() {
 		return userIsDestroyed();
 	}
 
+	/**
+	 * Handles the game loss scenario by stopping the background music and transitioning to the loss screen.
+	 */
 	private void handleGameLoss() {
 		soundManager.stopBackgroundMusic();
 		loseGame();
 	}
 
+	/**
+	 * Determines if the kill target for advancing the level has been reached.
+	 *
+	 * @return true if the kill target is reached, false otherwise.
+	 */
 	private boolean isKillTargetReached() {
 		return getKillCountDisplay().getKillCount() >= KILLS_TO_ADVANCE;
 	}
 
+	/**
+	 * Handles advancing to the next level by stopping the background music and loading LevelTwo.
+	 */
 	private void handleLevelAdvance() {
 		soundManager.stopBackgroundMusic();
 		goToNextLevel(new LevelTwo(getScreenHeight(), getScreenWidth()));
@@ -66,16 +88,21 @@ public class LevelOne extends LevelParent {
 		addUserToScene();
 	}
 
+	/**
+	 * Plays the background music for Level One.
+	 */
 	private void playLevelMusic() {
 		playLevelMusic(SoundManager.LEVEL_ONE_MUSIC);
 	}
 
+	/**
+	 * Adds the user's plane to the scene if it is not already present.
+	 */
 	private void addUserToScene() {
 		if (!getRoot().getChildren().contains(getUser())) { // Check if already added
 			getRoot().getChildren().add(getUser());
 		}
 	}
-
 
 	/**
 	 * Spawn enemy units based on the spawn probability and current number of enemies
@@ -90,16 +117,30 @@ public class LevelOne extends LevelParent {
 		}
 	}
 
+	/**
+	 * Determines if an enemy should be spawned in the current frame based on the spawn probability.
+	 *
+	 * @return true if an enemy should be spawned, false otherwise.
+	 */
 	private boolean shouldSpawnEnemy() {
 		return Math.random() < ENEMY_SPAWN_PROBABILITY;
 	}
 
+	/**
+	 * Spawns a new enemy plane and adds it to the level.
+	 */
 	private void spawnEnemy() {
 		double initialYPosition = Math.random() * getEnemyMaximumYPosition();
 		ActiveActorDestructible newEnemy = createEnemy(initialYPosition);
 		addEnemyUnit(newEnemy);
 	}
 
+	/**
+	 * Creates a new enemy plane at the specified vertical position.
+	 *
+	 * @param initialYPosition The initial Y position of the enemy plane.
+	 * @return A new {@link ActiveActorDestructible} representing the enemy plane.
+	 */
 	private ActiveActorDestructible createEnemy(double initialYPosition) {
 		return new EnemyPlane(getScreenWidth(), initialYPosition);
 	}

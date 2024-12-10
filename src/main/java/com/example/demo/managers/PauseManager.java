@@ -9,12 +9,25 @@ import com.example.demo.screens.MenuView;
 import javafx.scene.Group;
 import javafx.stage.Stage;
 
+/**
+ * Manages the game's pause functionality, including pausing, resuming, restarting, and returning to the main menu.
+ * <p>
+ * The {@link PauseManager} handles the interactions between the game's state, sound, and visual elements during a paused state.
+ * </p>
+ */
 public class PauseManager {
 
     private final GameLoopManager gameLoopManager;
     private final SoundManager soundManager;
     private final Group root;
 
+    /**
+     * Constructs a {@link PauseManager} instance.
+     *
+     * @param gameLoopManager The {@link GameLoopManager} controlling the game's loop.
+     * @param soundManager    The {@link SoundManager} for managing game sounds.
+     * @param root            The root {@link Group} for the game's visual elements.
+     */
     public PauseManager(GameLoopManager gameLoopManager, SoundManager soundManager, Group root)
     {
         this.gameLoopManager = gameLoopManager;
@@ -59,9 +72,6 @@ public class PauseManager {
         );
         pauseScreen.show();
     }
-
-
-
 
     /**
      * Resumes the game from a paused state.

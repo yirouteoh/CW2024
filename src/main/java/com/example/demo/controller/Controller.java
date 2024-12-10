@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -11,6 +10,11 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 import com.example.demo.levels.LevelParent;
 
+
+/**
+ * Controls the game's flow by managing transitions between levels and handling property change events.
+ * This class dynamically loads and navigates between levels using reflection.
+ */
 public class Controller implements PropertyChangeListener {
 
 	private static final String LEVEL_ONE_CLASS_NAME = "com.example.demo.levels.LevelOne";

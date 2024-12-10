@@ -240,21 +240,25 @@ public class LevelThree extends LevelParent {
         finalBossMessageTimeline.play();
     }
 
-
-
+    /**
+     * Pauses the animation for the final boss message.
+     * This can be called when the game is paused to stop the boss entry animation.
+     */
     public void pauseFinalBossMessage() {
         if (finalBossMessageTimeline != null && finalBossMessageTimeline.getStatus() == javafx.animation.Animation.Status.RUNNING) {
             finalBossMessageTimeline.pause();
         }
     }
 
+    /**
+     * Resumes the animation for the final boss message.
+     * This can be called when the game is resumed to continue the boss entry animation.
+     */
     public void resumeFinalBossMessage() {
         if (finalBossMessageTimeline != null && finalBossMessageTimeline.getStatus() == javafx.animation.Animation.Status.PAUSED) {
             finalBossMessageTimeline.play();
         }
     }
-
-
 
     /**
      * Creates the text for the final boss entry message.

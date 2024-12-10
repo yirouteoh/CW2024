@@ -3,6 +3,15 @@ package com.example.demo.actors;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+
+/**
+ * Represents an active, drawable actor in the game.
+ * <p>
+ * This abstract class provides the basic structure and functionality for game actors,
+ * including image initialization, positioning, and movement logic. Subclasses must implement
+ * specific behavior by overriding the {@link #updatePosition()} method.
+ * </p>
+ */
 public abstract class ActiveActor extends ImageView {
 
 	private static final String IMAGE_LOCATION = "/com/example/demo/images/";

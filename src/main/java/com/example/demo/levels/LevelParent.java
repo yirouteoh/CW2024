@@ -24,7 +24,14 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-
+/**
+ * Represents the base class for all levels in the game.
+ * <p>
+ * Provides core functionalities for managing user planes, enemies, game states,
+ * collisions, and UI updates. Specific levels inherit and customize behavior
+ * from this class.
+ * </p>
+ */
 public abstract class LevelParent {
 
 	// ==================== Constants & Core Properties =====================
@@ -82,8 +89,7 @@ public abstract class LevelParent {
 		this.soundManager = SoundManager.getInstance();
 
 		// Pass 'this' (current LevelParent instance)
-		this.sceneManager = new SceneManager(backgroundImageName, screenHeight, screenWidth,
-				gameLoopManager, soundManager, null, this);
+		this.sceneManager = new SceneManager(backgroundImageName, screenHeight, screenWidth, gameLoopManager, soundManager, null, this);
 
 		this.pauseManager = new PauseManager(gameLoopManager, soundManager, sceneManager.getRoot());
 		this.sceneManager.setPauseManager(pauseManager);
@@ -116,12 +122,25 @@ public abstract class LevelParent {
 	 * The timeline runs indefinitely and invokes the updateScene method at fixed intervals.
 	 */
 	protected abstract void initializeFriendlyUnits();
+
+	/**
+	 * Abstract method to check game-over conditions (e.g., loss or level completion).
+	 * Implemented by child classes.
+	 */
 	protected abstract void checkIfGameOver();
 
+	/**
+	 * Spawns enemy units using the EnemyManager.
+	 */
 	protected void spawnEnemyUnits() {
 		enemyManager.spawnEnemies();
 	}
 
+	/**
+	 * Abstract method to instantiate the level-specific UI elements (e.g., health display).
+	 *
+	 * @return The level's UI view.
+	 */
 	protected abstract LevelView instantiateLevelView();
 
 	/**
@@ -139,7 +158,11 @@ public abstract class LevelParent {
 		return scene;
 	}
 
-
+	/**
+	 * Starts the game, displaying a countdown overlay before beginning the game loop.
+	 *
+	 * @param primaryStage The primary game window.
+	 */
 	public void startGame(Stage primaryStage) {
 		Scene scene = initializeScene();
 		primaryStage.setScene(scene); // Set the Scene on the Stage
@@ -154,12 +177,16 @@ public abstract class LevelParent {
 		});
 	}
 
+	/**
+	 * Plays the background music for the level.
+	 *
+	 * @param musicFilePath The file path of the music to play.
+	 */
 	protected void playLevelMusic(String musicFilePath) {
 		if (!soundManager.isBackgroundMusicMuted()) {
 			soundManager.playBackgroundMusic(musicFilePath);
 		}
 	}
-
 
 	// ==================== Game Loop =====================
 	// Methods that define and update the game loop, including actor updates, collisions, and UI refresh.
@@ -196,16 +223,23 @@ public abstract class LevelParent {
 		updateLevelView();
 	}
 
+	/**
+	 * Generates fire (projectiles) for enemy units using the EnemyManager.
+	 */
 	private void generateEnemyFire() {
 		enemyManager.generateEnemyFire();
 	}
 
-
+	/**
+	 * Updates the current number of enemies based on the enemy manager's count.
+	 */
 	private void updateNumberOfEnemies() {
 		currentNumberOfEnemies = enemyManager.getCurrentEnemyCount();
 	}
 
-
+	/**
+	 * Updates the kill count based on destroyed enemies and refreshes the kill count display.
+	 */
 	private void updateKillCount() {
 		int kills = currentNumberOfEnemies - actorManager.getEnemyUnits().size();
 		for (int i = 0; i < kills; i++) {
@@ -214,10 +248,18 @@ public abstract class LevelParent {
 		}
 	}
 
+	/**
+	 * Updates the level view, such as removing hearts from the health display.
+	 */
 	private void updateLevelView() {
 		levelView.removeHearts(user.getHealth());
 	}
 
+	/**
+	 * Advances to the next level.
+	 *
+	 * @param nextLevel The next level to transition to.
+	 */
 	public void goToNextLevel(LevelParent nextLevel) {
 		try {
 			gameLoopManager.stop();
@@ -235,15 +277,27 @@ public abstract class LevelParent {
 		}
 	}
 
+	/**
+	 * Displays an error dialog with the specified message.
+	 *
+	 * @param message The error message to display.
+	 */
 	public void showErrorDialog(String message) {
 		sceneManager.showErrorDialog(message);
 	}
 
+	/**
+	 * Retrieves the kill count display for the level.
+	 *
+	 * @return The {@link KillCountDisplay} instance used in the level.
+	 */
 	protected KillCountDisplay getKillCountDisplay() {
 		return killCountDisplay;
 	}
 
-
+	/**
+	 * Fires a projectile from the user's plane and adds it to the scene.
+	 */
 	public void fireProjectile() {
 		ActiveActorDestructible projectile = user.fireProjectile();
 		if (projectile != null) {
@@ -251,14 +305,30 @@ public abstract class LevelParent {
 		}
 	}
 
+	/**
+	 * Adds a projectile to the game scene. This is typically used for projectiles
+	 * created by power-ups or other game events.
+	 *
+	 * @param projectile The projectile to add to the scene.
+	 */
 	public void addProjectile(ActiveActorDestructible projectile) {
 		actorManager.addUserProjectile(projectile, sceneManager.getRoot()); // Use ActorManager to add the projectile
 	}
 
+	/**
+	 * Adds a property change listener to observe changes in the level's state.
+	 *
+	 * @param pcl The {@link PropertyChangeListener} to add.
+	 */
 	public void addPropertyChangeListener(PropertyChangeListener pcl) {
 		support.addPropertyChangeListener(pcl);
 	}
 
+	/**
+	 * Retrieves the current number of enemies in the game.
+	 *
+	 * @return The number of enemy units currently active in the level.
+	 */
 	protected int getCurrentNumberOfEnemies() {
 		return actorManager.getEnemyUnits().size();
 	}
@@ -268,9 +338,8 @@ public abstract class LevelParent {
 	// Methods for pausing, resuming, and managing game-over conditions.
 
 	/**
-	 * Pauses the game and displays the pause menu.
+	 * Pauses the game and displays the pause menu using the {@link PauseManager}.
 	 */
-
 	public void showPauseScreen() {
 		pauseManager.showPauseScreen(this);
 	}
@@ -283,10 +352,16 @@ public abstract class LevelParent {
 		pauseManager.showPauseScreen(this);
 	}
 
+	/**
+	 * Handles the win scenario for the level, transitioning to the appropriate state or screen.
+	 */
 	protected void winGame() {
 		eventHandler.handleWin();
 	}
 
+	/**
+	 * Handles the lose scenario for the level, transitioning to the appropriate state or screen.
+	 */
 	protected void loseGame() {
 		eventHandler.handleLose();
 	}
@@ -294,10 +369,20 @@ public abstract class LevelParent {
 	// ==================== Actor & Projectile Management =====================
 	// Methods responsible for adding, removing, or interacting with actors and projectiles.
 
+	/**
+	 * Adds an enemy unit to the game scene and manages it using the {@link ActorManager}.
+	 *
+	 * @param enemy The enemy unit to add.
+	 */
 	public void addEnemyUnit(ActiveActorDestructible enemy) {
 		actorManager.addEnemyUnit(enemy, sceneManager.getRoot()); // Use ActorManager to add the enemy
 	}
 
+	/**
+	 * Adds a power-up to the game scene. This power-up is managed by the {@link ActorManager}.
+	 *
+	 * @param powerUp The power-up to add.
+	 */
 	public void addPowerUp(ActiveActorDestructible powerUp) {
 		actorManager.addPowerUp(powerUp, sceneManager.getRoot()); // Use ActorManager to add the power-up
 	}

@@ -10,6 +10,13 @@ import javafx.scene.input.KeyCode;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Manages user input for controlling the game.
+ * <p>
+ * This class tracks key presses, processes input in the game loop,
+ * and executes corresponding actions, such as movement, firing projectiles, and pausing the game.
+ * </p>
+ */
 public class InputManager {
 
     private final UserPlane user;
@@ -19,12 +26,27 @@ public class InputManager {
 
     private final Set<KeyCode> pressedKeys = new HashSet<>(); // Key State Tracker
 
+    /**
+     * Constructs an {@link InputManager} instance.
+     *
+     * @param user        The user's plane that responds to movement and actions.
+     * @param levelParent The current game level being played.
+     */
     public InputManager(UserPlane user, LevelParent levelParent) {
         this.user = user;
         this.levelParent = levelParent;
         this.soundManager = SoundManager.getInstance();
     }
 
+    /**
+     * Initializes input handlers for the specified scene.
+     * <p>
+     * This method sets up listeners for key presses and releases, handling specific actions like
+     * firing projectiles and pausing the game.
+     * </p>
+     *
+     * @param scene The {@link Scene} to attach input handlers to.
+     */
     public void initializeInputHandlers(Scene scene) {
         scene.setOnKeyPressed(event -> {
             pressedKeys.add(event.getCode()); // Add key to tracker

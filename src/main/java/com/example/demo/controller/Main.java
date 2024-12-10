@@ -4,6 +4,12 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import com.example.demo.screens.MenuView;
 
+/**
+ * The entry point of the Sky Battle game.
+ * <p>
+ * This class initializes the JavaFX application, sets up the primary stage, and displays the main menu.
+ * </p>
+ */
 public class Main extends Application {
 
 	private static final int SCREEN_WIDTH = 1300;

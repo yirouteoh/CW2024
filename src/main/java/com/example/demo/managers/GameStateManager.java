@@ -1,12 +1,22 @@
 package com.example.demo.managers;
 
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+/**
+ * Manages the state of the game and notifies listeners of state changes.
+ * <p>
+ * This class uses the singleton pattern to ensure there is only one instance of the
+ * {@link GameStateManager} in the application. It tracks the current game state
+ * and provides methods to change or query the state.
+ * </p>
+ */
 public class GameStateManager {
 
     private static GameStateManager instance;
 
+    /**
+     * Enum representing possible game states.
+     */
     public enum GameState {
         PLAYING,
         PAUSED,
@@ -14,6 +24,10 @@ public class GameStateManager {
         WIN
     }
 
+    /**
+     * Constructs a {@link GameStateManager} with the initial state set to {@code PLAYING}.
+     * This constructor is private to enforce the singleton pattern.
+     */
     private GameState currentState;
     private final PropertyChangeSupport support;
 
@@ -25,6 +39,11 @@ public class GameStateManager {
         this.support = new PropertyChangeSupport(this);
     }
 
+    /**
+     * Retrieves the singleton instance of the {@link GameStateManager}.
+     *
+     * @return The singleton instance of {@link GameStateManager}.
+     */
     public static GameStateManager getInstance() {
         if (instance == null) {
             synchronized (GameStateManager.class) {

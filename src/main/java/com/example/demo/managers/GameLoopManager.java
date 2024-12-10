@@ -4,6 +4,13 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 
+/**
+ * Manages the game loop using a {@link Timeline}.
+ * <p>
+ * This class provides methods to start, stop, pause, and resume the game loop,
+ * allowing for precise control over game state transitions.
+ * </p>
+ */
 public class GameLoopManager {
 
     private final Timeline timeline;

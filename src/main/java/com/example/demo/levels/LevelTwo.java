@@ -5,6 +5,10 @@ import com.example.demo.screens.LevelViewLevelTwo;
 import com.example.demo.sounds.SoundManager;
 import com.example.demo.actors.plane.Boss;
 
+/**
+ * Represents the second level of the game.
+ * This level features a single boss as the primary challenge.
+ */
 public class LevelTwo extends LevelParent {
 
 	// Constants
@@ -27,7 +31,11 @@ public class LevelTwo extends LevelParent {
 		this.soundManager = SoundManager.getInstance();
 	}
 
-	// Boss creation encapsulated in its own method for flexibility
+	/**
+	 * Creates the boss for Level Two.
+	 *
+	 * @return A configured {@link Boss} instance.
+	 */
 	private Boss createBoss() {
 		return new Boss();
 	}
@@ -41,10 +49,16 @@ public class LevelTwo extends LevelParent {
 		addUserPlaneToScene();
 	}
 
+	/**
+	 * Plays the background music for Level Two.
+	 */
 	private void playLevelMusic() {
 		playLevelMusic(SoundManager.LEVEL_TWO_MUSIC);
 	}
 
+	/**
+	 * Adds the user's plane to the scene.
+	 */
 	private void addUserPlaneToScene() {
 		getRoot().getChildren().add(getUser());
 	}
@@ -61,24 +75,43 @@ public class LevelTwo extends LevelParent {
 		}
 	}
 
+	/**
+	 * Determines if the user has lost the game.
+	 *
+	 * @return true if the user's plane is destroyed, false otherwise.
+	 */
 	private boolean isGameLost() {
 		return userIsDestroyed();
 	}
 
+	/**
+	 * Handles the loss condition by stopping the level music and transitioning to the loss screen.
+	 */
 	private void handleGameLoss() {
 		stopLevelMusic();
 		loseGame();
 	}
 
+	/**
+	 * Determines if the boss has been defeated.
+	 *
+	 * @return true if the boss is destroyed, false otherwise.
+	 */
 	private boolean isBossDefeated() {
 		return boss.isDestroyed();
 	}
 
+	/**
+	 * Handles advancing to the next level by stopping the level music and loading Level Three.
+	 */
 	private void handleLevelAdvance() {
 		stopLevelMusic();
 		goToNextLevel(new LevelThree(getScreenHeight(), getScreenWidth()));
 	}
 
+	/**
+	 * Stops the background music for the level.
+	 */
 	private void stopLevelMusic() {
 		soundManager.stopBackgroundMusic();
 	}
@@ -93,16 +126,27 @@ public class LevelTwo extends LevelParent {
 		}
 	}
 
+	/**
+	 * Determines if the boss should be spawned.
+	 *
+	 * @return true if the boss should be spawned, false otherwise.
+	 */
 	private boolean shouldSpawnBoss() {
 		return getCurrentNumberOfEnemies() == 0 && !boss.isDestroyed();
 	}
 
+	/**
+	 * Spawns the boss and adds its health bar and shield to the scene.
+	 */
 	private void spawnBoss() {
 		addEnemyUnit(boss);
 		addBossHealthBarToScene();
 		getRoot().getChildren().add(boss.getShieldImage()); // Add the shield image
 	}
 
+	/**
+	 * Adds the boss's health bar to the scene.
+	 */
 	private void addBossHealthBarToScene() {
 		getRoot().getChildren().addAll(boss.getHealthBarBackground(), boss.getHealthBar());
 	}

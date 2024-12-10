@@ -10,6 +10,10 @@ import javafx.scene.Group;
 
 import java.util.Random;
 
+/**
+ * Manages enemy-related functionalities, such as spawning, firing projectiles, and keeping track of active enemies.
+ * This class works with {@link ActorManager} and a factory pattern to create and manage enemies dynamically.
+ */
 public class EnemyManager {
     private final ActorManager actorManager;
     private final Group root;

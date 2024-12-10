@@ -13,6 +13,13 @@ import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+/**
+ * Manages the configuration and display of the game's main scene.
+ * <p>
+ * This class handles the initialization of the scene, including the background,
+ * pause functionality, and audio controls. It also supports displaying error dialogs.
+ * </p>
+ */
 public class SceneManager {
 
     private final Group root;
@@ -135,14 +142,29 @@ public class SceneManager {
         alert.show();
     }
 
+    /**
+     * Retrieves the root {@link Group} of the scene.
+     *
+     * @return The root {@link Group}.
+     */
     public Group getRoot() {
         return root;
     }
 
+    /**
+     * Retrieves the {@link Scene} managed by this class.
+     *
+     * @return The {@link Scene}.
+     */
     public Scene getScene() {
         return scene;
     }
 
+    /**
+     * Sets a new {@link PauseManager} for the scene.
+     *
+     * @param pauseManager The new {@link PauseManager} instance.
+     */
     public void setPauseManager(PauseManager pauseManager) {
         this.pauseManager = pauseManager;
     }
