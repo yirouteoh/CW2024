@@ -85,13 +85,14 @@ public abstract class LevelParent {
 		this.screenWidth = screenWidth;
 		this.enemyMaximumYPosition = screenHeight - SCREEN_HEIGHT_ADJUSTMENT;
 
-		this.gameLoopManager = new GameLoopManager(Duration.millis(MILLISECOND_DELAY), this::updateScene);
+		this.gameLoopManager = GameLoopManager.getInstance();
+		this.gameLoopManager.initialize(Duration.millis(MILLISECOND_DELAY), this::updateScene);
 		this.soundManager = SoundManager.getInstance();
 
 		// Pass 'this' (current LevelParent instance)
-		this.sceneManager = new SceneManager(backgroundImageName, screenHeight, screenWidth, gameLoopManager, soundManager, null, this);
+		this.sceneManager = new SceneManager(backgroundImageName, screenHeight, screenWidth, soundManager, null, this);
 
-		this.pauseManager = new PauseManager(gameLoopManager, soundManager, sceneManager.getRoot());
+		this.pauseManager = new PauseManager(soundManager, sceneManager.getRoot());
 		this.sceneManager.setPauseManager(pauseManager);
 
 		this.user = new UserPlane(playerInitialHealth);
@@ -389,12 +390,6 @@ public abstract class LevelParent {
 
 	// ==================== Utility Methods =====================
 	// Miscellaneous methods, including getters and utility functions for game logic.
-
-	// Getter for GameLoopManager
-	public GameLoopManager getGameLoopManager() {
-		return gameLoopManager;
-	}
-
 	// Getter for countdownInProgress
 	public boolean isCountdownInProgress() {
 		return countdownInProgress;

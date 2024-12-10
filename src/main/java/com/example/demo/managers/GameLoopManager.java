@@ -13,20 +13,40 @@ import javafx.util.Duration;
  */
 public class GameLoopManager {
 
-    private final Timeline timeline;
+    private static GameLoopManager instance; // Singleton instance
+    private Timeline timeline;
     private boolean paused = false; // Track whether the game loop is paused
 
     /**
-     * Constructs a GameLoopManager with a specified frame duration and update task.
+     * Private constructor to enforce Singleton pattern.
+     */
+    private GameLoopManager() {
+        timeline = new Timeline();
+        timeline.setCycleCount(Timeline.INDEFINITE); // Loop indefinitely
+    }
+
+    /**
+     * Returns the singleton instance of GameLoopManager.
+     *
+     * @return The singleton instance of GameLoopManager.
+     */
+    public static synchronized GameLoopManager getInstance() {
+        if (instance == null) {
+            instance = new GameLoopManager();
+        }
+        return instance;
+    }
+
+    /**
+     * Initializes the game loop with the specified frame duration and update task.
      *
      * @param frameDuration The duration of each frame in milliseconds.
      * @param updateTask    The task to run on each frame.
      */
-    public GameLoopManager(Duration frameDuration, Runnable updateTask) {
-        timeline = new Timeline();
+    public void initialize(Duration frameDuration, Runnable updateTask) {
+        timeline.getKeyFrames().clear(); // Clear any existing frames
         KeyFrame keyFrame = new KeyFrame(frameDuration, e -> updateTask.run());
         timeline.getKeyFrames().add(keyFrame);
-        timeline.setCycleCount(Timeline.INDEFINITE); // Loop indefinitely
     }
 
     /**
@@ -75,5 +95,4 @@ public class GameLoopManager {
     public boolean isPaused() {
         return paused;
     }
-
 }

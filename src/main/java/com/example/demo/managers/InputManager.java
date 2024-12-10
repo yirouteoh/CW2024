@@ -61,8 +61,8 @@ public class InputManager {
                 }
                 case ESCAPE -> {
                     GameStateManager gameStateManager = GameStateManager.getInstance();
-                    if (!gameStateManager.isGameOver() && !gameStateManager.isWin() && !levelParent.getGameLoopManager().isPaused()) {
-                        levelParent.getGameLoopManager().pause();
+                    if (!gameStateManager.isGameOver() && !gameStateManager.isWin() && !GameLoopManager.getInstance().isPaused()) {
+                        GameLoopManager.getInstance().pause();
                         soundManager.pauseBackgroundMusic();
                         levelParent.showPauseScreen();
                     }

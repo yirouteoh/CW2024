@@ -26,7 +26,7 @@ public class EventHandler {
      */
     public void handleWin() {
         if (!gameStateManager.isWin()) { // Prevent duplicate calls
-            levelParent.getGameLoopManager().stop();
+            GameLoopManager.getInstance().stop();
             soundManager.stopBackgroundMusic();
             soundManager.playBackgroundMusic(SoundManager.WIN_GAME_MUSIC);
             gameStateManager.changeState(GameStateManager.GameState.WIN);
@@ -46,7 +46,7 @@ public class EventHandler {
      */
     public void handleLose() {
         if (!gameStateManager.isGameOver()) { // Prevent duplicate calls
-            levelParent.getGameLoopManager().stop();
+            GameLoopManager.getInstance().stop();
             soundManager.stopBackgroundMusic();
             soundManager.playBackgroundMusic(SoundManager.GAME_OVER_MUSIC);
             gameStateManager.changeState(GameStateManager.GameState.GAME_OVER);

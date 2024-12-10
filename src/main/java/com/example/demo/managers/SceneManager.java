@@ -30,20 +30,19 @@ public class SceneManager {
 
     private ImageView pauseButton;
     private final AudioControlPanel audioControlPanel;
-    private final GameLoopManager gameLoopManager;
     private final SoundManager soundManager;
     private PauseManager pauseManager;
     private final LevelParent levelParent; // Reference to LevelParent
+    private final GameLoopManager gameLoopManager;
 
-    public SceneManager(String backgroundImageName, double screenHeight, double screenWidth,
-                        GameLoopManager gameLoopManager, SoundManager soundManager,
+    public SceneManager(String backgroundImageName, double screenHeight, double screenWidth, SoundManager soundManager,
                         PauseManager pauseManager, LevelParent levelParent) {
         this.root = new Group();
         this.scene = new Scene(root, screenWidth, screenHeight);
         this.background = new ImageView(new Image(MenuView.getResourceOrThrow(backgroundImageName).toExternalForm()));
         this.screenHeight = screenHeight;
         this.screenWidth = screenWidth;
-        this.gameLoopManager = gameLoopManager;
+        this.gameLoopManager = GameLoopManager.getInstance();
         this.soundManager = soundManager;
         this.pauseManager = pauseManager;
         this.levelParent = levelParent; // Store LevelParent instance
@@ -121,7 +120,7 @@ public class SceneManager {
                     return; // Disable pausing during countdown
                 }
 
-                gameLoopManager.pause();
+                GameLoopManager.getInstance().pause();
                 soundManager.pauseBackgroundMusic(); // Pause music
                 pauseManager.showPauseScreen(levelParent); // Pass LevelParent reference
             }

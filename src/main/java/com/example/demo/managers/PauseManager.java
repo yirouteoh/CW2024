@@ -17,20 +17,11 @@ import javafx.stage.Stage;
  */
 public class PauseManager {
 
-    private final GameLoopManager gameLoopManager;
     private final SoundManager soundManager;
     private final Group root;
 
-    /**
-     * Constructs a {@link PauseManager} instance.
-     *
-     * @param gameLoopManager The {@link GameLoopManager} controlling the game's loop.
-     * @param soundManager    The {@link SoundManager} for managing game sounds.
-     * @param root            The root {@link Group} for the game's visual elements.
-     */
-    public PauseManager(GameLoopManager gameLoopManager, SoundManager soundManager, Group root)
+    public PauseManager(SoundManager soundManager, Group root)
     {
-        this.gameLoopManager = gameLoopManager;
         this.soundManager = soundManager;
         this.root = root;
     }
@@ -49,7 +40,7 @@ public class PauseManager {
             throw new IllegalStateException("The root group must be added to a Scene before showing the pause screen.");
         }
 
-        gameLoopManager.pause();
+        GameLoopManager.getInstance().pause();
         soundManager.pauseBackgroundMusic();
         GameStateManager.getInstance().changeState(GameStateManager.GameState.PAUSED);
 
@@ -79,7 +70,7 @@ public class PauseManager {
      * @param levelParent The current LevelParent for state management.
      */
     private void resumeGame(LevelParent levelParent) {
-        gameLoopManager.resume();
+        GameLoopManager.getInstance().resume();
         GameStateManager.getInstance().changeState(GameStateManager.GameState.PLAYING);
         soundManager.resumeBackgroundMusic();
     }
@@ -96,7 +87,7 @@ public class PauseManager {
             }
 
             GameStateManager.getInstance().changeState(GameStateManager.GameState.PLAYING);
-            gameLoopManager.stop();
+            GameLoopManager.getInstance().stop();
             soundManager.stopBackgroundMusic();
 
             com.example.demo.controller.Controller controller = new com.example.demo.controller.Controller(
@@ -125,7 +116,7 @@ public class PauseManager {
         }
 
         GameStateManager.getInstance().changeState(GameStateManager.GameState.PAUSED);
-        gameLoopManager.stop();
+        GameLoopManager.getInstance().stop();
 
         Stage stage = (Stage) levelParent.getScene().getWindow();
         MenuView menuView = new MenuView(stage, new com.example.demo.controller.Controller(stage));
