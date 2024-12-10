@@ -81,20 +81,20 @@ public class CollisionManager {
         });
     }
 
-
     private void handlePlaneCollisions() {
-        actorManager.getFriendlyUnits().forEach(friendly -> {
-            actorManager.getEnemyUnits().forEach(enemy -> {
-                if (friendly instanceof UserPlane && friendly.getBoundsInParent().intersects(enemy.getBoundsInParent())) {
-                    friendly.takeDamage();
-                    enemy.takeDamage();
-                    soundManager.playCrashSound(); // Play crash sound
-                    shakeScreen(); // Trigger screen shake
-                }
-            });
-        });
+        actorManager.getFriendlyUnits().forEach(friendly ->
+                actorManager.getEnemyUnits().forEach(enemy -> handleCollision(friendly, enemy))
+        );
     }
 
+    private void handleCollision(ActiveActorDestructible friendly, ActiveActorDestructible enemy) {
+        if (friendly instanceof UserPlane && friendly.getBoundsInParent().intersects(enemy.getBoundsInParent())) {
+            friendly.takeDamage();
+            enemy.takeDamage();
+            soundManager.playCrashSound(); // Play crash sound
+            shakeScreen(); // Trigger screen shake
+        }
+    }
 
     private void handlePowerUpCollisions() {
         actorManager.getPowerUps().forEach(powerUp -> {
