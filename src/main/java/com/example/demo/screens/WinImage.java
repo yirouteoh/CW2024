@@ -12,6 +12,13 @@ import javafx.scene.paint.Stop;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
+/**
+ * Represents the "You Win" screen displayed when the player completes the game.
+ * <p>
+ * This screen features a congratulatory message, a gradient background,
+ * a confetti animation, and buttons to restart the game or exit to the main menu.
+ * </p>
+ */
 public class WinImage extends Group {
 
 	private static final String RESTART_IMAGE_NAME = "/com/example/demo/images/restart.png";

@@ -2,6 +2,13 @@ package com.example.demo.utils;
 
 import javafx.scene.text.Text;
 
+/**
+ * Represents a display for tracking and showing the player's current kill count.
+ * <p>
+ * The display shows the current number of kills relative to the target kill count
+ * required to advance in the game.
+ * </p>
+ */
 public class KillCountDisplay {
 
     private int killCount; // Tracks the current kill count

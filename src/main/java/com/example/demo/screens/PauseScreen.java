@@ -9,6 +9,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 
+/**
+ * Represents the pause screen overlay displayed when the game is paused.
+ * <p>
+ * This overlay includes options to resume the game, restart the game, or return to the main menu.
+ * It also interacts with the {@link SoundManager} to manage background music.
+ * </p>
+ */
 public class PauseScreen {
 
     private final Group root; // Root node of the current scene

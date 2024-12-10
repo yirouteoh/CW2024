@@ -3,6 +3,13 @@ package com.example.demo.powerups;
 import com.example.demo.actors.ActiveActorDestructible;
 import com.example.demo.actors.plane.UserPlane;
 
+/**
+ * Represents a power-up in the game.
+ * <p>
+ * Power-ups are collectible items that grant special abilities or effects to the user's plane.
+ * They fall from the top of the screen and are removed if they move off-screen or are collected.
+ * </p>
+ */
 public class PowerUp extends ActiveActorDestructible {
 
     private static final int IMAGE_HEIGHT = 40; // Fixed height for power-up images

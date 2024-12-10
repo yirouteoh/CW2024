@@ -6,6 +6,15 @@ import javafx.scene.media.MediaPlayer;
 
 import java.net.URL;
 
+/**
+ * Manages background music and sound effects for the game.
+ * <p>
+ * This class provides methods to play, pause, and stop background music,
+ * as well as control sound effects like shooting and crash sounds.
+ * It uses a Singleton pattern to ensure a single instance of the sound manager
+ * across the application.
+ * </p>
+ */
 public class SoundManager {
     private static SoundManager instance; // Singleton instance
     private MediaPlayer mediaPlayer; // For background music

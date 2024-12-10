@@ -4,6 +4,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 
+/**
+ * Represents a visual display of hearts used to indicate the player's health.
+ * <p>
+ * The class manages a container of heart icons, allowing hearts to be dynamically
+ * added or removed based on the player's current health.
+ * </p>
+ */
 public class HeartDisplay {
 
 	private static final String HEART_IMAGE_NAME = "/com/example/demo/images/heart.png";

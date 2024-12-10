@@ -13,6 +13,12 @@ import javafx.scene.text.Text;
 import javafx.scene.Scene;
 import javafx.util.Duration;
 
+/**
+ * Represents the "Game Over" screen displayed when the player loses the game.
+ * <p>
+ * This screen provides motivational text and options to restart the game or exit to the main menu.
+ * </p>
+ */
 public class GameOverImage extends Group {
 
 	private static final String RESTART_IMAGE_NAME = "/com/example/demo/images/restart.png";

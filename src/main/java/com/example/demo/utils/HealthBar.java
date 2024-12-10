@@ -12,6 +12,13 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+/**
+ * Represents a health bar that visually displays the health status of an entity in the game.
+ * <p>
+ * The health bar consists of a background, a colored bar indicating current health,
+ * and a label displaying the numeric health values.
+ * </p>
+ */
 public class HealthBar {
 
     private final Rectangle healthBar; // The current health bar
@@ -127,10 +134,20 @@ public class HealthBar {
 
     // Getters for the components
 
+    /**
+     * Retrieves the current health bar rectangle.
+     *
+     * @return The {@link Rectangle} representing the health bar.
+     */
     public Rectangle getHealthBar() {
         return healthBar;
     }
 
+    /**
+     * Retrieves the background rectangle of the health bar.
+     *
+     * @return The {@link Rectangle} representing the health bar background.
+     */
     public Rectangle getHealthBarBackground() {
         return healthBarBackground;
     }
