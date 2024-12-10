@@ -22,9 +22,9 @@ public class CollisionManager {
     private final double screenWidth;
 
 
-    public CollisionManager(ActorManager actorManager, SoundManager soundManager, UserPlane user, Group root, double screenWidth) {
+    public CollisionManager(ActorManager actorManager, UserPlane user, Group root, double screenWidth) {
         this.actorManager = actorManager;
-        this.soundManager = soundManager;
+        this.soundManager = SoundManager.getInstance();
         this.user = user;
         this.root = root;
         this.screenWidth = screenWidth;

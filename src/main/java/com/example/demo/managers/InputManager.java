@@ -19,10 +19,10 @@ public class InputManager {
 
     private final Set<KeyCode> pressedKeys = new HashSet<>(); // Key State Tracker
 
-    public InputManager(UserPlane user, LevelParent levelParent, SoundManager soundManager) {
+    public InputManager(UserPlane user, LevelParent levelParent) {
         this.user = user;
         this.levelParent = levelParent;
-        this.soundManager = soundManager;
+        this.soundManager = SoundManager.getInstance();
     }
 
     public void initializeInputHandlers(Scene scene) {

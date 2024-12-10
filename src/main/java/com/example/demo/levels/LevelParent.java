@@ -97,8 +97,8 @@ public abstract class LevelParent {
 
 		this.killCountDisplay = new KillCountDisplay(600, 55, targetKillCount);
 		this.countdownOverlay = new CountdownOverlay(sceneManager.getRoot(), screenWidth, screenHeight);
-		this.collisionManager = new CollisionManager(actorManager, soundManager, user, sceneManager.getRoot(), screenWidth);
-		this.inputManager = new InputManager(user, this, soundManager);
+		this.collisionManager = new CollisionManager(actorManager, user, sceneManager.getRoot(), screenWidth);
+		this.inputManager = new InputManager(user, this);
 		this.enemyManager = new EnemyManager(
 				actorManager,
 				sceneManager.getRoot(),
@@ -108,7 +108,7 @@ public abstract class LevelParent {
 				0.25,                           // Spawn probability
 				10                              // Max enemies
 		);
-		this.eventHandler = new EventHandler(soundManager, pauseManager, this);
+		this.eventHandler = new EventHandler(pauseManager, this);
 	}
 
 	/**

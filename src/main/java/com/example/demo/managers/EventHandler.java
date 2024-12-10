@@ -15,8 +15,8 @@ public class EventHandler {
     private final PauseManager pauseManager;
     private final LevelParent levelParent;
 
-    public EventHandler(SoundManager soundManager, PauseManager pauseManager, LevelParent levelParent) {
-        this.soundManager = soundManager;
+    public EventHandler(PauseManager pauseManager, LevelParent levelParent) {
+        this.soundManager = SoundManager.getInstance();
         this.pauseManager = pauseManager;
         this.levelParent = levelParent;
     }
