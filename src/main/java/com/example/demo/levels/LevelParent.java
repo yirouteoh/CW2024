@@ -44,20 +44,20 @@ public abstract class LevelParent {
 	private final KillCountDisplay killCountDisplay;
 
 	private final ActorManager actorManager = new ActorManager();
-	private GameLoopManager gameLoopManager;
+	private final GameLoopManager gameLoopManager;
 	private final GameStateManager gameStateManager = GameStateManager.getInstance();
-	private CollisionManager collisionManager;
-	private InputManager inputManager;
-	private PauseManager pauseManager;
-	private EnemyManager enemyManager;
-	private SoundManager soundManager;
-	private EventHandler eventHandler;
+	private final CollisionManager collisionManager;
+	private final InputManager inputManager;
+	private final PauseManager pauseManager;
+	private final EnemyManager enemyManager;
+	private final SoundManager soundManager;
+	private final EventHandler eventHandler;
 
-	private PropertyChangeSupport support = new PropertyChangeSupport(this);
+	private final PropertyChangeSupport support = new PropertyChangeSupport(this);
 
 	private int currentNumberOfEnemies;
-	private LevelView levelView;
-	private CountdownOverlay countdownOverlay;
+	private final LevelView levelView;
+	private final CountdownOverlay countdownOverlay;
 	private boolean countdownInProgress = false; // Flag to track countdown state
 
 	// ==================== Initialization =====================
@@ -304,11 +304,6 @@ public abstract class LevelParent {
 
 	// ==================== Utility Methods =====================
 	// Miscellaneous methods, including getters and utility functions for game logic.
-
-	// Getter for GameStateManager
-	public GameStateManager getGameStateManager() {
-		return gameStateManager;
-	}
 
 	// Getter for GameLoopManager
 	public GameLoopManager getGameLoopManager() {
