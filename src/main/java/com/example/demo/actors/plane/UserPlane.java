@@ -1,7 +1,7 @@
 package com.example.demo.actors.plane;
 
 import com.example.demo.levels.LevelParent;
-import com.example.demo.actors.projectile.UserProjectile;
+import com.example.demo.actors.factory.ProjectileFactory;
 import com.example.demo.actors.ActiveActorDestructible;
 
 import java.util.ArrayList;
@@ -95,11 +95,17 @@ public class UserPlane extends FighterPlane {
 			spreadshotCount--; // Decrease the spreadshot count after firing
 			return spreadshotProjectiles.get(2); // Return the center projectile for compatibility
 		} else {
-			ActiveActorDestructible projectile = new UserProjectile(currentX + 100, currentY);
+			// Use ProjectileFactory to create a UserProjectile
+			ActiveActorDestructible projectile = ProjectileFactory.createProjectile(
+					ProjectileFactory.ProjectileType.USER,
+					currentX + 100, // Offset X so the projectile starts in front of the plane
+					currentY
+			);
 			levelParent.addProjectile(projectile);
 			return projectile;
 		}
 	}
+
 
 	public void activateOneTimeSpreadshot() {
 		spreadshotCount++;
@@ -107,13 +113,14 @@ public class UserPlane extends FighterPlane {
 
 	private List<ActiveActorDestructible> createSpreadshotProjectiles(double currentX, double currentY) {
 		List<ActiveActorDestructible> projectiles = new ArrayList<>();
-		projectiles.add(new UserProjectile(currentX + 100, currentY - 30)); // Left
-		projectiles.add(new UserProjectile(currentX + 100, currentY - 15)); // Left-mid
-		projectiles.add(new UserProjectile(currentX + 100, currentY));      // Center
-		projectiles.add(new UserProjectile(currentX + 100, currentY + 15)); // Right-mid
-		projectiles.add(new UserProjectile(currentX + 100, currentY + 30)); // Right
+		projectiles.add(ProjectileFactory.createProjectile(ProjectileFactory.ProjectileType.USER, currentX + 100, currentY - 30)); // Left
+		projectiles.add(ProjectileFactory.createProjectile(ProjectileFactory.ProjectileType.USER, currentX + 100, currentY - 15)); // Left-mid
+		projectiles.add(ProjectileFactory.createProjectile(ProjectileFactory.ProjectileType.USER, currentX + 100, currentY));      // Center
+		projectiles.add(ProjectileFactory.createProjectile(ProjectileFactory.ProjectileType.USER, currentX + 100, currentY + 15)); // Right-mid
+		projectiles.add(ProjectileFactory.createProjectile(ProjectileFactory.ProjectileType.USER, currentX + 100, currentY + 30)); // Right
 		return projectiles;
 	}
+
 
 	public void setLevelParent(LevelParent levelParent) {
 		this.levelParent = levelParent;

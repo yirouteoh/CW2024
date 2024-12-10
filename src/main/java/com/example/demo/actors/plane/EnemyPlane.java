@@ -1,7 +1,8 @@
 package com.example.demo.actors.plane;
 
-import com.example.demo.actors.projectile.EnemyProjectile;
 import com.example.demo.actors.ActiveActorDestructible;
+import com.example.demo.actors.factory.ProjectileFactory;
+
 
 /**
  * Represents an enemy plane in the game.
@@ -43,13 +44,16 @@ public class EnemyPlane extends FighterPlane {
 	 */
 	@Override
 	public ActiveActorDestructible fireProjectile() {
-		if (Math.random() < FIRE_RATE) {
-			double projectileXPosition = getProjectileXPosition(PROJECTILE_X_POSITION_OFFSET);
-			double projectileYPosition = getProjectileYPosition(PROJECTILE_Y_POSITION_OFFSET);
-			return new EnemyProjectile(projectileXPosition, projectileYPosition);
+		if (Math.random() < FIRE_RATE) { // Keep the fire rate logic
+			double randomOffsetX = -100 + Math.random() * 20; // Randomize X offset
+			double randomOffsetY = -30 + Math.random() * 60;  // Randomize Y offset
+			double projectileX = getProjectileXPosition(randomOffsetX);
+			double projectileY = getProjectileYPosition(randomOffsetY);
+			return ProjectileFactory.createProjectile(ProjectileFactory.ProjectileType.ENEMY, projectileX, projectileY);
 		}
 		return null; // No projectile fired
 	}
+
 
 	/**
 	 * Updates the enemy plane's state, including position and potential firing of projectiles.

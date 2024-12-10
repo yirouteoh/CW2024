@@ -2,7 +2,7 @@ package com.example.demo.actors.plane;
 
 import java.util.*;
 
-import com.example.demo.actors.projectile.BossProjectile;
+import com.example.demo.actors.factory.ProjectileFactory;
 import com.example.demo.utils.HealthBar;
 import com.example.demo.actors.ActiveActorDestructible;
 import com.example.demo.powerups.ShieldImage;
@@ -115,8 +115,19 @@ public class Boss extends FighterPlane {
 
 	@Override
 	public ActiveActorDestructible fireProjectile() {
-		return bossFiresInCurrentFrame() ? new BossProjectile(getProjectileInitialPosition()) : null;
+		if (bossFiresInCurrentFrame()) { // Keep your existing firing logic
+			double projectileY = getProjectileInitialPosition();
+			// Use ProjectileFactory to create the BossProjectile
+			return ProjectileFactory.createProjectile(
+					ProjectileFactory.ProjectileType.BOSS,
+					getLayoutX() + getTranslateX(), // X is fixed for BossProjectile
+					projectileY
+			);
+		}
+		return null; // No projectile fired
 	}
+
+
 
 	@Override
 	public void takeDamage() {
