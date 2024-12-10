@@ -45,7 +45,7 @@ public abstract class LevelParent {
 
 	private final ActorManager actorManager = new ActorManager();
 	private GameLoopManager gameLoopManager;
-	private final GameStateManager gameStateManager = new GameStateManager();
+	private final GameStateManager gameStateManager = GameStateManager.getInstance();
 	private CollisionManager collisionManager;
 	private InputManager inputManager;
 	private PauseManager pauseManager;
@@ -85,7 +85,7 @@ public abstract class LevelParent {
 		this.sceneManager = new SceneManager(backgroundImageName, screenHeight, screenWidth,
 				gameLoopManager, soundManager, null, this);
 
-		this.pauseManager = new PauseManager(gameLoopManager, gameStateManager, soundManager, sceneManager.getRoot());
+		this.pauseManager = new PauseManager(gameLoopManager, soundManager, sceneManager.getRoot());
 		this.sceneManager.setPauseManager(pauseManager);
 
 		this.user = new UserPlane(playerInitialHealth);
@@ -108,8 +108,7 @@ public abstract class LevelParent {
 				0.25,                           // Spawn probability
 				10                              // Max enemies
 		);
-		this.eventHandler = new EventHandler(gameStateManager, soundManager, pauseManager, this);
-
+		this.eventHandler = new EventHandler(soundManager, pauseManager, this);
 	}
 
 	/**

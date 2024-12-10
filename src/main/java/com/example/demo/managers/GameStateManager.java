@@ -5,6 +5,8 @@ import java.beans.PropertyChangeSupport;
 
 public class GameStateManager {
 
+    private static GameStateManager instance;
+
     public enum GameState {
         PLAYING,
         PAUSED,
@@ -18,9 +20,20 @@ public class GameStateManager {
     /**
      * Constructs a GameStateManager with the initial state set to PLAYING.
      */
-    public GameStateManager() {
+    private GameStateManager() {
         this.currentState = GameState.PLAYING;
         this.support = new PropertyChangeSupport(this);
+    }
+
+    public static GameStateManager getInstance() {
+        if (instance == null) {
+            synchronized (GameStateManager.class) {
+                if (instance == null) {
+                    instance = new GameStateManager();
+                }
+            }
+        }
+        return instance;
     }
 
     /**

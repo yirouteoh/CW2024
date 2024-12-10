@@ -10,13 +10,12 @@ import com.example.demo.screens.WinImage;
  */
 public class EventHandler {
 
-    private final GameStateManager gameStateManager;
+    private final GameStateManager gameStateManager = GameStateManager.getInstance();
     private final SoundManager soundManager;
     private final PauseManager pauseManager;
     private final LevelParent levelParent;
 
-    public EventHandler(GameStateManager gameStateManager, SoundManager soundManager, PauseManager pauseManager, LevelParent levelParent) {
-        this.gameStateManager = gameStateManager;
+    public EventHandler(SoundManager soundManager, PauseManager pauseManager, LevelParent levelParent) {
         this.soundManager = soundManager;
         this.pauseManager = pauseManager;
         this.levelParent = levelParent;

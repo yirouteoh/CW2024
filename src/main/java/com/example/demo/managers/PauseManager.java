@@ -12,13 +12,12 @@ import javafx.stage.Stage;
 public class PauseManager {
 
     private final GameLoopManager gameLoopManager;
-    private final GameStateManager gameStateManager;
     private final SoundManager soundManager;
     private final Group root;
 
-    public PauseManager(GameLoopManager gameLoopManager, GameStateManager gameStateManager, SoundManager soundManager, Group root) {
+    public PauseManager(GameLoopManager gameLoopManager, SoundManager soundManager, Group root)
+    {
         this.gameLoopManager = gameLoopManager;
-        this.gameStateManager = gameStateManager;
         this.soundManager = soundManager;
         this.root = root;
     }
@@ -39,7 +38,7 @@ public class PauseManager {
 
         gameLoopManager.pause();
         soundManager.pauseBackgroundMusic();
-        gameStateManager.changeState(GameStateManager.GameState.PAUSED);
+        GameStateManager.getInstance().changeState(GameStateManager.GameState.PAUSED);
 
         // Check if levelParent is LevelThree and pause "Final Boss Message"
         if (levelParent instanceof LevelThree levelThree) {
@@ -71,7 +70,7 @@ public class PauseManager {
      */
     private void resumeGame(LevelParent levelParent) {
         gameLoopManager.resume();
-        gameStateManager.changeState(GameStateManager.GameState.PLAYING);
+        GameStateManager.getInstance().changeState(GameStateManager.GameState.PLAYING);
         soundManager.resumeBackgroundMusic();
     }
 
@@ -86,7 +85,7 @@ public class PauseManager {
                 throw new IllegalArgumentException("LevelParent is null. Cannot restart the game.");
             }
 
-            gameStateManager.changeState(GameStateManager.GameState.PLAYING);
+            GameStateManager.getInstance().changeState(GameStateManager.GameState.PLAYING);
             gameLoopManager.stop();
             soundManager.stopBackgroundMusic();
 
@@ -115,7 +114,7 @@ public class PauseManager {
             throw new IllegalArgumentException("LevelParent cannot be null when returning to the main menu.");
         }
 
-        gameStateManager.changeState(GameStateManager.GameState.PAUSED);
+        GameStateManager.getInstance().changeState(GameStateManager.GameState.PAUSED);
         gameLoopManager.stop();
 
         Stage stage = (Stage) levelParent.getScene().getWindow();
