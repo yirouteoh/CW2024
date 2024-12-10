@@ -1,140 +1,242 @@
-#Project Title: Sky Battle Game (rmb to put table content here) (add which line in modified class)
+# COMP2042 Coursework
 
+## **Details**
+- Written by: Teoh Yi Rou (20508985)
+- GitHub Repository for COMP2042_Coursework: https://github.com/yirouteoh/CW2024.git
 
-**GitHub**
-[GitHub Repository Link](https://github.com/YourUsername/YourRepository)
+---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+## **Compilation Instructions:**
 
-**Compilation Instructions**
-To compile and run the application, follow these steps:
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/YourUsername/YourRepository.git
+## **Pre-requisites**
+- SDK: 21 (corretto-21) (Amazon Corretto 21.0.5)
+- IDE: IntelliJ IDEA
+- JavaFX: 19.0.2
 
-2. Navigate to the project directory:
-   cd YourRepository
+1. Start by cloning the project repository to your local machine. ---  https://github.com/yirouteoh/CW2024.git
+2. Set up javaFX
+3. Import the Project into IntelliJ IDEA or other IDE
+4. Compile and Run the Project
 
-3. Add dependencies:
-   Ensure you have JavaFX set up as it is required for this project.
-   If using IntelliJ, go to File > Project Structure > Libraries and add the path to JavaFX SDK.
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+## Table of Contents
+1. [Details](#details)
+2. [Compilation Instructions](#compilation-instructions)
+3. [Features](#features)
+    - [Implemented and Working Properly](#implemented-and-working-properly)
+    - [Implemented but Not Working Properly](#implemented-but-not-working-properly)
+    - [Features Not Implemented](#features-not-implemented)
 
-4. Run the application from your IDE (e.g., IntelliJ or Eclipse), ensuring that the necessary JavaFX configurations are set up. If running from the command line, use the following:
-   java --module-path /path/to/javafx/lib --add-modules javafx.controls,javafx.fxml -jar SkyBattle.jar
+---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+# Features
+## Implemented and Working Properly
 
-**Implemented and Working Properly**
-##UserPlane:
-1. UserPlane Element: UserPlane element is display when player runs the game.
-2. UserPlane Control: The UserPlane responds to **UP AND DOWN arrow keys**, allowing smooth **vertical movement** within screen boundaries, providing reponsive gameplay.
-3. UserPlane Projectile Firing: When the UserPlane fires a projectile by **pressing spacebar in keyboard**, it can **hit and destroy EnemyPlane** instances. Upon impact, the **EnemyPlane disappears**, simulating a successful hit and providing **visual feedback** to the player.
+### **1. User Interface (UI)**
 
-##Enemy:
-1. EnemyPlane Display: EnemyPlanes appear at intervals when player runs the game, **moving towards the UserPlane**. They are correctly removed upon destruction, updating the player’s score and maintaining gameplay flow.
-2. EnemyProjectile Behavior: EnemyProjectiles are **fired by enemy planes**, moving toward the UserPlane. Projectiles are **removed** on collision or when off-screen, with accurate collision detection for player damage.
+### **1. User Interface (UI)**
 
-##UserPlane and enemy interactions:
-1. Enemy Interaction: Projectile **fired by UserPlane** correctly **distroyed EnemyPlane**. Then, **EnemyPlane disappears**.
-2. Health Display: Health level **decrease** when EnemyPlane and EnemyProjectile **collides with the Userplane**.
+#### **1.1 Heart Display**
+- **Description**: Dynamically displays the player's health or remaining lives using heart icons that visually update in response to in-game events.
+- **Details**: The `HeartDisplay` class manages the display of heart icons by adding them to an `HBox` container using the `addHeartsToContainer()` method. When the player loses health, the `removeHeart()` method updates the display, ensuring synchronization with the player's current health state.
 
-##Level Transition:
-1. Players successfully **transition from Level One to Level Two** upon achieving the required kill count.
-2. Boss Behavior in Level Two: The boss in Level Two has **unique movement patterns** and a shield activation mechanism.
+#### **1.2 Kill Count Display**
+- **Description**: Provides a real-time display of the total number of enemies defeated by the player, enhancing gameplay feedback.
+- **Details**: The `KillCountDisplay` class uses the `incrementKillCount()` method to update the kill count each time an enemy is defeated. The `createDisplay(double x, double y)` method positions a `Text` element on the screen, ensuring visibility and alignment with the game's UI layout.
 
-##Projectile Collision with Boss:
-1. A custom collision detection logic ensures that projectiles only damage the Boss when they **truly collide with its custom-defined hitbox**.
-2. Improved hitbox accuracy for the Boss plane to prevent projectiles from causing damage when they are just near the Boss.
+#### **1.3 Pause Screen**
+- **Description**: Enables players to pause the game, offering options to resume, restart, or return to the main menu while maintaining the current game state.
+- **Details**: The `PauseScreen` class creates a semi-transparent overlay using the `createPauseOverlay()` method, which houses buttons for `resumeAction`, `restartAction`, and `returnToMenuAction`. The intuitive design ensures seamless interaction without interrupting gameplay flow.
 
-##Boss:
-1. A shield with a glow effect happen randomly, at this moment, it **keeps userprojectile from attacking the boss**. Boss health won't decrease even when it is attacked. 
+#### **1.4 Game Over Screen**
+- **Description**: Displays a game-over screen when the player loses, featuring motivational text and interactive options to restart or exit.
+- **Details**: The `GameOverImage` class renders an overlay with a darkened background and motivational text using the `createMotivationalText()` method. Navigation buttons are created via the `createButtonContainer()` method, allowing the player to restart or return to the menu with a single click.
 
-**New Java Class**
+#### **1.5 Win Screen**
+- **Description**: Celebrates the player's victory with a congratulatory message and animated effects, providing options to replay or exit the game.
+- **Details**: The `WinImage` class uses the `createAndAnimateConfetti()` method to generate colorful animated confetti that enhances the celebratory mood. The `createWinImage()` method centers the victory message on the screen, creating a satisfying end to the game.
 
-**Modified Java Class**
-##Boss
-1. Changes made (Encapsulation):
-    - Added the `isShielded()` method to provide read access to the `isShielded` field.
-   ###Reason:
-    - To protect the `isShielded` field and ensure it can only be accessed through a method, reinforcing the principles of encapsulation. 
-    - This prevents other classes from directly changing the shield status, thereby maintaining the integrity of the object's state management.
+#### **1.6 Audio Control Panel**
+- **Description**: Allows players to toggle and adjust audio settings, including background music and sound effects, for a customizable gaming experience.
+- **Details**: The `AudioControlPanel` class includes buttons created by `createMuteBackgroundMusicButton()` and `createMuteSoundEffectsButton()`. These methods toggle the mute state dynamically, ensuring player preferences are reflected instantly.
 
-2. Changes made (Shield virtual effect):
-    - Enhanced the `updateActor()` method to include conditional logic that adjusts visual effects based on the shield status:
-    - When `isShielded()` returns true, a glow effect is applied.
-    - When `isShielded()` returns false, any existing effect is removed.
-   ###Reason:
-   - To provide immediate visual feedback regarding the boss's shield status, enhancing player experience and interaction. 
-   - This change helps players visually identify when the boss is shielded and when it is vulnerable.
+#### **1.7 Menu View**
+- **Description**: Provides an intuitive main menu interface with options to start the game, access instructions, and modify settings.
+- **Details**: The `MenuView` class renders the main menu using the `showMenu()` method, featuring a polished layout created by the `createMenuPanel()` method. Buttons are styled and strategically placed for easy navigation, ensuring an engaging first impression.
 
-3. Changes made (`getCustomHitbox()`):
-    - Added a getCustomHitbox method to define a precise collision area for the Boss instead of relying on default bounding boxes.
-    - djusted the position recalibration logic to ensure the Boss stays within bounds.
-    - Ensured projectiles only interact with the custom hitbox for collisions.
-   ###Reason:
-    - The default collision logic allowed projectiles to damage the Boss when they were visually near but not actually intersecting it. 
-    - These changes ensure fairness and improve gameplay by making the collisions accurate.
+### **2. Game Levels**
 
+#### **2.1. Level One**
+- **Description**: The introductory level that familiarizes players with basic game mechanics and simple enemy encounters.
+- **Details**: The `LevelOne` class uses `spawnEnemyUnits()` to dynamically generate enemies and `initializeFriendlyUnits()` to set up the player plane. Progression to Level Two is triggered by `handleLevelAdvance()` upon reaching the kill target.
 
-##LevelParent
-1. Changes made (Event Handling and Inter-Component Communication):
-    - Added a method `addPropertyChangeListener` to allow the registration of `PropertyChangeListener` objects:
-    - This method enables other components of the application to listen for and react to property changes within the `LevelParent` class.
-   Reason:
-    - Facilitates the communication between different parts of the system by notifying registered listeners of changes to the properties within the `LevelParent` class, 
-    - Thereby enhancing the responsiveness and interactivity of the application.
+#### **2.2. Level Two**
+- **Description**: A challenging level featuring more advanced enemies and a boss battle.
+- **Details**: Managed in the `LevelTwo` class, the level spawns enemies via `spawnEnemyUnits()` and transitions to Level Three through `handleLevelAdvance()` upon defeating the boss using `isBossDefeated()`.
 
-2. Changes made (Dynamic Level Loading and Seamless Transitions):
-    -  Implemented the `goToNextLevel` method to transition from the current level to a dynamically specified next level:
-    - Stops the current level's timeline.
-    - Dynamically loads the next level class using reflection (`Class.forName(levelName)`).
-    - Creates an instance of the next level class and initializes the scene.
-    - Sets the new scene on the primary stage and starts the next level's game logic.
-   Reason:
-    - Allows the game to dynamically transition between different levels without hard-coding specific level details, supporting extensibility and scalability of the game. 
-    - Facilitates adding new levels or changing existing ones without changing the central game logic, improving maintainability and flexibility of the game's architecture.
+#### **2.3. Level Three**
+- **Description**: The final level with waves of enemies and a climactic boss fight.
+- **Details**: The `LevelThree` class spawns enemy waves using `spawnEnemyUnits()` and introduces the final boss via `spawnFinalBoss()`. Victory is achieved by defeating the boss, determined by `isFinalBossDefeated()`.
 
-3. Changes made (Error Handling):
-    - Added the `showErrorDialog` method to display error messages in a dialog box:
-    - Utilizes JavaFX's `Alert` class to create and display an error alert with a specific message passed to the method.
-    Reason:
-    - Enhances the user interface by providing clear and immediate feedback to the user when an error occurs during game operations, such as failing to load a level.
+### **3. Game Actors**
 
-4. Changes made (Collision logic):
-   - Added the `handleCollisions` method to manage interactions between projectiles and enemies:
-   - The method checks for collisions between each projectile and each enemy.
-   - It handles different behaviors based on the type of enemy and whether a boss is shielded.
-   Reason:
-   - By differentiating the collision response based on the enemy type and states (such as a boss being shielded), it allows for a nuanced interaction model. 
-   - This ensures that the game remains challenging yet fair, maintaining the integrity and continuity of gameplay by applying appropriate effects based on the context of the collision.
+#### **3.1. User Plane**
+- **Description**: The player-controlled fighter plane capable of movement, shooting, and utilizing power-ups.
+- **Details**: Defined in the `UserPlane` class. The `updatePosition()` method ensures smooth movement within boundaries, while `fireProjectile()` allows firing of regular or spreadshot projectiles.
 
-##Levelone
-    Changes made:
-    - Adjusted the level transition logic to use the goToNextLevel method in LevelParent.
-   Reason:
-    - Previous hardcoded logic for transitions caused errors when moving to LevelTwo. This update ensures a dynamic and error-free transition system.
+#### **3.2. Enemy Planes**
+- **Description**: Enemy planes that engage the player with horizontal movement and randomized projectile attacks.
+- **Details**: Implemented in the `EnemyPlane` class. Movement is managed by `updatePosition()`, and `fireProjectile()` adds dynamic shooting mechanics.
 
-##Leveltwo
-    Changes made:
-   - Integrated Boss mechanics and limited enemy spawning.
-   Reason:
-   - To optimize performance and ensure the Boss works correctly with updated collision logic.
+#### **3.3. Boss Plane**
+- **Description**: A formidable enemy with high health, a shield mechanic, and randomized movements.
+- **Details**: The `Boss` class manages complex behavior through `updateActor()`, including shield activation (`isShielded()`) and projectile attacks. Damage is applied only when the shield is inactive, controlled by `takeDamage()`.
 
+### **4. Power-Ups**
 
-##HeartDisplay.java
-   Changes made:
-   - Fields containerXPosition, containerYPosition, and numberOfHeartsToDisplay were declared as final to ensure that these values, once set during construction, do not change throughout the lifecycle of an object, emphasizing immutability.
-   - Added null check before using toExternalForm() on the image URL to prevent NullPointerException if the image resource is not found.
-   Reason:
-   - Making fields final aligns with best practices for class design where these values should not change after initialization, enhancing thread safety and predictability of the object's state.
-   - Implementing a null check prevents application crashes due to missing resources, improving the robustness and reliability of the application.
+#### **4.1. Shield Power-Up**
+- **Description**: Grants the player temporary invincibility by activating a protective shield around their plane.
+- **Key Feature**: The `showShield()` method in the `ShieldImage` class displays a visible shield effect, while `hideShield()` removes it when the effect ends.
 
+#### **4.2. Spreadshot Power-Up**
+- **Description**: Enhances the player’s attack by allowing them to fire multiple projectiles simultaneously.
+- **Key Feature**: The `activate()` method in the `SpreadshotPowerUp` class triggers the `activateOneTimeSpreadshot()` function in the `UserPlane`, enabling a spread pattern for the next attack.
 
-##WinImage.java
-   Changes made: 
-   - Adjusted the destroy() method to only allow setting isDestroyed to true. This reflects the irreversible state change of an object being destroyed.
-   Reason:
-   - This change clarifies the intended use of the destroy() method, ensuring that the destruction state is final and cannot be mistakenly reverted, which aligns with the typical game logic where objects, once destroyed, do not return to an active state.
+### **5. Game Mechanics**
 
-##GameOverImage.java
-   Changes made: 
-   - Implemented a robust resource loading strategy with error handling for the game over image, similar to other image handling updates in the project.
-   - Consistency in error handling across all classes that load images ensures that missing images are handled gracefully and errors are logged, improving maintainability and user experience.
+#### **5.1. Collision Management**
+- **Description**: Handles interactions between objects, such as projectiles hitting enemies or the player colliding with power-ups.
+- **Key Feature**: The `Projectile.takeDamage()` method in the `Projectile` class ensures immediate destruction of projectiles upon collision, maintaining game balance and realism.
+
+#### **5.2. Health Bar**
+- **Description**: Displays the current health of a game actor with a graphical bar and numeric representation.
+- **Key Feature**: The `updateHealth()` method in the `HealthBar` class dynamically adjusts the width of the health bar and updates the numeric label to reflect the current and maximum health.
+
+#### **5.3. Projectile Mechanics**
+- **Description**: Manages the behavior of all projectiles, including movement, firing rates, and destruction.
+- **Key Feature**: The `updatePosition()` method in the `UserProjectile`, `EnemyProjectile`, and `BossProjectile` classes ensures smooth, directional movement of projectiles during gameplay.
+
+#### **5.4. Event Handling**
+- **Description**: Manages win and loss conditions, transitioning the game state appropriately.
+- **Key Feature**: The `handleWin()` and `handleLose()` methods in the `EventHandler` class transition to the appropriate screens (win or game over) while managing music and pausing gameplay.
+
+### **6. Sound System**
+
+#### **6.1. Background Music**
+- **Description**: Provides immersive audio through looping background tracks tailored to each game state or level.
+- **Key Feature**: The `playBackgroundMusic(String audioFilePath)` method in the `SoundManager` class allows dynamic playback of background music. It ensures smooth transitions and infinite looping for continuous immersion.
+
+#### **6.2. Sound Effects**
+- **Description**: Enhances gameplay feedback with sound effects for actions like shooting and collisions.
+- **Key Feature**: The `playShootSound()` and `playCrashSound()` methods in the `SoundManager` class handle quick playback of audio clips, offering responsive and engaging auditory cues during gameplay.
+
+### **7. Utility Features**
+
+#### **7.1. Health Bar Utility**
+- **Description**: Displays a dynamic visual representation of the player's or boss's health during gameplay.
+- **Key Feature**: The `updateHealth(double healthPercentage, int currentHealth, int maxHealth)` method in the `HealthBar` class adjusts the bar width and updates the health text to reflect the current health state in real time.
+
+#### **7.2. Countdown Overlay**
+- **Description**: Provides a visual countdown at the start of levels to prepare players for action.
+- **Key Feature**: The `startCountdown(int seconds)` method initializes the countdown timer, dynamically rendering numbers on the screen to create anticipation for gameplay.
+
+#### **7.3. Shake Screen**
+- **Description**: Adds dramatic effect by shaking the screen during critical events such as explosions or collisions.
+- **Key Feature**: The `applyShakeEffect()` method adjusts the camera or viewport position temporarily to simulate a screen shake effect when userplane collides with enemy projectile or enemy plane, enhancing gameplay intensity.
+
+### **8. Collision and Projectile Management**
+
+#### **8.1. Remove Bullet When They Collide**
+- **Description**: Ensures that bullets are removed from the game when they collide with targets, reducing unnecessary resource usage.
+- **Key Feature**: The `Projectile.takeDamage()` method in the `Projectile` class triggers immediate destruction of the projectile upon collision, maintaining efficient memory usage and gameplay logic.
+
+#### **8.2. Remove Projectiles When Out of Screen**
+- **Description**: Automatically removes projectiles that move beyond the visible game area to optimize performance.
+- **Key Feature**: The `isOutOfBounds()` method in the `Projectile` class detects when a projectile leaves the screen and invokes `destroy()` to remove it from the game loop.
+
+#### **8.3. Bullet Pass Through the Boss Plane When Shielded**
+- **Description**: Allows bullets to bypass the boss when its shield is active, maintaining the shield's integrity.
+- **Key Feature**: The `Boss.isShielded()` method in the `Boss` class prevents bullets from applying damage when the boss's shield is activated, enforcing the shield mechanic.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Implemented but Not Working Properly
+
+### **1. User Movement and Projectile Responsiveness Issue**
+
+**Problem Description:**
+- **Issue**: Player movement becomes laggy, especially in Level Three, and holding the spacebar for extended periods sometimes causes inconsistent projectile behavior (e.g., spamming or unresponsiveness).
+
+**Possible Causes:**
+1. **Input Handling Timing Issues**:
+   - The `InputManager` relies on a `HashSet` for key state tracking, which may not handle rapid key presses effectively.
+2. **Event Handling Conflicts**:
+   - The `fireProjectile()` method tied to spacebar input might not properly regulate firing rate during extended key presses.
+3. **Game Loop Processing Delays**:
+   - High processing demands in Level Three may occasionally impact the responsiveness of input handling.
+
+**Attempted Solutions:**
+1. **Continuous Input Processing**:
+   - Implemented the `processInput()` method in the game loop to dynamically handle key states and ensure smoother user movement.
+2. **HashSet for Key Tracking**:
+   - Utilized a `HashSet<KeyCode>` to track active key presses and prevent duplicate event handling.
+3. **Input Timing Adjustment**:
+   - Introduced a cooldown mechanism to regulate projectile firing rate by limiting how often `fireProjectile()` can trigger.
+
+**Current Status:**
+- **Outcome**: Movement issues have been resolved, but the projectile behavior remains inconsistent. Spacebar spamming sometimes results in rapid firing, while at other times, the input is not registered. Further debugging is required to fully stabilize projectile input handling.
+
+### **2. Kill Count Logic Issue**
+
+**Problem Description:**
+- **Issue**: The kill count increases whenever an `EnemyPlane` is destroyed, regardless of the cause. This includes scenarios where the enemy exits the screen or collides with obstacles, even when the player did not directly shoot it.
+
+**Possible Causes:**
+1. **Generic Kill Event Handling**:
+   - The kill count logic is tied to the destruction of `EnemyPlane` objects (`takeDamage()` or similar methods), rather than being specifically triggered by player actions.
+2. **Screen Boundary Collision**:
+   - Enemies exiting the screen are treated as destroyed, inadvertently triggering the kill count increment.
+3. **Lack of Source Verification**:
+   - The system does not verify the source of the damage or destruction event (e.g., projectile, collision, or screen boundary exit), leading to incorrect kill count increments.
+
+**Attempted Solutions:**
+1. **Event Source Validation**:
+   - Added checks to determine if the enemy was destroyed by a `UserProjectile` before incrementing the kill count.
+2. **Screen Exit Handling**:
+   - Updated the logic for screen boundary checks to differentiate between destruction events caused by gameplay actions and natural exits.
+3. **Debugging Enemy Logic**:
+   - Conducted tests to ensure only valid enemy kills caused by the player contribute to the kill count.
+
+**Current Status:**
+- **Outcome**: The issue persists; enemies passing through the screen boundary still incorrectly increment the kill count. Further debugging and refinement of the screen boundary handling logic are required to resolve this behavior.
+
+### **3. Screen Scaling and Alignment Issue**
+
+**Problem Description:**
+- **Issue**: When running the game on a laptop, the scaling of certain screens (e.g., pause screen and main menu) becomes inconsistent. The screen appears shifted to the bottom-right and does not fit properly. However, on a large monitor or with adjusted display settings, the screens align correctly.
+
+**Possible Causes:**
+1. **Scale Resolution Discrepancies**:
+   - The game UI does not dynamically adapt to varying screen resolutions or DPI settings.
+2. **JavaFX Scaling Limitations**:
+   - JavaFX may not automatically scale UI components to fit screens with differing resolutions or scaling factors (e.g., 125%, 150% display settings).
+3. **Fixed Layout Dimensions**:
+   - Hardcoded dimensions for certain screens may prevent proper scaling on devices with smaller or non-standard resolutions.
+
+**Attempted Solutions:**
+1. **Dynamic Scene Sizing**:
+   - Modified the scene initialization to bind the game layout dimensions to the window size dynamically using `Stage` and `Scene` resizing properties.
+2. **Resolution Testing**:
+   - Tested the application on multiple resolutions and DPI settings. The issue persists on smaller displays but resolves on large monitors with standard scaling (100%).
+3. **Monitor Dependency**:
+   - Used a large monitor with its own desktop configuration, ensuring the game scales and fits properly for all scenes.
+
+**Current Status:**
+- **Outcome**: The issue remains unresolved on laptops with smaller displays or non-standard scaling settings. To ensure proper screen alignment, the game must be run on a large monitor or the system display scaling must be reduced to 100%. Further adjustments to dynamic scaling logic are required for a permanent fix.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Features Not Implemented
