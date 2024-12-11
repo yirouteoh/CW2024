@@ -29,7 +29,7 @@ public class LevelThree extends LevelParent {
 
     private final BossPlane finalBoss; // The final boss of the level
     private final SoundManager soundManager; // Handles background music and sounds
-    private javafx.animation.SequentialTransition finalBossMessageTimeline;
+    protected javafx.animation.SequentialTransition finalBossMessageTimeline;
     private int currentWave; // Current wave number
     private int totalSpawnedEnemies; // Total number of spawned enemies
     private final int[] waveEnemyCounts = {5, 8, 11}; // Number of enemies per wave
@@ -217,7 +217,7 @@ public class LevelThree extends LevelParent {
     /**
      * Displays a message announcing the final boss and spawns the boss.
      */
-    private void displayFinalBossMessage() {
+    protected void displayFinalBossMessage() {
         if (!finalBossMessageDisplayed) {
             showFinalBossMessage();
             finalBossMessageDisplayed = true;
