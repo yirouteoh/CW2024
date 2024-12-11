@@ -30,7 +30,16 @@
       <version>19.0.2</version>
     </dependency>
 
-<dependency>
+    <!-- For Maven -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.9.2</version>
+      <scope>test</scope>
+    </dependency>
+
+
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <version>${junit.version}</version>
@@ -42,6 +51,8 @@
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>  </dependencies>
+
+
 
   <build>
     <plugins>
