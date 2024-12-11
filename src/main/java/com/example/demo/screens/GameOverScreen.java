@@ -19,7 +19,7 @@ import javafx.util.Duration;
  * This screen provides motivational text and options to restart the game or exit to the main menu.
  * </p>
  */
-public class GameOverImage extends Group {
+public class GameOverScreen extends Group {
 
 	private static final String RESTART_IMAGE_NAME = "/com/example/demo/images/restart.png";
 	private static final String EXIT_IMAGE_NAME = "/com/example/demo/images/exit.jpg";
@@ -35,7 +35,7 @@ public class GameOverImage extends Group {
 	 * @param onRestart     Action to perform on restart.
 	 * @param onExitToMenu  Action to perform on exiting to the menu.
 	 */
-	public GameOverImage(double screenWidth, double screenHeight, Runnable onRestart, Runnable onExitToMenu) {
+	public GameOverScreen(double screenWidth, double screenHeight, Runnable onRestart, Runnable onExitToMenu) {
 		this.screenWidth = screenWidth;
 		this.screenHeight = screenHeight;
 

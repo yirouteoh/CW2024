@@ -20,7 +20,7 @@ import javafx.scene.shape.Rectangle;
  * damage, and has a cooldown period before the shield can be reactivated.
  * </p>
  */
-public class Boss extends FighterPlane {
+public class BossPlane extends FighterPlane {
 
 	private static final String IMAGE_NAME = "bossPlane.png";
 	private static final double INITIAL_X_POSITION = 1000.0;
@@ -53,7 +53,7 @@ public class Boss extends FighterPlane {
 	 * Constructs a Boss instance with predefined properties such as initial position, health,
 	 * movement pattern, and shield mechanics.
 	 */
-	public Boss() {
+	public BossPlane() {
 		super(IMAGE_NAME, IMAGE_HEIGHT, INITIAL_X_POSITION, INITIAL_Y_POSITION, HEALTH);
 
 		// Initialize movement variables

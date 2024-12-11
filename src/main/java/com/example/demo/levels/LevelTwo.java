@@ -3,7 +3,7 @@ package com.example.demo.levels;
 import com.example.demo.screens.LevelView;
 import com.example.demo.screens.LevelViewLevelTwo;
 import com.example.demo.sounds.SoundManager;
-import com.example.demo.actors.plane.Boss;
+import com.example.demo.actors.plane.BossPlane;
 
 /**
  * Represents the second level of the game.
@@ -16,7 +16,7 @@ public class LevelTwo extends LevelParent {
 	private static final int PLAYER_INITIAL_HEALTH = 5;
 	private static final int TARGET_KILL_COUNT = 1;
 
-	private final Boss boss;
+	private final BossPlane boss;
 	private final SoundManager soundManager;
 
 	/**
@@ -34,10 +34,10 @@ public class LevelTwo extends LevelParent {
 	/**
 	 * Creates the boss for Level Two.
 	 *
-	 * @return A configured {@link Boss} instance.
+	 * @return A configured {@link BossPlane} instance.
 	 */
-	private Boss createBoss() {
-		return new Boss();
+	private BossPlane createBoss() {
+		return new BossPlane();
 	}
 
 	/**

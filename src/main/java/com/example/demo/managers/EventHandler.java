@@ -2,8 +2,8 @@ package com.example.demo.managers;
 
 import com.example.demo.sounds.SoundManager;
 import com.example.demo.levels.LevelParent;
-import com.example.demo.screens.GameOverImage;
-import com.example.demo.screens.WinImage;
+import com.example.demo.screens.GameOverScreen;
+import com.example.demo.screens.WinScreen;
 
 /**
  * Handles events related to winning and losing the game.
@@ -31,7 +31,7 @@ public class EventHandler {
             soundManager.playBackgroundMusic(SoundManager.WIN_GAME_MUSIC);
             gameStateManager.changeState(GameStateManager.GameState.WIN);
 
-            WinImage winScreen = new WinImage(
+            WinScreen winScreen = new WinScreen(
                     levelParent.getScreenWidth(),
                     levelParent.getScreenHeight(),
                     () -> pauseManager.restartGame(levelParent), // Use PauseManager for restarting
@@ -51,7 +51,7 @@ public class EventHandler {
             soundManager.playBackgroundMusic(SoundManager.GAME_OVER_MUSIC);
             gameStateManager.changeState(GameStateManager.GameState.GAME_OVER);
 
-            GameOverImage gameOverScreen = new GameOverImage(
+            GameOverScreen gameOverScreen = new GameOverScreen(
                     levelParent.getScreenWidth(),
                     levelParent.getScreenHeight(),
                     () -> pauseManager.restartGame(levelParent), // Use PauseManager for restarting

@@ -4,7 +4,7 @@ import com.example.demo.screens.LevelView;
 import com.example.demo.sounds.SoundManager;
 import com.example.demo.powerups.SpreadshotPowerUp;
 import com.example.demo.actors.ActiveActorDestructible;
-import com.example.demo.actors.plane.Boss;
+import com.example.demo.actors.plane.BossPlane;
 import com.example.demo.actors.plane.EnemyPlane;
 import com.example.demo.actors.plane.UserPlane;
 import javafx.scene.image.Image;
@@ -27,7 +27,7 @@ public class LevelThree extends LevelParent {
     private static final double POWER_UP_SPAWN_PROBABILITY = 0.02; // Probability of spawning power-ups
     private static final String FINAL_BOSS_IMAGE = "/com/example/demo/images/jetplane.png";
 
-    private final Boss finalBoss; // The final boss of the level
+    private final BossPlane finalBoss; // The final boss of the level
     private final SoundManager soundManager; // Handles background music and sounds
     private javafx.animation.SequentialTransition finalBossMessageTimeline;
     private int currentWave; // Current wave number
@@ -55,8 +55,8 @@ public class LevelThree extends LevelParent {
      *
      * @return a configured Boss instance
      */
-    private Boss createFinalBoss() {
-        Boss boss = new Boss();
+    private BossPlane createFinalBoss() {
+        BossPlane boss = new BossPlane();
         boss.setImage(new Image(getClass().getResource(FINAL_BOSS_IMAGE).toExternalForm()));
         boss.setFitHeight(300);
         boss.setFitWidth(500);

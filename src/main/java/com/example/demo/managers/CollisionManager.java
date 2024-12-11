@@ -1,7 +1,7 @@
 package com.example.demo.managers;
 
 import com.example.demo.actors.ActiveActorDestructible;
-import com.example.demo.actors.plane.Boss;
+import com.example.demo.actors.plane.BossPlane;
 import com.example.demo.actors.plane.UserPlane;
 import com.example.demo.powerups.PowerUp;
 import com.example.demo.powerups.SpreadshotPowerUp;
@@ -88,7 +88,7 @@ public class CollisionManager {
     private void handleCollisions(List<ActiveActorDestructible> projectiles, List<ActiveActorDestructible> enemies) {
         for (ActiveActorDestructible projectile : projectiles) {
             for (ActiveActorDestructible enemy : enemies) {
-                if (enemy instanceof Boss boss) {
+                if (enemy instanceof BossPlane boss) {
                     if (boss.getCustomHitbox().intersects(projectile.getBoundsInParent())) {
                         if (!boss.isShielded()) {
                             projectile.takeDamage();

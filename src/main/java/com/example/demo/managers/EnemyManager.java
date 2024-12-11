@@ -2,7 +2,7 @@ package com.example.demo.managers;
 
 import com.example.demo.actors.ActiveActorDestructible;
 import com.example.demo.actors.plane.FighterPlane;
-import com.example.demo.actors.plane.Boss;
+import com.example.demo.actors.plane.BossPlane;
 
 import com.example.demo.actors.factory.FighterPlaneFactory;
 
@@ -44,7 +44,7 @@ public class EnemyManager {
                 actorManager.addEnemyUnit(enemy, root);
 
                 // Check if the spawned enemy is a Boss
-                if (enemy instanceof Boss boss) {
+                if (enemy instanceof BossPlane boss) {
                     root.getChildren().add(boss);  // Add the boss first
                     root.getChildren().add(boss.getShieldImage());  // Add the shield image after the boss
                 }

@@ -19,7 +19,7 @@ import javafx.util.Duration;
  * a confetti animation, and buttons to restart the game or exit to the main menu.
  * </p>
  */
-public class WinImage extends Group {
+public class WinScreen extends Group {
 
 	private static final String RESTART_IMAGE_NAME = "/com/example/demo/images/restart.png";
 	private static final String EXIT_IMAGE_NAME = "/com/example/demo/images/exit.jpg";
@@ -37,7 +37,7 @@ public class WinImage extends Group {
 	 * @param onRestart     Action to perform when the restart button is clicked.
 	 * @param onExitToMenu  Action to perform when the exit button is clicked.
 	 */
-	public WinImage(double screenWidth, double screenHeight, Runnable onRestart, Runnable onExitToMenu) {
+	public WinScreen(double screenWidth, double screenHeight, Runnable onRestart, Runnable onExitToMenu) {
 		this.screenWidth = screenWidth;
 		this.screenHeight = screenHeight;
 
