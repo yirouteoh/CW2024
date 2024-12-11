@@ -559,28 +559,43 @@
 - **Location:** `com.example.demo.levels`
 
 **Changes Made**:
-1. **Enhanced Game Loop Management**:
+1. **Integration of Managers**:
+    - Centralized management and integration of various game components through the following managers:
+        - `ActorManager`: Handles the addition, removal, and updates of actors such as enemies, projectiles, and power-ups.
+        - `GameLoopManager`: Manages the game loop, ensuring the game state updates at fixed intervals.
+        - `GameStateManager`: Manages transitions between different game states, such as playing, paused, and game over.
+        - `CollisionManager`: Detects and handles collisions between game entities like projectiles and planes.
+        - `InputManager`: Processes player inputs, including movement, firing, and pausing.
+        - `PauseManager`: Controls the game's pause functionality and displays the pause menu.
+        - `SceneManager`: Manages the scene graph, including UI elements, background, and transitions between levels.
+        - `EnemyManager`: Spawns enemies dynamically and controls their behaviors such as movement and firing.
+        - `EventHandler`: Handles game events, including wins, losses, and other state transitions.
+
+**Purpose**:
+- To streamline level management by integrating modular managers, adhering to the Single Responsibility Principle (SRP), and improving code organization and reusability.
+
+2. **Enhanced Game Loop Management**:
    - Integrated `GameLoopManager` for a centralized control of the game loop, ensuring better modularity and ease of updates.
    - `updateScene()` handles all game state updates, including input processing, actor updates, and collision handling.
 
-2. **Dynamic Actor Management**:
+3. **Dynamic Actor Management**:
    - Introduced `ActorManager` to manage friendly units, enemies, and projectiles efficiently.
    - Added methods like `addEnemyUnit()`, `addPowerUp()`, and `fireProjectile()` for streamlined actor management.
 
-3. **Improved UI Integration**:
+4. **Improved UI Integration**:
    - Incorporated `LevelView` and `KillCountDisplay` for level-specific UI elements, including health display and kill tracking.
    - Added `CountdownOverlay` for a countdown before the game loop starts.
 
-4. **Enhanced State and Event Handling**:
+5. **Enhanced State and Event Handling**:
    - Integrated `GameStateManager` for tracking game states (e.g., Playing, Paused).
    - Added `PauseManager` to handle pausing functionality with a user-friendly pause menu.
    - Used `PropertyChangeSupport` for observing and responding to state changes dynamically.
 
-5. **Simplified Enemy and Collision Management**:
+6. **Simplified Enemy and Collision Management**:
    - Leveraged `EnemyManager` to handle enemy spawning and firing logic.
    - Centralized collision handling in `CollisionManager` for improved modularity and ease of debugging.
 
-6. **Dynamic Scene and Sound Management**:
+7. **Dynamic Scene and Sound Management**:
    - Used `SceneManager` for dynamic background setup, scene transitions, and managing UI overlays.
    - Integrated `SoundManager` to control background music and sound effects efficiently.
 
