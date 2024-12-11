@@ -1,6 +1,8 @@
 package com.example.demo.screens;
 
 import com.example.demo.sounds.SoundManager;
+import com.example.demo.screens.InstructionsPage;
+
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -29,6 +31,7 @@ public class MenuView {
     private final Image unmuteMusicImage;
     private final Image unmuteSoundImage;
     private static final Logger logger = Logger.getLogger(MenuView.class.getName());
+
 
     // Constructor
     public MenuView(Stage stage, com.example.demo.controller.Controller controller) {
@@ -111,8 +114,6 @@ public class MenuView {
         return exitButton;
     }
 
-
-
     /**
      * Creates the root pane with a background image.
      *
@@ -143,7 +144,10 @@ public class MenuView {
         StackPane title = createTitle();
 
         Button playButton = createStyledButton("Play", e -> launchGame());
-        Button instructionsButton = createStyledButton("Instructions", e -> showInstructionsOverlay());
+        Button instructionsButton = createStyledButton("Instructions", e -> {
+            InstructionsPage instructionsPage = new InstructionsPage(stage, instructionsImage, settingsImage);
+            instructionsPage.show();
+        });
         Button audioSettingsButton = createStyledButton("Audio Settings", e -> showAudioSettingsOverlay());
         Button exitButton = createStyledButton("Exit", e -> System.exit(0));
 
@@ -217,162 +221,6 @@ public class MenuView {
         } catch (Exception ex) {
             logger.severe("Error launching game: " + ex.getMessage());
         }
-    }
-
-    /**
-     * Displays the instructions overlay.
-     */
-    private void showInstructionsOverlay() {
-        // Create overlay only once and reuse it
-        StackPane overlay = new StackPane();
-        overlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.5);");
-        overlay.setAlignment(Pos.CENTER);
-
-        VBox container = new VBox(20);
-        container.setStyle("-fx-background-color: #dff9fb; -fx-padding: 20; -fx-border-color: #badc58; -fx-border-width: 3; -fx-background-radius: 10;");
-        container.setAlignment(Pos.CENTER);
-        container.setMaxWidth(500);
-        container.setMaxHeight(400);
-
-        // Create the pages
-        VBox howToPlayPage = createHowToPlayPage();
-        VBox settingsPage = createSettingsPage();
-
-        // StackPane for toggling between pages
-        StackPane pages = new StackPane(howToPlayPage, settingsPage);
-        settingsPage.setVisible(false);
-
-        // Create navigation buttons
-        HBox firstPageButtons = createNavigationButtons(howToPlayPage, settingsPage, overlay, true);
-        HBox secondPageButtons = createNavigationButtons(howToPlayPage, settingsPage, overlay, false);
-
-        // Add navigation buttons to each page
-        howToPlayPage.getChildren().add(firstPageButtons);
-        settingsPage.getChildren().add(secondPageButtons);
-
-        // Add pages to the container
-        container.getChildren().addAll(pages);
-        overlay.getChildren().add(container);
-
-        // Add overlay to the root pane and toggle visibility
-        StackPane root = (StackPane) stage.getScene().getRoot();
-        if (!root.getChildren().contains(overlay)) {
-            root.getChildren().add(overlay);
-        }
-        overlay.setVisible(true);
-    }
-
-
-    /**
-     * Creates the "How to Play" page content.
-     *
-     * @return VBox containing the content.
-     */
-    private VBox createHowToPlayPage() {
-        VBox page = new VBox(15);
-        page.setAlignment(Pos.CENTER);
-
-        ImageView icon = new ImageView(instructionsImage);
-        icon.setFitHeight(100);
-        icon.setFitWidth(100);
-
-        Text text = new Text("""
-        How to Play Sky Battle
-
-        1. Use arrow keys to navigate your plane.
-        2. Press space to shoot.
-        3. Destroy enemy planes and avoid obstacles.
-        4. Collect power-ups at level 3 to spread shot!
-        5. Survive and progress through levels to win!
-        """);
-        text.setStyle("-fx-font-size: 16px; -fx-text-fill: #30336b;");
-        text.setWrappingWidth(450);
-
-        page.getChildren().addAll(icon, text);
-        return page;
-    }
-
-
-    /**
-     * Creates the settings page content.
-     *
-     * @return VBox containing the content.
-     */
-    private VBox createSettingsPage() {
-        VBox page = new VBox(15);
-        page.setAlignment(Pos.CENTER);
-
-        ImageView icon = new ImageView(settingsImage);
-        icon.setFitHeight(100);
-        icon.setFitWidth(100);
-
-        Text text = new Text("""
-        Control Keys
-
-        1. Arrow Keys: Navigate your plane.
-        2. Spacebar: Shoot bullets.
-        3. ESC: Pause the game.
-        """);
-        text.setStyle("-fx-font-size: 16px; -fx-text-fill: #30336b;");
-        text.setWrappingWidth(450);
-
-        page.getChildren().addAll(icon, text);
-        return page;
-    }
-
-
-    /**
-     * Creates navigation buttons for the instruction overlay.
-     *
-     * @param howToPlayPage The "How to Play" page.
-     * @param settingsPage The settings page.
-     * @param overlay The overlay to close.
-     * @return HBox containing navigation buttons.
-     */
-    private HBox createNavigationButtons(VBox howToPlayPage, VBox settingsPage, StackPane overlay, boolean isFirstPage) {
-        HBox buttons = new HBox(10);
-        buttons.setAlignment(Pos.CENTER);
-
-        if (isFirstPage) {
-            // For the first page: "Next" and "Close"
-            Button nextButton = new Button("Next");
-            nextButton.setStyle("-fx-background-color: #74b9ff; -fx-text-fill: white; -fx-font-size: 14px;");
-            nextButton.setOnAction(e -> {
-                howToPlayPage.setVisible(false);
-                settingsPage.setVisible(true);
-            });
-
-            Button closeButton = new Button("Close");
-            closeButton.setStyle("-fx-background-color: #ffbe76; -fx-text-fill: white; -fx-font-size: 14px;");
-            closeButton.setOnAction(e -> {
-                overlay.setVisible(false);
-                StackPane root = (StackPane) stage.getScene().getRoot();
-                root.getChildren().remove(overlay);
-            });
-
-            buttons.getChildren().addAll(nextButton, closeButton);
-
-        } else {
-            // For the second page: "Previous" and "Close"
-            Button prevButton = new Button("Previous");
-            prevButton.setStyle("-fx-background-color: #74b9ff; -fx-text-fill: white; -fx-font-size: 14px;");
-            prevButton.setOnAction(e -> {
-                settingsPage.setVisible(false);
-                howToPlayPage.setVisible(true);
-            });
-
-            Button closeButton = new Button("Close");
-            closeButton.setStyle("-fx-background-color: #ffbe76; -fx-text-fill: white; -fx-font-size: 14px;");
-            closeButton.setOnAction(e -> {
-                overlay.setVisible(false);
-                StackPane root = (StackPane) stage.getScene().getRoot();
-                root.getChildren().remove(overlay);
-            });
-
-            buttons.getChildren().addAll(prevButton, closeButton);
-        }
-
-        return buttons;
     }
 
     private void showAudioSettingsOverlay() {
