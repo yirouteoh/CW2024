@@ -1,6 +1,5 @@
 package com.example.demo.powerups;
 
-import com.example.demo.actors.plane.UserPlane;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
