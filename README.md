@@ -10,13 +10,49 @@
 
 ## **Pre-requisites**
 - SDK: 21 (corretto-21) (Amazon Corretto 21.0.5)
-- IDE: IntelliJ IDEA
 - JavaFX: 19.0.2
+- IDE (IntelliJ IDEA): Required to run the project in IntelliJ IDEA.[Download IntelliJ IDEA](https://www.jetbrains.com/idea/download/)
+- Maven:  Needed for building the application. IntelliJ IDEA includes a bundled Maven. However, if you prefer, you can configure it to use a specific Maven version installed on your system from [Maven's official site](https://maven.apache.org/download.cgi) and ensure it's added to your PATH.
 
-1. Start by cloning the project repository to your local machine. ---  https://github.com/yirouteoh/CW2024.git
-2. Set up javaFX
-3. Import the Project into IntelliJ IDEA or other IDE
-4. Compile and Run the Project
+### Importing the Project
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/yirouteoh/CW2024.git
+    ```
+2. **Open IntelliJ IDEA** and select **File > Open...**
+3. **Navigate** to the directory the downloaded project also containing  `pom.xml` file, select this folder.
+4. Click **OK** to open it as a project in IntelliJ IDEA, which will automatically detect and configure it as a Maven project.
+
+### Configuring SDK in IntelliJ IDEA
+1. Navigate to **File > Project Structure > Project**.
+2. Set the **Project SDK** to SDK corretto 21. If SDK corretto 21 is not listed:
+   - Click **New...** and find your SDK installation path.
+3. Click **Apply** and **OK**.
+
+### Setting Up Maven in IntelliJ IDEA
+- The maven should be automatically set up, if not:
+1. Go to **File > Settings > Build, Execution, Deployment > Build Tools > Maven**.
+2. Make sure the **Maven home directory** is set correctly (the bundled version or specify another installation).
+
+
+### Running the Application Using Maven
+To run the application using Maven's `javafx:run` goal, follow these steps:
+1. In IntelliJ IDEA, open the **Maven** tool window by clicking on the Maven icon on the right side of the workspace.
+2. In the Maven tool window, navigate to **Plugins** > **javafx** and double-click on **javafx:run** to execute the application.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
