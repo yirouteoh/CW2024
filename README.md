@@ -314,6 +314,710 @@
 
 ### Detailed in New Java Classes:
 
+#### 1. `BasicFighterPlaneFactory`
+
+#### **Package**: `com.example.demo.actors.factory`
+
+#### **Purpose**:
+Factory class for creating instances of `BasicFighterPlane`. This class generates enemy planes with randomized positions within specified screen boundaries.
+
+**Key Features**
+
+1. **Implements the `FighterPlaneFactory` interface**:
+   - Defines a standardized method for creating `FighterPlane` objects.
+
+---
+
+#### 2. `FighterPlaneFactory`
+
+#### **Package**: `com.example.demo.actors.factory`
+
+#### **Purpose**:
+Interface defining the contract for factories that create instances of `FighterPlane`.
+
+**Key Features**
+
+1. **Provides a method signature for creating `FighterPlane` objects**:
+   - Ensures factories conform to consistent creation constraints.
+
+---
+
+#### 3. `ProjectileFactory`
+
+#### **Package**: `com.example.demo.actors.factory`
+
+#### **Purpose**:
+Factory class for creating different types of projectiles (`BossProjectile`, `EnemyProjectile`, and `UserProjectile`).
+
+**Key Features**
+
+1. **Contains an inner `ProjectileType` enum to classify projectiles**:
+   - Defines types like `BOSS`, `ENEMY`, and `USER` for projectiles.
+2. **Provides a static method for creating projectiles**:
+   - Projectiles are created based on their type and initial positions.
+
+---
+
+### 4. `BasicFighterPlane`
+
+#### **Package**: `com.example.demo.actors.plane`
+
+#### **Purpose**:
+The `BasicFighterPlane` class represents a simple enemy plane with well-defined behavior for movement and attack. It acts as a foundational enemy in the game, exhibiting predictable but challenging patterns for the player to counter.
+
+**Key Features**
+
+1. **Constructor to initialize position and properties**:
+   - Accepts initial X and Y coordinates to position the plane within the game world.
+   - Sets up attributes like health, size, and image (e.g., `"enemyplane.png"`) to ensure visual and functional consistency.
+   - Configures a basic health value to determine the plane's resilience.
+
+2. **Projectile firing with `fireProjectile()`**:
+   - Launches an `EnemyProjectile` object towards the player.
+   - Uses precise offset calculations for the projectile's starting position to align with the plane's visual representation.
+
+3. **State update with `updateActor()`**:
+   - Updates the internal state of the plane, including movement, firing logic, and other behaviors required during each frame of the game loop.
+   - Ensures smooth, continuous behavior, adhering to the overall game dynamics.
+
+4. **Custom horizontal movement**:
+   - Implements a consistent leftward motion across the screen using `updatePosition()`.
+   - Configures a speed factor (e.g., `-3`) to dictate the pace of the plane’s movement, providing players with a predictable but engaging challenge.
+
+---
+
+### 5. `LevelThree`
+
+#### **Package**: `com.example.demo.levels`
+
+#### **Purpose**:
+The `LevelThree` class represents the third and climactic stage of the game. It introduces escalating waves of enemies, culminating in a dramatic showdown with a powerful final boss. This level is designed to challenge the player's reflexes, strategy, and resource management skills.
+
+**Key Features**
+
+1. **Final boss integration**:
+   - Spawns a `BossPlane` equipped with a shield, a large health pool, and unique abilities.
+   - Displays a custom health bar and visual effects to enhance the immersive experience.
+
+2. **Dynamic wave-based enemy spawning**:
+   - Configures multiple waves of enemies, each increasing in difficulty with varied enemy counts and spawn probabilities.
+   - Utilizes a `waveEnemyCounts` array to manage the progression of enemy waves.
+
+3. **Power-up spawning**:
+   - Randomly spawns power-ups like `SpreadshotPowerUp` to aid the player.
+   - Configures a spawn probability (e.g., `0.02`) to ensure strategic but unpredictable placement of power-ups.
+
+4. **Boss message animation**:
+   - Displays an animated message using JavaFX transitions to announce the entry of the final boss.
+   - Implements a glowing text effect to emphasize the gravity of the encounter.
+
+5. **Game win/loss detection**:
+   - Monitors player health and boss status to determine game-over or victory conditions.
+   - Integrates with `SoundManager` to play appropriate background music for each scenario.
+
+---
+
+### 6. `ActorManager`
+
+#### **Package**: `com.example.demo.managers`
+
+#### **Purpose**:
+The `ActorManager` serves as the backbone for managing all active game objects. It ensures that each actor—whether a friendly unit, enemy, projectile, or power-up—is updated, maintained, and removed efficiently.
+
+**Key Features**
+
+1. **Centralized actor management**:
+   - Organizes actors into distinct lists (e.g., `friendlyUnits`, `enemyUnits`, `userProjectiles`) for streamlined access and management.
+   - Prevents duplication by verifying that an actor isn't already added to the scene graph.
+
+2. **Scene graph integration**:
+   - Adds actors to the scene graph dynamically, ensuring smooth gameplay transitions and interactions.
+   - Supports JavaFX’s `Group` objects for efficient rendering and interaction.
+
+3. **Update and cleanup operations**:
+   - Iterates through all actor lists to invoke their `updateActor()` methods during each game loop iteration.
+   - Removes destroyed actors from both the scene graph and internal lists, maintaining optimal game performance.
+
+---
+
+### 7. `CollisionManager`
+
+#### **Package**: `com.example.demo.managers`
+
+#### **Purpose**:
+The `CollisionManager` is responsible for detecting and resolving all collisions within the game. It ensures that interactions between projectiles, planes, power-ups, and other game elements are handled accurately and efficiently.
+
+**Key Features**
+
+1. **User projectile and enemy interactions**:
+   - Detects and resolves collisions between user-fired projectiles and enemy units or bosses.
+   - Applies damage and updates game states accordingly.
+
+2. **Enemy projectile and user interactions**:
+   - Identifies collisions where enemy projectiles hit the user’s plane, triggering health reduction and sound effects.
+
+3. **Power-up collection**:
+   - Detects when the user plane intersects with a power-up object.
+   - Activates the power-up’s effects and removes it from the scene.
+
+4. **Screen shake effect**:
+   - Provides visual feedback for impactful collisions through screen shake animations.
+   - Implements a timeline-based approach for smooth and engaging visual effects.
+
+---
+
+### 8. `EnemyManager`
+
+#### **Package**: `com.example.demo.managers`
+
+#### **Purpose**:
+The `EnemyManager` handles the spawning and behavior of enemy planes. It integrates seamlessly with the `ActorManager` and utilizes factory patterns for dynamic and flexible enemy generation.
+
+**Key Features**
+
+1. **Randomized enemy spawning**:
+   - Uses a probability-based system to determine when and where new enemies spawn.
+   - Ensures the total number of enemies on-screen does not exceed a specified limit (`maxEnemies`).
+
+2. **Projectile generation**:
+   - Coordinates enemy planes to fire projectiles, adding an additional layer of challenge for the player.
+
+3. **Boss support**:
+   - Includes logic for spawning and managing boss enemies, complete with shields and unique interactions.
+
+---
+
+### 9. `EventHandler`
+
+#### **Package**: `com.example.demo.managers`
+
+#### **Purpose**:
+The `EventHandler` class facilitates high-level game state transitions, such as detecting game completion or failure. It ensures that the appropriate visual, auditory, and gameplay changes occur seamlessly.
+
+**Key Features**
+
+1. **Win condition handling**:
+   - Stops the game loop and transitions to a victory screen with appropriate animations and background music.
+   - Integrates a `WinScreen` for user-friendly options, such as restarting or returning to the main menu.
+
+2. **Loss condition handling**:
+   - Detects game-over scenarios and transitions to a `GameOverScreen`.
+   - Plays unique soundtracks to signal game-over states, enhancing the player’s emotional connection.
+
+3. **Sound management**:
+   - Works closely with the `SoundManager` to play and transition background music dynamically based on game events.
+
+4. **Pause integration**:
+   - Uses `PauseManager` for handling game pauses, restarts, and menu navigation, providing a cohesive user experience.
+
+---
+
+### 10. `GameLoopManager`
+
+#### **Package**: `com.example.demo.managers`
+
+#### **Purpose**:
+The `GameLoopManager` class serves as the central controller for the game’s execution flow. It manages the continuous game loop using JavaFX’s `Timeline` and offers precise controls for starting, pausing, resuming, and stopping the game. This ensures smooth animations and responsive interactions throughout gameplay.
+
+**Key Features**
+
+1. **Singleton Design Pattern**:
+   - Guarantees a single instance of `GameLoopManager` throughout the application, ensuring consistent management of the game loop across all modules.
+   - Provides a thread-safe mechanism for accessing the instance using double-checked locking.
+
+2. **Timeline-based game loop**:
+   - Utilizes JavaFX’s `Timeline` to schedule and execute tasks repeatedly, ensuring a reliable frame-by-frame execution of game logic.
+   - Supports indefinite looping, making it suitable for real-time gameplay scenarios.
+
+3. **Dynamic frame duration configuration**:
+   - Allows developers to specify the duration of each frame in milliseconds, enabling customization for different gameplay speeds or frame rates.
+   - Ensures tasks are executed at regular intervals, contributing to smooth animations and responsiveness.
+
+4. **Pause and resume functionality**:
+   - Provides dedicated methods to pause and resume the game loop, allowing interruptions for menus, dialogs, or gameplay states like "Game Over."
+   - Maintains internal state to prevent unintended behavior when toggling between paused and active states.
+
+5. **Error tolerance and stability**:
+   - Implements mechanisms to gracefully handle unexpected errors during frame execution, ensuring the game loop doesn’t crash during runtime.
+   - Logs errors for debugging without disrupting the user experience.
+
+6. **Game flow synchronization**:
+   - Synchronizes with other managers, such as `SceneManager` and `PauseManager`, to coordinate state transitions like pausing the background music when the game loop is paused.
+
+---
+
+### 11. `GameStateManager`
+
+#### **Package**: `com.example.demo.managers`
+
+#### **Purpose**:
+The `GameStateManager` is responsible for managing the overall state of the game. It tracks transitions between states like `PLAYING`, `PAUSED`, `GAME_OVER`, and `WIN`, ensuring that gameplay elements respond appropriately to changes in state.
+
+**Key Features**
+
+1. **Singleton Design Pattern**:
+   - Implements a thread-safe singleton, ensuring that the game state is globally accessible and consistent throughout the application.
+   - Encapsulates game state logic within a single instance to avoid conflicts.
+
+2. **State transitions with listeners**:
+   - Uses `PropertyChangeSupport` to notify other components (e.g., `InputManager`, `EventHandler`) whenever the game state changes.
+   - Ensures real-time updates for UI elements and gameplay systems.
+
+3. **Enum-based state representation**:
+   - Defines game states using an enumeration (`GameState`) for clarity and type safety.
+   - Includes states like `PLAYING`, `PAUSED`, `GAME_OVER`, and `WIN` to represent all possible scenarios in the game lifecycle.
+
+4. **Validation of state changes**:
+   - Validates all state transitions, preventing invalid or redundant changes (e.g., transitioning to `GAME_OVER` twice).
+   - Throws appropriate exceptions for invalid state requests, aiding debugging and stability.
+
+5. **Integration with managers**:
+   - Coordinates with `PauseManager`, `InputManager`, and `SceneManager` to ensure seamless state handling during gameplay, pauses, and transitions.
+
+6. **Query and utility methods**:
+   - Provides helper methods like `isGameOver()` and `isWin()` to simplify state checks for other components.
+   - Supports debugging by exposing the current state for logging and diagnostics.
+
+---
+
+### 12. `InputManager`
+
+#### **Package**: `com.example.demo.managers`
+
+#### **Purpose**:
+The `InputManager` processes and manages user input, enabling the player to control their in-game avatar. It supports real-time tracking of key presses and ensures that all inputs are handled efficiently and accurately.
+
+**Key Features**
+
+1. **Real-time key tracking**:
+   - Maintains a set of currently pressed keys using JavaFX's `KeyCode`.
+   - Allows multiple key combinations, enabling features like diagonal movement or simultaneous actions.
+
+2. **Integrated with game state**:
+   - Skips input processing during non-playing states (e.g., when the game is paused or in countdown mode).
+   - Prevents unintended actions like firing projectiles during a pause.
+
+3. **Movement and actions**:
+   - Maps arrow keys (`UP`, `DOWN`, `LEFT`, `RIGHT`) to movement, controlling the player’s velocity dynamically.
+   - Assigns specific actions, like firing projectiles (`SPACE`) or pausing the game (`ESCAPE`), to corresponding keys.
+
+4. **Smooth transitions**:
+   - Provides immediate response when keys are pressed or released, ensuring fluid and responsive player controls.
+   - Stops movement instantly when movement keys are released, preventing unwanted drift.
+
+5. **Sound integration**:
+   - Plays sound effects for actions like shooting, adding to the game’s immersive experience.
+   - Pauses and resumes background music based on game state transitions initiated by input events.
+
+6. **Customizable input handling**:
+   - Allows easy modification of key bindings for flexibility and accessibility.
+   - Provides centralized control over all input-related logic, simplifying maintenance and debugging.
+
+---
+
+### 13. `PauseManager`
+
+#### **Package**: `com.example.demo.managers`
+
+#### **Purpose**:
+The `PauseManager` handles the game’s pause functionality, ensuring a smooth transition between playing and paused states. It integrates visual, audio, and gameplay elements to deliver a cohesive user experience.
+
+**Key Features**
+
+1. **Pause screen management**:
+   - Displays a pause screen with options to resume, restart, or return to the main menu.
+   - Dynamically adapts to the current game state, ensuring compatibility with all levels.
+
+2. **State synchronization**:
+   - Updates the `GameStateManager` to reflect the paused or playing state, ensuring consistency across components.
+   - Coordinates with the `GameLoopManager` to pause and resume the game loop.
+
+3. **Integration with levels**:
+   - Customizes behavior for specific levels, such as pausing or resuming animations in `LevelThree`.
+   - Supports seamless transitions back to gameplay without disrupting level-specific elements.
+
+4. **Sound management**:
+   - Pauses and resumes background music to enhance the sense of immersion.
+   - Plays sound effects during menu interactions on the pause screen.
+
+5. **Error handling**:
+   - Provides robust checks to prevent issues like displaying the pause screen when no level is loaded.
+   - Displays user-friendly error messages when unexpected issues occur.
+
+6. **User-friendly design**:
+   - Offers intuitive navigation options on the pause screen, improving the overall player experience.
+   - Supports callbacks for buttons like "Resume" and "Restart," ensuring tight integration with the game flow.
+
+---
+
+### 14. `SceneManager`
+
+#### **Package**: `com.example.demo.managers`
+
+#### **Purpose**:
+The `SceneManager` manages the game’s primary scene, configuring visual elements like the background and user interface. It serves as the hub for setting up and managing the game’s display.
+
+**Key Features**
+
+1. **Dynamic scene initialization**:
+   - Configures the scene's root node (`Group`) and clears existing elements to prepare for new content.
+   - Supports flexible resizing to accommodate various screen dimensions.
+
+2. **Background management**:
+   - Loads and sets the background image dynamically based on the current level.
+   - Ensures proper scaling and alignment for a seamless visual experience.
+
+3. **Control panel integration**:
+   - Adds a control panel with a pause button and audio controls, allowing players to manage gameplay and sound settings conveniently.
+   - Aligns controls dynamically for consistent placement across different resolutions.
+
+4. **Error handling**:
+   - Displays error dialogs for critical issues, such as loading failures or unexpected crashes.
+   - Provides detailed messages to help users understand and resolve errors.
+
+5. **Pause button functionality**:
+   - Configures a responsive pause button to trigger the `PauseManager` and display the pause screen.
+   - Ensures compatibility with countdown timers and other gameplay-specific conditions.
+
+6. **Collaboration with managers**:
+   - Integrates seamlessly with `PauseManager`, `GameLoopManager`, and `LevelParent` to provide a cohesive experience.
+   - Synchronizes scene elements with gameplay events, ensuring a consistent user experience.
+
+---
+
+### 15. `PowerUp`
+
+#### **Package**: `com.example.demo.powerups`
+
+#### **Purpose**:
+Represents collectible items that provide temporary enhancements to the player's plane. These items dynamically interact with the player to introduce new mechanics and advantages in the gameplay.
+
+**Key Features**
+
+1. **Dynamic motion and removal**:
+   - Moves vertically down the screen at a speed defined by `FALL_SPEED`.
+   - Detects when it exits the screen using the `isOutOfBounds()` method and self-destructs to prevent unused objects.
+
+2. **Activation with custom effects**:
+   - Includes a base `activate(UserPlane user)` method to apply effects like a spreadshot or other specialized functionalities.
+   - Designed to handle custom effects efficiently for easy extension in subclasses.
+
+3. **Interaction with `UserPlane`**:
+   - Directly modifies the behavior of the `UserPlane`, such as enabling spreadshot functionality.
+   - Enhances gameplay by creating an immediate and noticeable effect when collected.
+
+4. **Efficient lifecycle management**:
+   - Ensures power-ups are removed from the game after use or if they take damage.
+   - Helps maintain a clean and optimized game environment.
+
+5. **Inheritance-ready design**:
+   - Serves as a base class for more specialized power-ups like `SpreadshotPowerUp`.
+   - Simplifies the implementation of new power-up types while maintaining consistency.
+
+---
+
+### 16. `SpreadshotPowerUp`
+
+#### **Package**: `com.example.demo.powerups`
+
+#### **Purpose**:
+Specializes the `PowerUp` class to provide a spreadshot ability to the `UserPlane`. This feature empowers players by enabling them to fire multiple projectiles simultaneously for a limited time.
+
+**Key Features**
+
+1. **Custom spreadshot activation**:
+   - Overrides the `activate` method to trigger the `activateOneTimeSpreadshot()` functionality in `UserPlane`.
+   - Provides a strategic advantage by allowing players to hit multiple enemies at once.
+
+2. **Unique visuals**:
+   - Uses the image `spreadshot.png` for easy recognition by players.
+   - Visually distinct to indicate its powerful effect among other power-ups.
+
+3. **Reuse of base functionality**:
+   - Inherits movement and out-of-bounds detection from the `PowerUp` base class.
+   - Ensures consistent behavior with minimal additional code.
+
+---
+
+### 17. `AudioControlPanel`
+
+#### **Package**: `com.example.demo.screens`
+
+#### **Purpose**:
+Adds a user interface panel to manage audio settings in-game. Players can mute or unmute background music and sound effects, enhancing the interactive experience.
+
+**Key Features**
+
+1. **Interactive audio toggles**:
+   - Includes buttons for muting and unmuting both background music and sound effects.
+   - Uses icons (`musicIcon`, `soundIcon`) to provide clear visual feedback on the current audio state.
+
+2. **Integration with levels**:
+   - Dynamically retrieves and plays music based on the current level (`LevelOne`, `LevelTwo`, or `LevelThree`).
+   - Maintains consistency in audio playback across gameplay sessions.
+
+3. **Responsive focus handling**:
+   - Automatically restores focus to the game after interacting with the audio controls, preventing disruptions in player input.
+
+4. **Reusable and modular design**:
+   - Designed as an `HBox` component for easy integration into various screens.
+   - Encapsulates audio management functionality to ensure clean and maintainable code.
+
+5. **Dynamic icon updates**:
+   - Updates button icons in real-time to reflect changes in audio settings (e.g., switching between muted and unmuted states).
+
+6. **Consistent styling**:
+   - Configured with spacing and alignment for seamless incorporation into the game’s UI.
+
+---
+
+### 18. `CountdownOverlay`
+
+#### **Package**: `com.example.demo.screens`
+
+#### **Purpose**:
+Displays a countdown (3-2-1-GO) with animations before gameplay begins. This feature sets the stage for players by building anticipation and clearly indicating the start of the game.
+
+**Key Features**
+
+1. **Visually enhanced countdown**:
+   - Uses scaling and fading animations for the countdown text to create a polished and engaging experience.
+   - Transitions seamlessly to the game once the countdown is complete.
+
+2. **Customizable overlay**:
+   - Includes a semi-transparent background overlay to focus the player's attention on the countdown.
+   - Dynamically adjusts text positioning based on screen dimensions.
+
+3. **Event-driven completion**:
+   - Executes a user-defined `Runnable` once the countdown ends, ensuring precise integration with gameplay logic.
+   - Removes all countdown elements from the scene after completion for a clean visual reset.
+
+---
+
+### 19. `AudioSettingsPage`
+
+#### **Package**: `com.example.demo.screens`
+
+#### **Purpose**:
+Provides an interactive overlay for managing audio settings during gameplay. Players can toggle background music and sound effects with visual feedback.
+
+**Key Features**
+
+1. **Stylized interface**:
+   - Displays a visually appealing overlay with rounded corners, borders, and a semi-transparent background.
+   - Includes styled buttons (`Mute Background Music`, `Mute Sound Effects`) with hover animations.
+
+2. **Interactive audio control**:
+   - Allows users to toggle background music and sound effects independently.
+   - Provides immediate visual feedback by updating button text and icons based on the current audio state.
+
+3. **Smooth animations**:
+   - Implements hover effects using `ScaleTransition`, enhancing the user experience with responsive button interactions.
+
+4. **Flexible overlay management**:
+   - Dynamically adds and removes the overlay from the game’s root pane, ensuring a seamless transition between views.
+   - Provides a `Close` button to exit the settings page easily.
+
+5. **Reusable components**:
+   - Designed for easy integration with other screens or levels, leveraging a modular structure for scalability.
+
+6. **Error handling for resources**:
+   - Ensures that all resources (e.g., images) are correctly loaded, throwing meaningful errors if not found.
+
+---
+
+### 20. `InstructionsPage`
+
+#### **Package**: `com.example.demo.screens`
+
+#### **Purpose**:
+The `InstructionsPage` class provides a comprehensive guide for new and returning players. It features a dual-page layout with detailed instructions on gameplay mechanics and controls, ensuring a seamless onboarding experience.
+
+**Key Features**
+
+1. **Dual-page interactive instructions**:
+   - Divides content into two clear sections: "How to Play" and "Control Keys."
+   - Includes navigation buttons (`Next`, `Previous`) for smooth transitions between pages, enhancing usability and clarity.
+
+2. **Visually engaging layout**:
+   - Displays icons (e.g., `instructionsImage` and `settingsImage`) alongside explanatory text to maintain player interest.
+   - Utilizes a semi-transparent background overlay to draw focus to the content without disrupting the game.
+
+3. **Customizable and responsive design**:
+   - Ensures that the page adjusts dynamically to various screen sizes and resolutions.
+   - Content is styled using `VBox` containers, aligning elements centrally with adequate spacing for readability.
+
+4. **Step-by-step instructions**:
+   - Explains core gameplay mechanics (e.g., navigation, shooting, and collecting power-ups) in a concise, easy-to-follow format.
+   - Provides actionable guidance for success, helping players master the game quickly.
+
+5. **Clear control keys explanation**:
+   - Details the use of arrow keys, the spacebar, and the escape key, ensuring players understand their functions.
+
+6. **Seamless exit functionality**:
+   - Includes a `Close` button that removes the overlay and returns players to the previous screen without disrupting gameplay flow.
+
+---
+
+### 21. `MenuView`
+
+#### **Package**: `com.example.demo.screens`
+
+#### **Purpose**:
+The `MenuView` class serves as the primary navigation hub for the game, providing options to start the game, access instructions, configure audio settings, or exit the application.
+
+**Key Features**
+
+1. **Interactive main menu**:
+   - Features buttons for key actions (`Play`, `Instructions`, `Audio Settings`, `Exit`), each styled with hover animations for a polished user experience.
+   - Uses `VBox` layout for a clean, vertically aligned design.
+
+2. **Dynamic background integration**:
+   - Displays a full-screen background image that scales proportionally to any screen resolution.
+   - Utilizes JavaFX `BackgroundImage` properties for high-quality rendering.
+
+3. **Audio settings access**:
+   - Integrates with the `AudioSettingsPage` to allow players to adjust music and sound effects directly from the menu.
+
+4. **Instructions page integration**:
+   - Links seamlessly to the `InstructionsPage`, enabling players to view gameplay and controls instructions from the main menu.
+
+5. **Smooth transitions and animations**:
+   - Uses `ScaleTransition` to create hover effects for buttons, increasing interactivity and feedback.
+   - Includes a polished exit button with scaling animations and immediate functionality.
+
+6. **Centralized title design**:
+   - Features a visually distinct title banner (`SKY BATTLE`) with customizable font and color styling.
+   - Encapsulated within a `StackPane` for precise alignment.
+
+---
+
+### 22. `PauseScreen`
+
+#### **Package**: `com.example.demo.screens`
+
+#### **Purpose**:
+The `PauseScreen` creates a visually appealing overlay displayed when the game is paused, allowing players to resume, restart, or return to the main menu while retaining focus on the current game state.
+
+**Key Features**
+
+1. **Comprehensive pause menu**:
+   - Offers three primary options: `Resume`, `Restart`, and `Main Menu`, ensuring players have full control over game state transitions.
+   - Features preloaded button icons (`resumeImage`, `restartImage`, `mainMenuImage`) for quick responsiveness.
+
+2. **Music and sound management**:
+   - Automatically pauses background music when the screen is displayed and resumes it upon returning to gameplay.
+   - Provides a seamless auditory experience, consistent with game state changes.
+
+3. **Dynamic overlay design**:
+   - Implements a semi-transparent black overlay (`VBox`) that adapts to the current scene dimensions.
+   - Ensures all components (buttons and background) are centered and scaled appropriately.
+
+4. **Efficient lifecycle management**:
+   - Removes the overlay from the scene when the player resumes or exits the game, preventing visual clutter.
+   - Guarantees smooth transitions without leaving residual UI elements.
+
+5. **Responsive interaction**:
+   - Integrates event handlers for all buttons, allowing immediate execution of player actions.
+   - Ensures that button presses are intuitive and consistent across different states.
+
+6. **Custom button functionality**:
+   - Includes helper methods (`createResumeButton`, `createRestartButton`, `createMainMenuButton`) for modular and reusable code.
+   - Ensures future scalability by encapsulating button creation logic.
+
+---
+
+### 23. `SoundManager`
+
+#### **Package**: `com.example.demo.sounds`
+
+#### **Purpose**:
+The `SoundManager` class handles all audio-related functionalities in the game, including background music and sound effects. It ensures a seamless auditory experience and is integral to enhancing player immersion.
+
+**Key Features**
+
+1. **Singleton design pattern**:
+   - Ensures only one instance of `SoundManager` exists throughout the game, simplifying audio control and resource management.
+
+2. **Comprehensive music control**:
+   - Provides methods to play, pause, stop, and resume background music dynamically based on game states.
+   - Supports looping of audio tracks (e.g., menu music, level-specific tracks) for continuous playback.
+
+3. **Sound effects integration**:
+   - Includes quick playback of sound effects (e.g., shooting and crash sounds) using preloaded `AudioClip` objects.
+   - Ensures latency-free effects by initializing audio clips at runtime.
+
+4. **Volume customization**:
+   - Enables muting/unmuting of background music and sound effects independently, allowing players to tailor their audio experience.
+   - Maintains a default volume level (`DEFAULT_VOLUME`) to ensure consistency across sessions.
+
+5. **Error handling for audio files**:
+   - Validates file paths and resources before playback, logging errors for missing or corrupted audio files.
+   - Provides fallbacks to ensure the game continues to function even when audio assets are unavailable.
+
+6. **Level-specific tracks**:
+   - Plays distinct background music for each level, adding thematic consistency and engagement.
+   - Supports transitions between tracks to align with game progression.
+
+---
+
+### 24. `HealthBar`
+
+#### **Package**: `com.example.demo.utils`
+
+#### **Purpose**:
+The `HealthBar` visually represents the health of game entities, providing real-time feedback to players on their status and fostering informed decision-making during gameplay.
+
+**Key Features**
+
+1. **Dynamic health visualization**:
+   - Adjusts the width of the bar based on the current health percentage, ensuring clear communication of health status.
+   - Displays exact health values (`currentHealth / maxHealth`) using a numeric label.
+
+2. **Gradient color styling**:
+   - Incorporates a gradient (lime to red) to visually depict health status, transitioning from green for full health to red for critical health.
+
+3. **Smooth animations**:
+   - Animates changes in health using `Timeline` and `KeyValue`, providing a polished and engaging user experience.
+
+4. **Positional flexibility**:
+   - Updates its position dynamically to remain aligned with the associated entity, regardless of screen movement.
+
+5. **Scalable design**:
+   - Configurable width and height allow for easy integration with entities of varying sizes.
+
+6. **Responsive labels**:
+   - Ensures that the health label adjusts its position dynamically based on the health bar dimensions, maintaining readability.
+
+---
+
+### 25. `KillCountDisplay`
+
+#### **Package**: `com.example.demo.utils`
+
+#### **Purpose**:
+Tracks and displays the player's progress in eliminating enemies, motivating players to reach their goals and providing a sense of accomplishment.
+
+**Key Features**
+
+1. **Real-time updates**:
+   - Increments the kill count upon each enemy destruction and immediately updates the on-screen display.
+
+2. **Goal-oriented feedback**:
+   - Shows the current kill count relative to the target kill count, creating clear milestones for progression.
+
+3. **Customizable display position**:
+   - Allows precise placement of the display on the screen, ensuring visibility across diverse screen layouts.
+
+4. **Readable and styled text**:
+   - Uses bold, high-contrast text to ensure visibility in various gameplay environments.
+
+5. **Game progression integration**:
+   - Directly influences level advancement by signaling when the target kill count is reached.
+
+
+
+
 
 
 
@@ -325,24 +1029,24 @@
 - List the Java classes you modified from the provided code base.
 - Describe the changes you made and explain why these modifications were necessary.
 
-| Class Name                | Description                                                                                                                      | Package                              |
-|---------------------------|----------------------------------------------------------------------------------------------------------------------------------|--------------------------------------|
-| `ActiveActor`             | Enhanced to include image initialization with a fallback to a placeholder image using `initializeImage()` method for robustness. | `com.example.demo.actors`            |
-| `UserProjectile`          | Enhanced for user-specific behavior, including rightward movement and unique visual styling.                                     | `com.example.demo.actors.projectile` |
-| `Boss`                    | Added shield mechanics with cooldown, a health bar overlay, and randomized movement patterns.                                    | `com.example.demo.actors.plane`      |
-| `EnemyPlane`              | Introduced randomized firing offsets and improved projectile spawning logic.                                                     | `com.example.demo.actors.plane`      |
-| `FighterPlane`            | Refactored to provide common projectile calculations and damage handling for all planes.                                         | `com.example.demo.actors.plane`      |
-| `UserPlane`               | Enhanced with spreadshot capabilities, bounded movement, and velocity-based acceleration.                                        | `com.example.demo.actors.plane`      |
-| `Controller`              | Refactored to use reflection for dynamic level transitions, simplifying level management.                                        | `com.example.demo.controller`        |
-| `Main`                    | Simplified initialization with clearer separation of concerns for menu setup and application start.                              | `com.example.demo.controller`        |
-| `LevelParent`             | Introduced modular game state updates, countdown overlays, and improved enemy management logic.                                  | `com.example.demo.levels`            |
-| `LevelOne`                | Enhanced with spawn probabilities and a kill target for progression.                                                             | `com.example.demo.levels`            |
-| `LevelTwo`                | Added boss-specific spawning logic with shield and health bar integrations.                                                      | `com.example.demo.levels`            |
-| `ShieldImage`             | Added dynamic visibility controls and size configuration for representing temporary invulnerability effects.                     | `com.example.demo.powerups`          |
-| `GameOverImage`           | Enhanced with motivational text, fade-in effects, and customizable buttons for restart and exit actions.                         | `com.example.demo.screens`           |
-| `LevelViewLevelTwo`       | Introduced the display of shields specific to Level Two, with modular methods for adding images to the scene.                    | `com.example.demo.screens`           |
-| `WinImage`                | Added confetti animations, gradient background overlays, and customizable buttons for endgame actions.                           | `com.example.demo.screens`           |
-| `HeartDisplay`            | Updated to dynamically add or remove heart icons, visually reflecting the player’s current health.                               | `com.example.demo.utils`             |
+| Class Name          | Description                                                                                                                      | Package                              |
+|---------------------|----------------------------------------------------------------------------------------------------------------------------------|--------------------------------------|
+| `ActiveActor`       | Enhanced to include image initialization with a fallback to a placeholder image using `initializeImage()` method for robustness. | `com.example.demo.actors`            |
+| `UserProjectile`    | Enhanced for user-specific behavior, including rightward movement and unique visual styling.                                     | `com.example.demo.actors.projectile` |
+| `BossPlane`         | Added shield mechanics with cooldown, a health bar overlay, and randomized movement patterns.                                    | `com.example.demo.actors.plane`      |
+| `EnemyPlane`        | Introduced randomized firing offsets and improved projectile spawning logic.                                                     | `com.example.demo.actors.plane`      |
+| `FighterPlane`      | Refactored to provide common projectile calculations and damage handling for all planes.                                         | `com.example.demo.actors.plane`      |
+| `UserPlane`         | Enhanced with spreadshot capabilities, bounded movement, and velocity-based acceleration.                                        | `com.example.demo.actors.plane`      |
+| `Controller`        | Refactored to use reflection for dynamic level transitions, simplifying level management.                                        | `com.example.demo.controller`        |
+| `Main`              | Simplified initialization with clearer separation of concerns for menu setup and application start.                              | `com.example.demo.controller`        |
+| `LevelParent`       | Introduced modular game state updates, countdown overlays, and improved enemy management logic.                                  | `com.example.demo.levels`            |
+| `LevelOne`          | Enhanced with spawn probabilities and a kill target for progression.                                                             | `com.example.demo.levels`            |
+| `LevelTwo`          | Added boss-specific spawning logic with shield and health bar integrations.                                                      | `com.example.demo.levels`            |
+| `ShieldImage`       | Added dynamic visibility controls and size configuration for representing temporary invulnerability effects.                     | `com.example.demo.powerups`          |
+| `GameOverScreen`    | Enhanced with motivational text, fade-in effects, and customizable buttons for restart and exit actions.                         | `com.example.demo.screens`           |
+| `LevelViewLevelTwo` | Introduced the display of shields specific to Level Two, with modular methods for adding images to the scene.                    | `com.example.demo.screens`           |
+| `WinScreen`         | Added confetti animations, gradient background overlays, and customizable buttons for endgame actions.                           | `com.example.demo.screens`           |
+| `HeartDisplay`      | Updated to dynamically add or remove heart icons, visually reflecting the player’s current health.                               | `com.example.demo.utils`             |
 
 -------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -375,24 +1079,27 @@
 - To make sure user projectile follow the user plane to shoot correctly.
 - To maintain code clarity and flexibility by using constants for projectile properties and movement logic.
 
-#### **3. `Boss`**
+#### **3. `BossPlane`**
 
 - **Location:** `com.example.demo.actors.plane`
 
 **Changes Made**:
-1. **Custom Shield Mechanic**:
+1. **Rename Class**:
+   - Rename from `Boss` to `BossPlane`.
+
+2. **Custom Shield Mechanic**:
    - Introduced a shield mechanism using `isShielded`, `activateShield()`, and `deactivateShield()` methods.
    - The shield can be activated based on a random probability (`BOSS_SHIELD_PROBABILITY`) and deactivates after a set duration (`MAX_FRAMES_WITH_SHIELD`).
 
-2. **Health Bar Integration**:
+3. **Health Bar Integration**:
    - Added a `HealthBar` instance to display the boss’s health visually above the entity.
    - The health bar dynamically updates its position and size based on the boss's health percentage.
 
-3. **Custom Hitbox**:
+4. **Custom Hitbox**:
    - Defined a padded bounding box for collision detection using `getCustomHitbox()`.
    - Ensures more accurate hit detection for the boss, considering its visual size.
 
-4. **Visual Effects**:
+5. **Visual Effects**:
    - Applied a glowing effect to the boss when its shield is active.
    - Added dynamic updates for the shield’s position and visibility using a `ShieldImage` instance.
 
@@ -621,59 +1328,65 @@
 - To enhance visual feedback for players when a shield power-up is activated or deactivated.
 - To ensure robust image loading and error handling for smoother gameplay experience.
 
-#### **13. `GameOverImage`**
+#### **13. `GameOverScreen`**
 
 - **Location**: `com.example.demo.screens`
 
 **Changes Made**:
-1. **Dynamic Background Overlay**:
+1. **Rename Class**:
+   - Rename from `GameOverImage` to `GameOverScreen`.
+
+2. **Dynamic Background Overlay**:
    - Added a semi-transparent black rectangle using the `createBackgroundOverlay` method to focus attention on the game-over elements.
 
-2. **Motivational Text and Fade-in Effects**:
+3. **Motivational Text and Fade-in Effects**:
    - Introduced motivational text ("Don’t give up! Try again and show them who's the boss!") below the "Game Over" header.
    - Applied a fade-in animation to the "Game Over" text using the `createGameOverText` method for enhanced visual appeal.
 
-3. **Restart and Exit Buttons with Images**:
+4. **Restart and Exit Buttons with Images**:
    - Designed buttons using the `createImageButton` method with text and images (`RESTART_IMAGE_NAME` and `EXIT_IMAGE_NAME`) to allow the user to restart the game or exit to the main menu.
 
-4. **Game Over Animation Image**:
+5. **Game Over Animation Image**:
    - Added an animated background or overlay image that transitions smoothly to enhance the dramatic effect when the player loses.
    - Integrated this animation with the `createBackgroundOverlay` and button actions.
 
-5. **Error Handling for Missing Images**:
-   - Implemented error handling in the `loadImageView` method to avoid runtime errors and log missing images gracefully.
+6. **Error Handling for Missing Images**:
+- Implemented error handling in the `loadImageView` method to avoid runtime errors and log missing images gracefully.
 
-6. **Flexible Layout and Text Alignment**:
+7. **Flexible Layout and Text Alignment**:
    - Used a vertical box (`VBox`) and dynamic text alignment (`getTextWidth`) to ensure UI elements are properly centered and responsive.
 
 **Purpose**:
-- The `GameOverImage` class enhances user experience by providing a visually engaging "Game Over" screen with interactive options, motivational encouragement, and a dramatic animated background image, making the game more immersive and polished.
+- The `GameOverScreen` class enhances user experience by providing a visually engaging "Game Over" screen with interactive options, motivational encouragement, and a dramatic animated background image, making the game more immersive and polished.
 
-#### **14. `WinImage`**
+#### **14. `WinScreen`**
 
 - **Location**: `com.example.demo.screens`
 
 **Changes Made**:
-1. **Gradient Background Overlay**:
+1. **Rename Class**:
+   - Rename from `WinImage` to `WinScreen`.
+
+2. **Gradient Background Overlay**:
    - Added a gradient overlay using `LinearGradient` with colors transitioning from light blue to light goldenrod yellow. This creates a celebratory visual effect.
    - Implemented in the `createBackgroundOverlay` method.
 
-2. **"You Win" Image**:
+3. **"You Win" Image**:
    - Introduced a "You Win" image placed at the top third of the screen.
    - The image dimensions are adjusted dynamically, and horizontal centering ensures proper alignment.
    - Code: `createWinImage`.
 
-3. **Restart and Exit Buttons**:
+4. **Restart and Exit Buttons**:
    - Designed restart and exit buttons using images and text.
    - Buttons are placed below the "You Win" image with consistent styling and spacing.
    - Code: `createButtonContainer` and `createImageButton`.
 
-4. **Confetti Animation**:
+5. **Confetti Animation**:
    - Implemented a confetti effect with an image falling from the top of the screen.
    - The animation uses `TranslateTransition` to create a smooth falling motion.
    - Code: `createAndAnimateConfetti` and `startConfettiAnimation`.
 
-5. **Error Handling for Missing Resources**:
+6. **Error Handling for Missing Resources**:
    - Enhanced error handling to log missing images gracefully.
    - Code: `loadImage`.
 
