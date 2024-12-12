@@ -10,7 +10,7 @@ import com.example.demo.screens.MenuView;
  * This class initializes the JavaFX application, sets up the primary stage, and displays the main menu.
  * </p>
  */
-public class Main extends Application {
+public class GameLauncher extends Application {
 
 	private static final int SCREEN_WIDTH = 1300;
 	private static final int SCREEN_HEIGHT = 750;
