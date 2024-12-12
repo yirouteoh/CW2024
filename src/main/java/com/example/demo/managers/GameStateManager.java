@@ -99,4 +99,14 @@ public class GameStateManager {
     public boolean isWin() {
         return this.currentState == GameState.WIN;
     }
+
+    /**
+     * Retrieves the current game state.
+     *
+     * @return The current game state.
+     */
+    public GameState getState() {
+        return this.currentState;
+    }
+
 }
