@@ -16,6 +16,7 @@ class SoundManagerTest {
     static void initializeJavaFX() {
         JavaFXInitializer.initialize(); // Ensure JavaFX is initialized once
     }
+
     @BeforeEach
     void setUp() {
         soundManager = SoundManager.getInstance(); // Ensure Singleton instance
