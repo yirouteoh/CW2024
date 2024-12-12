@@ -102,4 +102,5 @@ public class InputManager {
             user.setHorizontalVelocity(MOVEMENT_SPEED); // Move right
         }
     }
+
 }
