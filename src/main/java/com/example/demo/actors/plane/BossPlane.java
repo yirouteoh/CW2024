@@ -166,8 +166,8 @@ public class BossPlane extends FighterPlane {
 	public Bounds getCustomHitbox() {
 		Bounds originalBounds = super.getBoundsInParent();
 
-		double paddingX = 80;
-		double paddingY = 80;
+		double paddingX = 100;
+		double paddingY = 100;
 		return new BoundingBox(
 				originalBounds.getMinX() + paddingX,
 				originalBounds.getMinY() + paddingY,
