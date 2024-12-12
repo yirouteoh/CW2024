@@ -5,7 +5,6 @@ import com.example.demo.levels.LevelParent;
 import com.example.demo.screens.LevelView;
 import com.example.demo.JavaFXInitializer;
 import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 import javafx.application.Platform;
 import org.junit.jupiter.api.BeforeAll;
