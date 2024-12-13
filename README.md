@@ -13,6 +13,8 @@
 - JavaFX: 19.0.2
 - IDE (IntelliJ IDEA): Required to run the project in IntelliJ IDEA.[Download IntelliJ IDEA](https://www.jetbrains.com/idea/download/)
 - Maven:  Needed for building the application. IntelliJ IDEA includes a bundled Maven. However, if you prefer, you can configure it to use a specific Maven version installed on your system from [Maven's official site](https://maven.apache.org/download.cgi) and ensure it's added to your PATH.
+- If using laptop: make sure to change the laptop scale to (100%) to avoid any scaling issue for game (Settings --> System Display---> Scale= 100%) 
+- If using big monitor with desktop, there is no system display have to adjust.
 
 ### Importing the Project
 1. Clone the repository:
