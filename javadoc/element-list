@@ -1,0 +1,12 @@
+module:com.example.demo
+com.example.demo.actors
+com.example.demo.actors.factory
+com.example.demo.actors.plane
+com.example.demo.actors.projectile
+com.example.demo.controller
+com.example.demo.levels
+com.example.demo.managers
+com.example.demo.powerups
+com.example.demo.screens
+com.example.demo.sounds
+com.example.demo.utils
