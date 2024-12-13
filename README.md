@@ -50,6 +50,8 @@ To run the application using Maven's `javafx:run` goal, follow these steps:
     - [Features Not Implemented](#features-not-implemented)
 4. [New Java Classes](#new-java-classes)
 5. [Modified Java Classes](#modified-java-classes)
+6. [Unexpected Problems](#unexpected-problems)
+7.[Screenshots for 'Sky Battle' Game](#screenshots-for-sky-battle-game)
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -735,6 +737,9 @@ Represents collectible items that provide temporary enhancements to the player's
    - Serves as a base class for more specialized power-ups like `SpreadshotPowerUp`.
    - Simplifies the implementation of new power-up types while maintaining consistency.
 
+<img src="gameimages/powerup.png" alt="power up" style="width:300px;"/>
+
+
 ---
 
 ### 16. `SpreadshotPowerUp`
@@ -757,6 +762,9 @@ Specializes the `PowerUp` class to provide a spreadshot ability to the `UserPlan
 3. **Reuse of base functionality**:
    - Inherits movement and out-of-bounds detection from the `PowerUp` base class.
    - Ensures consistent behavior with minimal additional code.
+
+<img src="gameimages/spreadshot.png" alt="spreadshot" style="width:300px;"/>
+
 
 ---
 
@@ -789,6 +797,8 @@ Adds a user interface panel to manage audio settings in-game. Players can mute o
 
 6. **Consistent styling**:
    - Configured with spacing and alignment for seamless incorporation into the game’s UI.
+
+<img src="gameimages/audiocontrolpanel.png" alt="audiocontrolpanel" style="width:300px;"/>
 
 ---
 
@@ -1031,6 +1041,8 @@ The `HealthBar` visually represents the health of game entities, providing real-
 6. **Responsive labels**:
    - Ensures that the health label adjusts its position dynamically based on the health bar dimensions, maintaining readability.
 
+<img src="gameimages/heartbar.png" alt="heartbar" style="width:300px;"/>
+
 ---
 
 ### 25. `KillCountDisplay`
@@ -1057,11 +1069,7 @@ Tracks and displays the player's progress in eliminating enemies, motivating pla
 5. **Game progression integration**:
    - Directly influences level advancement by signaling when the target kill count is reached.
 
-
-
-
-
-
+<img src="gameimages/killcountdisplay.png" alt="Kill count display" style="width:300px;"/>
 
 -------------------------------------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1370,6 +1378,9 @@ Tracks and displays the player's progress in eliminating enemies, motivating pla
 - To enhance visual feedback for players when a shield power-up is activated or deactivated.
 - To ensure robust image loading and error handling for smoother gameplay experience.
 
+<img src="gameimages/shieldimage.png" alt="shield image" style="width:300px;"/>
+
+
 #### **13. `GameOverScreen`**
 
 - **Location**: `com.example.demo.screens`
@@ -1476,6 +1487,8 @@ Tracks and displays the player's progress in eliminating enemies, motivating pla
 **Purpose**:
 - Provides a dynamic and visually appealing representation of the player's health. 
 - It ensures the health display is modular, responsive, and accurate, contributing to the game's user interface with clear feedback on the player’s status.
+
+<img src="gameimages/heartdisplay.png" alt="heart display" style="width:300px;"/>
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
