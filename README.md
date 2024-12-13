@@ -39,21 +39,6 @@
 To run the application using Maven's `javafx:run` goal, follow these steps:
 1. In IntelliJ IDEA, open the **Maven** tool window by clicking on the Maven icon on the right side of the workspace.
 2. In the Maven tool window, navigate to **Plugins** > **javafx** and double-click on **javafx:run** to execute the application.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ## Table of Contents
@@ -82,15 +67,15 @@ To run the application using Maven's `javafx:run` goal, follow these steps:
 - **Details**: The `KillCountDisplay` class uses the `incrementKillCount()` method to update the kill count each time an enemy is defeated. The `createDisplay(double x, double y)` method positions a `Text` element on the screen, ensuring visibility and alignment with the game's UI layout.
 
 #### **1.3 Pause Screen**
-- **Description**: Enables players to pause the game, offering options to resume, restart, or return to the main menu while maintaining the current game state.
+- **Description**: Enables players to pause the game, offering options to "resume", "restart", or "exit to the main menu" while maintaining the current game state.
 - **Details**: The `PauseScreen` class creates a semi-transparent overlay using the `createPauseOverlay()` method, which houses buttons for `resumeAction`, `restartAction`, and `returnToMenuAction`. The intuitive design ensures seamless interaction without interrupting gameplay flow.
 
 #### **1.4 Game Over Screen**
-- **Description**: Displays a game-over screen when the player loses, featuring motivational text and interactive options to restart or exit.
+- **Description**: Displays a game-over screen when the player loses, featuring motivational text and interactive options to "restart" or "exit".
 - **Details**: The `GameOverImage` class renders an overlay with a darkened background and motivational text using the `createMotivationalText()` method. Navigation buttons are created via the `createButtonContainer()` method, allowing the player to restart or return to the menu with a single click.
 
 #### **1.5 Win Screen**
-- **Description**: Celebrates the player's victory with a congratulatory message and animated effects, providing options to replay or exit the game.
+- **Description**: Celebrates the player's victory with a congratulatory message and animated effects, providing options to "replay" or "exit" the game.
 - **Details**: The `WinImage` class uses the `createAndAnimateConfetti()` method to generate colorful animated confetti that enhances the celebratory mood. The `createWinImage()` method centers the victory message on the screen, creating a satisfying end to the game.
 
 #### **1.6 Audio Control Panel**
@@ -98,7 +83,7 @@ To run the application using Maven's `javafx:run` goal, follow these steps:
 - **Details**: The `AudioControlPanel` class includes buttons created by `createMuteBackgroundMusicButton()` and `createMuteSoundEffectsButton()`. These methods toggle the mute state dynamically, ensuring player preferences are reflected instantly.
 
 #### **1.7 Menu View**
-- **Description**: Provides an intuitive main menu interface with options to start the game, access instructions, modify settings and exit.
+- **Description**: Provides an intuitive main menu interface with options to "Play", "Instructions", "Audio Settings", and "Exit".
 - **Details**: The `MenuView` class renders the main menu using the `showMenu()` method, featuring a polished layout created by the `createMenuPanel()` method. Buttons are styled and strategically placed for easy navigation, ensuring an engaging first impression.
 
 #### **1.8 Instruction Page**
@@ -828,6 +813,14 @@ Displays a countdown (3-2-1-GO) with animations before gameplay begins. This fea
    - Executes a user-defined `Runnable` once the countdown ends, ensuring precise integration with gameplay logic.
    - Removes all countdown elements from the scene after completion for a clean visual reset.
 
+<img src="gameimages/countdown3.png" alt="countdown3.png" style="width:300px;"/>
+
+<img src="gameimages/countdown2.png" alt="countdown2.png" style="width:300px;"/>
+
+<img src="gameimages/countdown1.png" alt="countdown1.png" style="width:300px;"/>
+
+<img src="gameimages/countdowngo.png" alt="countdowngo.png" style="width:300px;"/>
+
 ---
 
 ### 19. `AudioSettingsPage`
@@ -859,6 +852,8 @@ Provides an interactive overlay for managing audio settings during gameplay. Pla
 
 6. **Error handling for resources**:
    - Ensures that all resources (e.g., images) are correctly loaded, throwing meaningful errors if not found.
+
+<img src="gameimages/audiosettings.png" alt="Audio Settings" style="width:300px;"/>
 
 ---
 
@@ -893,6 +888,11 @@ The `InstructionsPage` class provides a comprehensive guide for new and returnin
 6. **Seamless exit functionality**:
    - Includes a `Close` button that removes the overlay and returns players to the previous screen without disrupting gameplay flow.
 
+<img src="gameimages/instructionsfirstpage.png" alt="Instructions first page" style="width:300px;"/>
+
+
+<img src="gameimages/instructionssecondpage.png" alt="Instructions second page" style="width:300px;"/>
+
 ---
 
 ### 21. `MenuView`
@@ -925,6 +925,9 @@ The `MenuView` class serves as the primary navigation hub for the game, providin
 6. **Centralized title design**:
    - Features a visually distinct title banner (`SKY BATTLE`) with customizable font and color styling.
    - Encapsulated within a `StackPane` for precise alignment.
+
+<img src="gameimages/menuview.png" alt="Menu View" style="width:300px;"/>
+
 
 ---
 
@@ -960,6 +963,9 @@ The `PauseScreen` creates a visually appealing overlay displayed when the game i
 6. **Custom button functionality**:
    - Includes helper methods (`createResumeButton`, `createRestartButton`, `createMainMenuButton`) for modular and reusable code.
    - Ensures future scalability by encapsulating button creation logic.
+
+<img src="gameimages/pausescreen.png" alt="Pause Scren" style="width:300px;"/>
+
 
 ---
 
@@ -1470,6 +1476,108 @@ Tracks and displays the player's progress in eliminating enemies, motivating pla
 **Purpose**:
 - Provides a dynamic and visually appealing representation of the player's health. 
 - It ensures the health display is modular, responsive, and accurate, contributing to the game's user interface with clear feedback on the player’s status.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Unexpected Problems:
+- Communicate any unexpected challenges or issues you encountered during the assignment.
+- Describe how you addressed or attempted to resolve them.
+
+#### **Problem 1: Dynamic Level Loading Errors** (Fix)
+- **Issue Description**:
+   - The `Controller` class dynamically loads levels using reflection (`goToLevel` method). If a level class name was incorrectly specified, or the constructor was missing required parameters, runtime exceptions would occur. These issues were particularly challenging because they only surfaced when transitioning between levels, making them hard to detect during early development.
+   - For example, attempting to load `LevelTwo` with an incorrect constructor signature caused the game to fail silently, leaving the stage unresponsive.
+- **Solution**:
+   - Added robust error handling in the `instantiateLevel` method, including `try-catch` blocks to catch `ReflectiveOperationException`. Logged detailed error messages to help identify misconfigurations during debugging.
+   - Implemented unit tests to validate that all levels could be dynamically instantiated without errors. This included testing with mock levels to ensure future expansions would not introduce similar issues.
+
+#### **Problem 2: Unbalanced Enemy and Power-Up Spawning** (Fix)
+- **Issue Description**:
+   - In the early stages, spawning logic in the `EnemyManager` and power-ups like `SpreadshotPowerUp` often resulted in gameplay that was either too easy or too difficult. A high spawn probability led to overwhelming the screen with enemies, while a low probability made gameplay dull. Power-ups often spawned in inaccessible positions, such as outside the visible play area.
+   - Additionally, the maximum number of active entities (`maxEnemies`) was not always respected, causing frame rate drops on some systems.
+- **Solution**:
+   - Adjusted `spawnProbability` and `POWER_UP_SPAWN_PROBABILITY` based on extensive playtesting to balance challenge and fairness. Improved entity placement logic to ensure power-ups spawn within reachable areas of the screen.
+   - Introduced constraints to limit the maximum number of enemies and power-ups active at any given time. This optimization improved performance and prevented overcrowding.
+
+#### **Problem 3: Collision Detection Edge Cases** (Fix)
+- **Issue Description**:
+   - The `CollisionManager` handled various collision scenarios, including projectile-enemy, plane-to-plane, and power-up-user interactions. Specific edge cases, like shielded `BossPlane` collisions, caused unexpected behaviors. For example, projectiles would sometimes bypass shields, or shielded bosses would incorrectly register multiple hits in a single frame.
+   - Collisions between power-ups and the player occasionally failed due to incorrect bounding box calculations.
+- **Solution**:
+   - Implemented separate hitboxes for shielded and unshielded states in `BossPlane`. Enhanced the `handleCollisions` method to check for shield status before applying damage.
+   - Refactored power-up collision logic to ensure bounding boxes were correctly aligned with visual elements.
+
+#### **Problem 4: Projectile Misalignment** (Fix)
+- **Issue Description**:
+   - Projectiles, such as `BossProjectile` and `UserProjectile`, were not starting from the correct position relative to their source. This caused visual misalignments, especially noticeable with the spreadshot mechanic introduced by `SpreadshotPowerUp`.
+   - Additionally, projectiles sometimes appeared behind the firing plane, creating a poor visual experience.
+- **Solution**:
+   - Adjusted initial offsets in the projectile constructors to dynamically calculate positions based on the firing plane's size and orientation. Updated `fireProjectile` methods in plane classes to ensure proper alignment with the plane's muzzle.
+
+#### **Problem 5: Audio Resource Loading Issues** (Fix)
+- **Issue Description**:
+   - The `SoundManager` failed to load certain audio resources due to incorrect file paths or missing files. For example, background music for `LevelTwo` would not play if the audio file was misnamed, causing silent gameplay.
+   - Users reported inconsistent playback of sound effects like shooting or crashing, particularly during resource-intensive scenes.
+- **Solution**:
+   - Introduced a validation mechanism in the `SoundManager` to verify the existence of all audio files at startup. This includes logging warnings for missing files and providing fallback sounds.
+   - Improved resource management to avoid multiple instances of `MediaPlayer` or `AudioClip` being created unnecessarily, reducing performance issues.
+
+#### **Problem 6: Health Bar and UI Display Updates** (Fix)
+- **Issue Description**:
+   - The `HealthBar` and `HeartDisplay` sometimes lagged behind the actual health state of the player's plane. This caused visual discrepancies, such as displaying more health than the player actually had.
+   - Animations for health changes were abrupt, making it difficult for players to track damage visually during intense moments.
+- **Solution**:
+   - Synced the health display logic with the player's health updates in real-time. Added smooth animations (`animateHealth`) for transitions, providing clearer feedback on health changes.
+   - Tested extensively under various game scenarios to ensure consistency between health UI elements and actual gameplay states.
+
+#### **Problem 7: Final Boss Entry Animation Timing** (Fix)
+- **Issue Description**:
+   - In `LevelThree`, the final boss entry animation (`displayFinalBossMessage`) sometimes overlapped with active gameplay. This allowed player projectiles to hit the boss before its intended entry, or delayed the boss's appearance.
+- **Solution**:
+   - Paused all game components, including the game loop and user input, during the boss entry animation. Added logic in the `PauseManager` to resume gameplay only after the animation completed.
+   - Enhanced the animation with fade and scaling effects to improve its visual impact while maintaining gameplay integrity.
+
+#### **Problem 8: Game Restart Logic** (Fix)
+- **Issue Description**:
+   - Restarting the game via the `PauseManager` occasionally led to leftover objects from the previous session. This caused visual glitches, such as duplicate UI elements, or gameplay issues like lingering power-ups.
+- **Solution**:
+   - Refactored the `restartGame` method to clear all active objects and reset game state variables before reinitializing the game. Added unit tests to ensure complete cleanup of resources.
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+## Screenshots for 'Sky Battle' Game
+
+![Menu View](gameimages/menuview.png)
+
+![Instructions first page](gameimages/instructionsfirstpage.png)
+
+![Instructions second page](gameimages/instructionssecondpage.png)
+
+![Audio Settings page](gameimages/audiosettings.png)
+
+![Level one](gameimages/levelone.png)
+
+![Leveltwo](gameimages/leveltwo.png)
+
+![Level three](gameimages/levelthree1.png)
+
+![Level three](gameimages/levelthree2.png)
+
+![Game over screen](gameimages/gameoverscreen.png)
+
+![win screen](gameimages/winscreen.png)
+
+![pause screen](gameimages/pausescreen.png)
+
+
+
+
+
+
+
+
+
 
 
 
